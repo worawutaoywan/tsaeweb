@@ -37,3 +37,27 @@ jobs:
 
       - name: Build website
         run: npm run build
+
+      - name: Configure deployment SSH key
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          DEPLOY_KEY: ${{ secrets.TSAE_DEPLOY_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.TSAE_DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+
+      - name: Deploy static website
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          rsync -az --delete \
+            --exclude 'uploads/' \
+            --exclude 'wp-uploads/' \
+            -e 'ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes' \
+            dist/ tsae-deploy@104.248.152.59:/var/www/tsae_web/
+
+      - name: Verify production website
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: curl --fail --silent --show-error --retry 5 --retry-delay 3 https://www.tsae.asia/ > /dev/null
