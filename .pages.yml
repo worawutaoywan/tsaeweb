@@ -116,10 +116,7 @@ content:
         type: file
         path: data/cms/hero.json
         format: json
-        list:
-          collapsible:
-            collapsed: true
-            summary: "{badgeTH} ({index})"
+        list: true
         fields:
           - name: id
             label: รหัส
@@ -220,10 +217,7 @@ content:
         type: file
         path: data/cms/events.json
         format: json
-        list:
-          collapsible:
-            collapsed: true
-            summary: "{titleTH} ({index})"
+        list: true
         fields:
           - name: id
             label: URL Slug
@@ -308,10 +302,7 @@ content:
         type: file
         path: data/cms/home-conferences.json
         format: json
-        list:
-          collapsible:
-            collapsed: true
-            summary: "{titleTH} ({index})"
+        list: true
         fields:
           - name: enabled
             label: เปิดแสดง
