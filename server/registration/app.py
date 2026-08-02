@@ -923,36 +923,18 @@ def _admin_nav(active: str) -> str:
         ("reg", "ลงทะเบียนประชุม", "/api/admin", "M4 4h16v4H4V4zm0 8h16v8H4v-8z"),
         ("forms", "แบบฟอร์มอื่น ๆ", "/api/admin/submissions", "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"),
         ("members", "สมาชิก", "/api/admin/members", "M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z"),
-        ("cms", "จัดการเนื้อหา", "/api/admin/cms", "M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"),
-    )
-    # Thai labels only — keep in sync with cms/static/app.js NAV
-    cms_sub = (
-        ("dashboard", "ภาพรวม", "/api/admin/cms#/", '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>'),
-        ("pages", "หน้าเว็บ", "/api/admin/cms#/pages", '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>'),
-        ("timeline", "ข่าวและกิจกรรม", "/api/admin/cms#/timeline", '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/>'),
-        ("media", "คลังสื่อ", "/api/admin/cms#/media", '<path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>'),
+        ("content", "จัดการเนื้อหา ↗", "https://cms.tsae.asia", "M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"),
     )
     parts = []
     for key, label, href, icon in items:
         on = " on" if key == active else ""
+        external = ' target="_blank" rel="noopener noreferrer"' if href.startswith("https://") else ""
         parts.append(
-            f'<a class="nav{on}" href="{href}" data-nav="{key}" data-tip="{_esc(label)}">'
+            f'<a class="nav{on}" href="{href}"{external} data-nav="{key}" data-tip="{_esc(label)}">'
             f'<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'
             f'<path stroke-linecap="round" stroke-linejoin="round" d="{icon}"/></svg>'
             f'<span>{label}</span></a>'
         )
-        # Show CMS submenu only while in content management — keeps other pages clean
-        if key == "cms" and active == "cms":
-            sub_items = "\n".join(
-                f'<a href="{sub_href}">'
-                f'<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">{icon_path}</svg>'
-                f'<span>{sub_label}</span></a>'
-                for _k, sub_label, sub_href, icon_path in cms_sub
-            )
-            parts.append(
-                f'<div class="nav-label nav-label-sub">เนื้อหา</div>'
-                f'<div class="nav-sub">{sub_items}</div>'
-            )
     return "".join(parts)
 
 
@@ -1062,7 +1044,7 @@ def _login_page(error: str = "", next_url: str = "/api/admin") -> str:
     </div>
     <div class="quote">
       <h2>ระบบจัดการเว็บไซต์และสมาชิก<br>อย่างเป็นทางการ</h2>
-      <p>ศูนย์กลางการบริหารการลงทะเบียนประชุม การสมัครสมาชิก การจัดการเนื้อหา และข้อมูลข่าวสารของสมาคมฯ ผ่านระบบเดียว</p>
+      <p>ศูนย์กลางการบริหารการลงทะเบียนประชุม แบบฟอร์ม และข้อมูลสมาชิกของสมาคมฯ</p>
     </div>
     <div class="ft">© 2026 Thai Society of Agricultural Engineering · ก่อตั้ง พ.ศ. 2527</div>
   </div>
@@ -1076,7 +1058,7 @@ def _login_page(error: str = "", next_url: str = "/api/admin") -> str:
     <div class="loginbox">
       <div class="lbl">ระบบผู้ดูแล</div>
       <h1>เข้าสู่ระบบ</h1>
-      <p class="lead">ลงชื่อเข้าใช้เพื่อจัดการเนื้อหาและข้อมูลสมาชิก</p>
+      <p class="lead">ลงชื่อเข้าใช้เพื่อจัดการการลงทะเบียน แบบฟอร์ม และข้อมูลสมาชิก</p>
       <form method="post" action="/api/admin/login">
         <input type="hidden" name="next" value="{_esc(next_url)}">
         <label>ชื่อผู้ใช้</label>
@@ -1872,10 +1854,17 @@ def admin_rescan_spam(request: Request):
     return RedirectResponse(f"/api/admin/submissions?kind=spam&rescanned={n}", status_code=303)
 
 
-from cms import register_cms_routes
 from members import configure as configure_members, router as members_router
 
-register_cms_routes(app, DATA_DIR, current_admin)
+
+@app.get("/admin/cms", include_in_schema=False)
+@app.get("/admin/cms/", include_in_schema=False)
+@app.get("/admin/cms/{legacy_path:path}", include_in_schema=False)
+def legacy_cms_redirect(legacy_path: str = ""):
+    """Send old CMS bookmarks to the single Pages CMS content system."""
+    return RedirectResponse("https://cms.tsae.asia", status_code=308)
+
+
 configure_members(
     db=db,
     esc=_esc,
