@@ -1,0 +1,8 @@
+cms.tsae.asia {
+    request_body {
+        max_size 25MB
+    }
+
+    reverse_proxy 127.0.0.1:13003
+    encode zstd gzip
+}
