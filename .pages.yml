@@ -363,6 +363,71 @@ content:
             required: true
             options:
               media: news_images
+      - name: home_videos
+        label: วิดีโอ Watch & Learn
+        type: file
+        path: data/cms/home-videos.json
+        format: json
+        list: true
+        fields:
+          - name: id
+            label: YouTube Video ID
+            type: string
+            description: เว้นว่างเมื่อเป็นลิงก์ภายนอก เช่น Facebook
+          - name: date
+            label: วันที่
+            type: date
+            required: true
+            options:
+              format: yyyy-MM-dd
+          - name: category
+            label: หมวดหมู่
+            type: select
+            options:
+              values:
+                - value: symposium
+                  label: บันทึกงานสัมมนา
+                - value: exhibition
+                  label: งานนิทรรศการ
+                - value: training
+                  label: อบรม
+                - value: facebook
+                  label: Facebook
+          - name: pick
+            label: วิดีโอแนะนำ
+            type: boolean
+            default: false
+            description: รายการที่เลือกจะแสดงในส่วนแนะนำด้านบน
+          - name: href
+            label: ลิงก์วิดีโอภายนอก
+            type: string
+          - name: web
+            label: ลิงก์บทความประกอบ
+            type: string
+          - name: titleTH
+            label: ชื่อวิดีโอ (ไทย)
+            type: string
+            required: true
+          - name: titleEN
+            label: ชื่อวิดีโอ (อังกฤษ)
+            type: string
+            required: true
+          - name: summaryTH
+            label: คำอธิบาย (ไทย)
+            type: text
+            required: true
+          - name: summaryEN
+            label: คำอธิบาย (อังกฤษ)
+            type: text
+            required: true
+          - name: metaTH
+            label: ข้อมูลกำกับ (ไทย)
+            type: string
+            required: true
+          - name: metaEN
+            label: ข้อมูลกำกับ (อังกฤษ)
+            type: string
+            required: true
   - name: news
     label: ข่าวสาร
     type: collection

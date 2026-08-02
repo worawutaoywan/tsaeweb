@@ -1,4 +1,5 @@
 import type { Lang } from '../i18n/ui';
+import videoData from '../../data/cms/home-videos.json';
 
 /** ใส่เฉพาะเมื่อระบุได้ชัดจากชื่อคลิป/ช่อง — คลิปอื่นไม่บังคับหมวด */
 export type WatchCategory = 'symposium' | 'exhibition' | 'training' | 'facebook';
@@ -18,7 +19,7 @@ export type WatchVideo = {
   metaEN: string;
 };
 
-const RAW: WatchVideo[] = [
+const LEGACY_RAW: WatchVideo[] = [
   {
     id: 'vQr4T4l3G-I',
     date: '2026-05-22',
@@ -131,6 +132,9 @@ const RAW: WatchVideo[] = [
     metaEN: 'Facebook · THE FARMER',
   },
 ];
+
+// Editable source of truth: data/cms/home-videos.json (Pages CMS).
+const RAW = (videoData.length ? videoData : LEGACY_RAW) as WatchVideo[];
 
 const CATEGORY_LABELS: Record<WatchCategory, { th: string; en: string }> = {
   symposium: { th: 'บันทึกงานสัมมนา', en: 'Symposium recording' },
