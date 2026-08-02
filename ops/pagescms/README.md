@@ -28,3 +28,15 @@ it conflicts with Caddy on ports 80 and 443. See `ops/SERVER.md`.
    deployment before retiring the hosted Pages CMS login.
 
 Never commit `.env`, GitHub App keys, database dumps or generated secrets.
+
+## Security release gate
+
+Do not start or expose the on-premise application until its production
+dependencies pass the security review. On 2026-08-02, the official Pages CMS
+2.1.8 lockfile reported a critical Better Auth advisory and multiple high
+runtime advisories. `npm audit fix --force` is not an acceptable workaround
+because it proposes breaking dependency changes.
+
+Until a patched release is available and tested, continue using the hosted
+Pages CMS. The prepared on-premise proxy may return HTTP 502 because the
+application is intentionally not running.
