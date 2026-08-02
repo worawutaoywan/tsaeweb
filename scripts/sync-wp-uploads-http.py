@@ -27,18 +27,17 @@ if os.environ.get("TSAE_INSECURE_SSL") == "1":
 def collect_paths() -> set[str]:
     paths: set[str] = set()
 
-    news_path = ROOT / "data/cms/news.json"
-    if news_path.exists():
-        items = json.loads(news_path.read_text(encoding="utf-8"))
-        for item in items:
-            img = item.get("image")
-            if img and "/wp-uploads/" in img:
-                paths.add(img.split("?")[0])
-            html = item.get("html") or ""
-            for m in re.findall(r'(/wp-uploads/[^\s"\'<>]+)', html):
-                p = m.split("?")[0]
-                if len(os.path.basename(p)) < 200:
-                    paths.add(p)
+    news_dir = ROOT / "data/cms/news"
+    for news_path in news_dir.glob("*.json"):
+        item = json.loads(news_path.read_text(encoding="utf-8"))
+        img = item.get("image")
+        if img and "/wp-uploads/" in img:
+            paths.add(img.split("?")[0])
+        html = item.get("html") or ""
+        for m in re.findall(r'(/wp-uploads/[^\s"\'<>]+)', html):
+            p = m.split("?")[0]
+            if len(os.path.basename(p)) < 200:
+                paths.add(p)
 
     r = subprocess.run(
         ["rg", "-o", r'/wp-uploads/[^"\']+', "src", "public"],

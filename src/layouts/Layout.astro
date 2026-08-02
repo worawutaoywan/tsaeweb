@@ -2,8 +2,6 @@
 import NavBar from '../components/NavBar.astro';
 import Footer from '../components/Footer.astro';
 import Analytics from '../components/Analytics.astro';
-import AdminBar from '../components/AdminBar.astro';
-import InlineEditor from '../components/InlineEditor.astro';
 import '../styles/global.css';
 import { useTranslations, getLangFromUrl } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
@@ -68,8 +66,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     />
   </head>
   <body class="min-h-screen flex flex-col" style="font-family: 'Inter', 'Noto Sans Thai', sans-serif;">
-    <AdminBar />
-    <InlineEditor />
     <NavBar lang={lang} url={Astro.url} hideLangSwitch={hideLangSwitch} />
     <main class="flex-1">
       <slot />

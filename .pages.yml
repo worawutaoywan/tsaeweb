@@ -1,0 +1,109 @@
+media:
+  - name: news_images
+    label: รูปภาพข่าว
+    input: public/uploads/news
+    output: /uploads/news
+    rename: safe
+    categories: [image]
+  - name: documents
+    label: เอกสาร
+    input: public/uploads/documents
+    output: /uploads/documents
+    rename: safe
+    categories: [document]
+
+content:
+  - name: news
+    label: ข่าวสาร
+    type: collection
+    path: data/cms/news
+    format: json
+    filename:
+      template: "{id}.json"
+      field: create
+    view:
+      primary: title
+      fields: [title, date, category, featured]
+      sort: date
+      order: desc
+      search: [title, titleTH, excerpt, excerptTH, author]
+    fields:
+      - name: id
+        label: URL Slug
+        type: string
+        required: true
+        pattern:
+          regex: "^[a-z0-9][a-z0-9-]*$"
+          message: ใช้ตัวอักษรอังกฤษเล็ก ตัวเลข และขีดกลางเท่านั้น
+      - name: title
+        label: ชื่อข่าว (อังกฤษ/ชื่อหลัก)
+        type: string
+        required: true
+      - name: titleTH
+        label: ชื่อข่าวภาษาไทย
+        type: string
+      - name: date
+        label: วันที่เผยแพร่
+        type: date
+        required: true
+        options:
+          time: true
+          format: "yyyy-MM-dd'T'HH:mm:ssxxx"
+      - name: category
+        label: หมวดหมู่
+        type: select
+        required: true
+        options:
+          values:
+            - value: conference
+              label: การประชุม
+            - value: journal
+              label: วารสาร
+            - value: training
+              label: การฝึกอบรม
+            - value: announcement
+              label: ประกาศ
+            - value: activity
+              label: กิจกรรม
+      - name: excerpt
+        label: สรุปย่อ (อังกฤษ/ข้อความหลัก)
+        type: text
+        required: true
+      - name: excerptTH
+        label: สรุปย่อภาษาไทย
+        type: text
+      - name: image
+        label: รูปหน้าปก
+        type: image
+        options:
+          media: news_images
+      - name: featured
+        label: ข่าวเด่น
+        type: boolean
+        default: false
+      - name: author
+        label: ผู้เขียน
+        type: string
+      - name: html
+        label: เนื้อหาข่าว
+        type: rich-text
+        required: true
+        options:
+          format: html
+          media: news_images
+          switcher: true
+      - name: legacySlug
+        label: URL เดิมจาก WordPress
+        type: string
+        hidden: true
+
+settings:
+  content:
+    merge: true
+  commit:
+    identity: user
+    templates:
+      create: "content: เพิ่ม {name} ผ่าน Pages CMS"
+      update: "content: แก้ไข {name} ผ่าน Pages CMS"
+      delete: "content: ลบ {name} ผ่าน Pages CMS"
+      rename: "content: เปลี่ยนชื่อ {oldFilename} เป็น {newFilename}"

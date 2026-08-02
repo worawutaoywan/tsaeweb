@@ -2,13 +2,21 @@
  * Local CMS loaders — read JSON from data/cms/ (no WordPress dependency).
  */
 import type { Loader, LoaderContext } from 'astro:loaders';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 
 const CMS_DIR = path.join(process.cwd(), 'data', 'cms');
 
 function readJson<T>(file: string): T {
   return JSON.parse(readFileSync(path.join(CMS_DIR, file), 'utf-8')) as T;
+}
+
+function readJsonCollection<T>(directory: string): T[] {
+  const collectionDir = path.join(CMS_DIR, directory);
+  return readdirSync(collectionDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.json'))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((entry) => JSON.parse(readFileSync(path.join(collectionDir, entry.name), 'utf-8')) as T);
 }
 
 interface CmsNewsItem {
@@ -58,9 +66,9 @@ export function cmsNewsLoader(): Loader {
     async load(ctx: LoaderContext) {
       let items: CmsNewsItem[];
       try {
-        items = readJson<CmsNewsItem[]>('news.json');
+        items = readJsonCollection<CmsNewsItem>('news');
       } catch (err) {
-        ctx.logger.warn(`CMS news.json missing: ${err instanceof Error ? err.message : String(err)}`);
+        ctx.logger.warn(`CMS news collection missing: ${err instanceof Error ? err.message : String(err)}`);
         return;
       }
       ctx.store.clear();
@@ -81,7 +89,7 @@ export function cmsNewsLoader(): Loader {
           rendered: { html: item.html },
         });
       }
-      ctx.logger.info(`Loaded ${items.length} news items from CMS`);
+      ctx.logger.info(`Loaded ${items.length} news items from Pages CMS`);
     },
   };
 }
