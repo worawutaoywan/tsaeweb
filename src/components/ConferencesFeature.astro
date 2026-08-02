@@ -1,5 +1,6 @@
 ---
 import type { Lang } from '../i18n/ui';
+import conferenceData from '../../data/cms/home-conferences.json';
 
 interface Props {
   lang?: Lang;
@@ -19,43 +20,20 @@ const hLabel = isTH ? 'ชม.' : 'hrs';
 const mLabel = isTH ? 'นาที' : 'min';
 const countdownLabel = isTH ? 'เหลืออีก' : 'Starts in';
 
-const confs = [
-  {
-    href: '/2026conf-national/',
-    img: '/images/conf/tsae2026-national-poster.png',
-    badge: isTH ? 'ระดับชาติ · ครั้งที่ 27' : 'National · 27th',
-    title: isTH ? 'การประชุมวิชาการระดับชาติ ครั้งที่ 27' : '27th TSAE National Conference',
-    theme: isTH
-      ? '“วิศวกรรมเกษตรแห่งอนาคตในระเบียบโลกใหม่”'
-      : '“Agricultural Engineering for the Future in the New World Order”',
-    date: isTH ? '20 – 21 กรกฎาคม 2569' : '20 – 21 July 2026',
-    venue: isTH ? 'กรมส่งเสริมการเกษตร กรุงเทพฯ' : 'Dept. of Agricultural Extension, Bangkok',
-    target: '2026-07-20T08:30:00+07:00',
-    submit: 'https://easychair.org/conferences/?conf=tsae2026',
-  },
-  {
-    href: '/2026conf-intl/',
-    img: '/images/conf/tsae2026-intl-poster.jpg',
-    badge: isTH ? 'นานาชาติ · ครั้งที่ 19' : 'International · 19th',
-    title: isTH ? 'การประชุมวิชาการระดับนานาชาติ ครั้งที่ 19' : '19th TSAE International Conference',
-    theme: '“Empowering Engineering Solutions for Future Agriculture in the New World Order”',
-    date: isTH ? '7 – 10 กันยายน 2569' : '7 – 10 September 2026',
-    venue: isTH ? 'ไทเป ไต้หวัน' : 'Taipei, Taiwan ROC',
-    target: '2026-09-07T09:00:00+08:00',
-    submit: 'https://easychair.org/conferences/?conf=tsae2026',
-  },
-  {
-    href: '/iaec2026/',
-    img: '/images/conf/iaec2026-poster.jpg',
-    badge: isTH ? 'AAAE · IAEC 2026' : 'AAAE · IAEC 2026',
-    title: 'IAEC 2026',
-    theme: '“Appropriate Technologies for Climate Resilient Farming”',
-    date: isTH ? '26 – 28 พฤศจิกายน 2569' : '26 – 28 November 2026',
-    venue: isTH ? 'Prime Plaza Hotel, บาหลี' : 'Prime Plaza Hotel, Bali',
-    target: '2026-11-26T09:00:00+08:00',
-    submit: 'https://aaaesociety.org/register-iaec2026/',
-  },
-];
+const confs = conferenceData
+  .filter((item) => item.enabled)
+  .sort((a, b) => a.sortOrder - b.sortOrder)
+  .map((item) => ({
+    href: item.href,
+    img: item.image,
+    badge: isTH ? item.badgeTH : item.badgeEN,
+    title: isTH ? item.titleTH : item.titleEN,
+    theme: isTH ? item.themeTH : item.themeEN,
+    date: isTH ? item.dateTH : item.dateEN,
+    venue: isTH ? item.venueTH : item.venueEN,
+    target: item.target,
+    submit: item.submitUrl,
+  }));
 ---
 
 <section class="py-16" style="background-color:#f6faf7;">

@@ -13,6 +13,365 @@ media:
     categories: [document]
 
 content:
+  - name: homepage
+    label: หน้าแรก
+    type: group
+    items:
+      - name: homepage_settings
+        label: ข้อความและส่วนประกอบ
+        type: file
+        path: data/cms/homepage.json
+        format: json
+        fields:
+          - name: latestNewsEnabled
+            label: แสดงข่าวล่าสุด
+            type: boolean
+            default: true
+          - name: latestNewsTitleTH
+            label: หัวข้อข่าวล่าสุด (ไทย)
+            type: string
+            required: true
+          - name: latestNewsTitleEN
+            label: หัวข้อข่าวล่าสุด (อังกฤษ)
+            type: string
+            required: true
+          - name: latestNewsDescTH
+            label: คำอธิบายข่าวล่าสุด (ไทย)
+            type: text
+          - name: latestNewsDescEN
+            label: คำอธิบายข่าวล่าสุด (อังกฤษ)
+            type: text
+          - name: aboutEnabled
+            label: แสดงส่วนแนะนำสมาคม
+            type: boolean
+            default: true
+          - name: aboutBadgeTH
+            label: ป้ายแนะนำสมาคม (ไทย)
+            type: string
+          - name: aboutBadgeEN
+            label: ป้ายแนะนำสมาคม (อังกฤษ)
+            type: string
+          - name: aboutTitleTH
+            label: หัวข้อแนะนำสมาคม (ไทย)
+            type: string
+          - name: aboutTitleEN
+            label: หัวข้อแนะนำสมาคม (อังกฤษ)
+            type: string
+          - name: aboutDesc1TH
+            label: รายละเอียดสมาคม ย่อหน้า 1 (ไทย)
+            type: text
+          - name: aboutDesc1EN
+            label: รายละเอียดสมาคม ย่อหน้า 1 (อังกฤษ)
+            type: text
+          - name: aboutDesc2TH
+            label: รายละเอียดสมาคม ย่อหน้า 2 (ไทย)
+            type: text
+          - name: aboutDesc2EN
+            label: รายละเอียดสมาคม ย่อหน้า 2 (อังกฤษ)
+            type: text
+          - name: journalEnabled
+            label: แสดงวารสารล่าสุด
+            type: boolean
+            default: true
+          - name: journalVolume
+            label: วารสาร ปีที่ (Volume)
+            type: number
+            required: true
+          - name: journalIssue
+            label: วารสาร ฉบับที่ (Issue)
+            type: number
+            required: true
+          - name: journalYear
+            label: ปี ค.ศ.
+            type: number
+            required: true
+          - name: journalUrl
+            label: ลิงก์อ่านวารสาร
+            type: string
+            required: true
+          - name: ctaEnabled
+            label: แสดงส่วนสมัครสมาชิก
+            type: boolean
+            default: true
+          - name: ctaTitleTH
+            label: หัวข้อสมัครสมาชิก (ไทย)
+            type: string
+          - name: ctaTitleEN
+            label: หัวข้อสมัครสมาชิก (อังกฤษ)
+            type: string
+          - name: ctaDescTH
+            label: คำอธิบายสมัครสมาชิก (ไทย)
+            type: text
+          - name: ctaDescEN
+            label: คำอธิบายสมัครสมาชิก (อังกฤษ)
+            type: text
+          - name: ctaButtonTH
+            label: ข้อความปุ่มสมัครสมาชิก (ไทย)
+            type: string
+          - name: ctaButtonEN
+            label: ข้อความปุ่มสมัครสมาชิก (อังกฤษ)
+            type: string
+      - name: hero
+        label: Hero banners
+        type: file
+        path: data/cms/hero.json
+        format: json
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{badgeTH} ({index})"
+        fields:
+          - name: id
+            label: รหัส
+            type: string
+            required: true
+          - name: enabled
+            label: เปิดแสดง
+            type: boolean
+            default: true
+          - name: sortOrder
+            label: ลำดับ
+            type: number
+            required: true
+          - name: fullImage
+            label: ใช้ภาพเต็มพื้นที่
+            type: boolean
+            default: true
+          - name: badgeTH
+            label: ป้าย (ไทย)
+            type: string
+            required: true
+          - name: badgeEN
+            label: ป้าย (อังกฤษ)
+            type: string
+            required: true
+          - name: image
+            label: รูปภาพ
+            type: image
+            required: true
+            options:
+              media: news_images
+          - name: href
+            label: ลิงก์รายละเอียด
+            type: string
+            required: true
+          - name: href2
+            label: ลิงก์ที่สอง
+            type: string
+          - name: href2LabelTH
+            label: ชื่อลิงก์ที่สอง (ไทย)
+            type: string
+          - name: href2LabelEN
+            label: ชื่อลิงก์ที่สอง (อังกฤษ)
+            type: string
+          - name: registerHref
+            label: ลิงก์ลงทะเบียน
+            type: string
+          - name: titleTH
+            label: หัวข้อ (ไทย)
+            type: string
+          - name: titleEN
+            label: หัวข้อ (อังกฤษ)
+            type: string
+          - name: titleAccentTH
+            label: ข้อความเน้น (ไทย)
+            type: string
+          - name: titleAccentEN
+            label: ข้อความเน้น (อังกฤษ)
+            type: string
+          - name: themeTH
+            label: คำอธิบาย (ไทย)
+            type: text
+          - name: themeEN
+            label: คำอธิบาย (อังกฤษ)
+            type: text
+          - name: dateTH
+            label: วันเวลา (ไทย)
+            type: string
+          - name: dateEN
+            label: วันเวลา (อังกฤษ)
+            type: string
+          - name: locationTH
+            label: สถานที่ (ไทย)
+            type: string
+          - name: locationEN
+            label: สถานที่ (อังกฤษ)
+            type: string
+          - name: tagTH
+            label: ข้อความกำกับ (ไทย)
+            type: string
+          - name: tagEN
+            label: ข้อความกำกับ (อังกฤษ)
+            type: string
+          - name: bg
+            label: สีพื้นหลัง (CSS)
+            type: string
+            hidden: true
+          - name: overlay
+            label: Overlay (CSS)
+            type: string
+            hidden: true
+          - name: glow
+            label: Glow (CSS)
+            type: string
+            hidden: true
+      - name: events
+        label: งานประชุมและกิจกรรม
+        type: file
+        path: data/cms/events.json
+        format: json
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{titleTH} ({index})"
+        fields:
+          - name: id
+            label: URL Slug
+            type: string
+            required: true
+          - name: titleTH
+            label: ชื่องาน (ไทย)
+            type: string
+            required: true
+          - name: title
+            label: ชื่องาน (อังกฤษ)
+            type: string
+            required: true
+          - name: startDate
+            label: วันเริ่ม
+            type: date
+            required: true
+            options:
+              time: true
+              format: "yyyy-MM-dd'T'HH:mm:ssxxx"
+          - name: endDate
+            label: วันสิ้นสุด
+            type: date
+            options:
+              time: true
+              format: "yyyy-MM-dd'T'HH:mm:ssxxx"
+          - name: locationTH
+            label: สถานที่ (ไทย)
+            type: string
+          - name: location
+            label: สถานที่ (อังกฤษ)
+            type: string
+          - name: type
+            label: ประเภท
+            type: select
+            options:
+              values:
+                - value: national
+                  label: ระดับชาติ
+                - value: international
+                  label: นานาชาติ
+                - value: training
+                  label: อบรม
+                - value: webinar
+                  label: ออนไลน์
+          - name: status
+            label: สถานะ
+            type: select
+            options:
+              values:
+                - value: upcoming
+                  label: กำลังจะมาถึง
+                - value: ongoing
+                  label: กำลังดำเนินการ
+                - value: past
+                  label: สิ้นสุดแล้ว
+          - name: registrationUrl
+            label: ลิงก์ลงทะเบียน
+            type: string
+          - name: image
+            label: รูปภาพ
+            type: image
+            options:
+              media: news_images
+          - name: excerptTH
+            label: สรุป (ไทย)
+            type: text
+          - name: excerpt
+            label: สรุป (อังกฤษ)
+            type: text
+          - name: featured
+            label: แสดงเป็นงานเด่น
+            type: boolean
+          - name: html
+            label: รายละเอียด
+            type: rich-text
+            options:
+              format: html
+              media: news_images
+      - name: home_conferences
+        label: การ์ดงานเด่นหน้าแรก
+        type: file
+        path: data/cms/home-conferences.json
+        format: json
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{titleTH} ({index})"
+        fields:
+          - name: enabled
+            label: เปิดแสดง
+            type: boolean
+            default: true
+          - name: sortOrder
+            label: ลำดับ
+            type: number
+            required: true
+          - name: titleTH
+            label: ชื่องาน (ไทย)
+            type: string
+            required: true
+          - name: titleEN
+            label: ชื่องาน (อังกฤษ)
+            type: string
+            required: true
+          - name: badgeTH
+            label: ป้าย (ไทย)
+            type: string
+          - name: badgeEN
+            label: ป้าย (อังกฤษ)
+            type: string
+          - name: themeTH
+            label: Theme (ไทย)
+            type: text
+          - name: themeEN
+            label: Theme (อังกฤษ)
+            type: text
+          - name: dateTH
+            label: วันเวลา (ไทย)
+            type: string
+          - name: dateEN
+            label: วันเวลา (อังกฤษ)
+            type: string
+          - name: venueTH
+            label: สถานที่ (ไทย)
+            type: string
+          - name: venueEN
+            label: สถานที่ (อังกฤษ)
+            type: string
+          - name: target
+            label: วันเวลาเริ่มนับถอยหลัง
+            type: date
+            options:
+              time: true
+              format: "yyyy-MM-dd'T'HH:mm:ssxxx"
+          - name: href
+            label: ลิงก์รายละเอียด
+            type: string
+            required: true
+          - name: submitUrl
+            label: ลิงก์ส่งบทความ/ลงทะเบียน
+            type: string
+          - name: image
+            label: รูปภาพ
+            type: image
+            required: true
+            options:
+              media: news_images
   - name: news
     label: ข่าวสาร
     type: collection
