@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pagescms
+      POSTGRES_USER: pagescms
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pagescms_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pagescms -d pagescms"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [pagescms]
+
+  app:
+    build:
+      context: ./source
+      dockerfile: ../Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://pagescms:${POSTGRES_PASSWORD}@db:5432/pagescms
+      BASE_URL: https://cms.tsae.asia
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:13003:3000"
+    networks: [pagescms]
+
+networks:
+  pagescms:
+    driver: bridge
+
+volumes:
+  pagescms_db:

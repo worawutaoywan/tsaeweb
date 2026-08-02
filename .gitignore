@@ -32,6 +32,8 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+ops/pagescms/.env
+ops/pagescms/source/
 
 # macOS-specific files
 .DS_Store
