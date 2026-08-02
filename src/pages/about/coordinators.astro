@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CoordinatorsPage from '../../components/pages/CoordinatorsPage.astro';
+import { getLangFromUrl, useTranslations } from '../../i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+<Layout title={t('nav.about.coordinators')} lang={lang}>
+  <CoordinatorsPage lang={lang} />
+</Layout>

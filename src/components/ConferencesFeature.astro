@@ -1,0 +1,144 @@
+---
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'en' } = Astro.props;
+const isTH = lang === 'th';
+
+const sectionTitle = isTH ? 'งานประชุมวิชาการ 2569' : 'Flagship Conferences 2026';
+const sectionDesc = isTH
+  ? 'งานประชุมเรือธงของสมาคมฯ และงานนานาชาติ AAAE ที่สมาชิก TSAE ร่วมด้วย'
+  : 'TSAE flagship conferences plus AAAE’s IAEC 2026 — open for abstracts'
+const detailsBtn = isTH ? 'ดูรายละเอียด' : 'View Details';
+const submitBtn = isTH ? 'ส่งบทความ' : 'Submit Paper';
+const dLabel = isTH ? 'วัน' : 'days';
+const hLabel = isTH ? 'ชม.' : 'hrs';
+const mLabel = isTH ? 'นาที' : 'min';
+const countdownLabel = isTH ? 'เหลืออีก' : 'Starts in';
+
+const confs = [
+  {
+    href: '/2026conf-national/',
+    img: '/images/conf/tsae2026-national-poster.png',
+    badge: isTH ? 'ระดับชาติ · ครั้งที่ 27' : 'National · 27th',
+    title: isTH ? 'การประชุมวิชาการระดับชาติ ครั้งที่ 27' : '27th TSAE National Conference',
+    theme: isTH
+      ? '“วิศวกรรมเกษตรแห่งอนาคตในระเบียบโลกใหม่”'
+      : '“Agricultural Engineering for the Future in the New World Order”',
+    date: isTH ? '20 – 21 กรกฎาคม 2569' : '20 – 21 July 2026',
+    venue: isTH ? 'กรมส่งเสริมการเกษตร กรุงเทพฯ' : 'Dept. of Agricultural Extension, Bangkok',
+    target: '2026-07-20T08:30:00+07:00',
+    submit: 'https://easychair.org/conferences/?conf=tsae2026',
+  },
+  {
+    href: '/2026conf-intl/',
+    img: '/images/conf/tsae2026-intl-poster.jpg',
+    badge: isTH ? 'นานาชาติ · ครั้งที่ 19' : 'International · 19th',
+    title: isTH ? 'การประชุมวิชาการระดับนานาชาติ ครั้งที่ 19' : '19th TSAE International Conference',
+    theme: '“Empowering Engineering Solutions for Future Agriculture in the New World Order”',
+    date: isTH ? '7 – 10 กันยายน 2569' : '7 – 10 September 2026',
+    venue: isTH ? 'ไทเป ไต้หวัน' : 'Taipei, Taiwan ROC',
+    target: '2026-09-07T09:00:00+08:00',
+    submit: 'https://easychair.org/conferences/?conf=tsae2026',
+  },
+  {
+    href: '/iaec2026/',
+    img: '/images/conf/iaec2026-poster.jpg',
+    badge: isTH ? 'AAAE · IAEC 2026' : 'AAAE · IAEC 2026',
+    title: 'IAEC 2026',
+    theme: '“Appropriate Technologies for Climate Resilient Farming”',
+    date: isTH ? '26 – 28 พฤศจิกายน 2569' : '26 – 28 November 2026',
+    venue: isTH ? 'Prime Plaza Hotel, บาหลี' : 'Prime Plaza Hotel, Bali',
+    target: '2026-11-26T09:00:00+08:00',
+    submit: 'https://aaaesociety.org/register-iaec2026/',
+  },
+];
+---
+
+<section class="py-16" style="background-color:#f6faf7;">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="text-center mb-10">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-3" style="background-color: rgba(200,169,81,0.18); color:#a8892f;">
+        2026 · 2569
+      </div>
+      <h2 class="text-3xl font-bold mb-1" style="color:#1a6b3a;">{sectionTitle}</h2>
+      <p class="text-gray-500">{sectionDesc}</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-7">
+      {confs.map((c) => (
+        <div class="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow overflow-hidden flex flex-col sm:flex-row">
+          <a href={c.href} class="block sm:w-44 lg:w-48 shrink-0 bg-gray-50">
+            <img src={c.img} alt={c.title} class="w-full h-48 sm:h-full object-cover" loading="lazy" />
+          </a>
+          <div class="p-6 flex flex-col flex-1">
+            <span class="self-start inline-flex items-center px-3 py-1 rounded-full text-xs font-bold mb-3" style="background-color:#1a6b3a; color:#fff;">{c.badge}</span>
+            <a href={c.href}>
+              <h3 class="text-xl font-bold text-gray-900 mb-1.5 leading-snug group-hover:text-green-800 transition-colors">{c.title}</h3>
+            </a>
+            <p class="text-sm font-medium mb-4" style="color:#a8892f;">{c.theme}</p>
+
+            <div class="space-y-1.5 text-sm text-gray-600 mb-4">
+              <p class="flex items-center gap-2">
+                <svg class="w-4 h-4 shrink-0" style="color:#1a6b3a" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                {c.date}
+              </p>
+              <p class="flex items-center gap-2">
+                <svg class="w-4 h-4 shrink-0" style="color:#1a6b3a" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                {c.venue}
+              </p>
+            </div>
+
+            <div class="conf-countdown flex items-center gap-2 mb-5" data-target={c.target}>
+              <span class="text-xs text-gray-400 mr-1">{countdownLabel}</span>
+              <div class="text-center px-2.5 py-1 rounded-lg" style="background-color:#eef6f0;">
+                <span class="block text-lg font-extrabold leading-none" style="color:#1a6b3a;" data-cd="days">--</span>
+                <span class="block text-[10px] text-gray-400">{dLabel}</span>
+              </div>
+              <div class="text-center px-2.5 py-1 rounded-lg" style="background-color:#eef6f0;">
+                <span class="block text-lg font-extrabold leading-none" style="color:#1a6b3a;" data-cd="hours">--</span>
+                <span class="block text-[10px] text-gray-400">{hLabel}</span>
+              </div>
+              <div class="text-center px-2.5 py-1 rounded-lg" style="background-color:#eef6f0;">
+                <span class="block text-lg font-extrabold leading-none" style="color:#1a6b3a;" data-cd="minutes">--</span>
+                <span class="block text-[10px] text-gray-400">{mLabel}</span>
+              </div>
+            </div>
+
+            <div class="mt-auto flex flex-wrap gap-2.5">
+              <a href={c.href} class="inline-flex items-center gap-1.5 px-5 py-2.5 text-white text-sm font-semibold rounded-lg transition-transform hover:scale-105" style="background-color:#1a6b3a;">{detailsBtn}</a>
+              <a href={c.submit} target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold rounded-lg border-2 transition-colors" style="border-color:#c8a951; color:#a8892f;">{submitBtn}</a>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  function initConfCountdowns() {
+    document.querySelectorAll<HTMLElement>('.conf-countdown').forEach((el) => {
+      const target = new Date(el.dataset.target || '').getTime();
+      if (!target) return;
+      const set = (u: string, v: number) => {
+        const n = el.querySelector(`[data-cd="${u}"]`);
+        if (n) n.textContent = String(v).padStart(2, '0');
+      };
+      const tick = () => {
+        const diff = target - Date.now();
+        if (diff <= 0) { set('days',0); set('hours',0); set('minutes',0); return; }
+        set('days', Math.floor(diff / 86400000));
+        set('hours', Math.floor((diff % 86400000) / 3600000));
+        set('minutes', Math.floor((diff % 3600000) / 60000));
+      };
+      tick();
+      setInterval(tick, 30000);
+    });
+  }
+  initConfCountdowns();
+  document.addEventListener('astro:page-load', initConfCountdowns);
+</script>

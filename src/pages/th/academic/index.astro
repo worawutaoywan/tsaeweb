@@ -1,0 +1,10 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import AcademicDocsPage from '../../../components/pages/AcademicDocsPage.astro';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+<Layout title={t('nav.academic')} lang={lang}>
+  <AcademicDocsPage lang={lang} />
+</Layout>

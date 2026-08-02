@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    font-family: 'Inter', 'Noto Sans Thai', sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    color: #1f2937;
+    background: #ffffff;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Thai', sans-serif;
+    font-weight: 700;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background-color: #1a6b3a;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+    text-decoration: none;
+  }
+
+  .btn-primary:hover {
+    background-color: #124d2a;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #c8a951;
+    color: #c8a951;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    text-decoration: none;
+    background: transparent;
+  }
+
+  .btn-secondary:hover {
+    background-color: #c8a951;
+    color: #ffffff;
+  }
+
+  .btn-gold {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background-color: #c8a951;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+    text-decoration: none;
+  }
+
+  .btn-gold:hover {
+    background-color: #a8892f;
+  }
+}

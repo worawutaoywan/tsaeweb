@@ -1,0 +1,106 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import NewsCard from '../../../components/NewsCard.astro';
+import { getCollection } from 'astro:content';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+
+const allNews = await getCollection('news');
+const sortedNews = allNews.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const categories = [
+  { value: 'all', labelKey: 'ui.all' as const },
+  { value: 'conference', labelKey: 'cat.conference' as const },
+  { value: 'journal', labelKey: 'cat.journal' as const },
+  { value: 'training', labelKey: 'cat.training' as const },
+  { value: 'announcement', labelKey: 'cat.announcement' as const },
+  { value: 'activity', labelKey: 'cat.activity' as const },
+];
+---
+
+<Layout title={t('news.title')} description={t('news.subtitle')} lang={lang}>
+  <div class="py-12" style="background: linear-gradient(135deg, #0d3b1e, #1a6b3a);">
+    <div class="max-w-7xl mx-auto px-4">
+      <nav class="flex items-center gap-2 text-sm text-green-300 mb-4">
+        <a href={`${base}/`} class="hover:text-white transition-colors">{t('ui.home')}</a>
+        <span>/</span>
+        <span class="text-white">{t('nav.news')}</span>
+      </nav>
+      <h1 class="text-4xl font-bold text-white mb-2">{t('news.title')}</h1>
+      <p class="text-green-200">{t('news.subtitle')}</p>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 py-12">
+    <div class="flex flex-wrap items-center gap-3 mb-10">
+      <span class="text-sm font-medium text-gray-600">{t('ui.filterBy')}</span>
+      {categories.map((cat) => (
+        <button
+          data-filter={cat.value}
+          class="filter-btn px-4 py-2 rounded-full text-sm font-medium transition-colors border-2"
+          style={cat.value === 'all' ? 'background-color: #1a6b3a; color: white; border-color: #1a6b3a;' : 'color: #4b5563; border-color: #e5e7eb; background: white;'}
+        >
+          {t(cat.labelKey)}
+        </button>
+      ))}
+    </div>
+
+    <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {sortedNews.map((news) => (
+        <div class="news-item" data-category={news.data.category}>
+          <NewsCard
+            title={news.data.title}
+            titleTH={news.data.titleTH}
+            date={news.data.date}
+            category={news.data.category}
+            excerpt={news.data.excerpt}
+            excerptTH={news.data.excerptTH}
+            image={news.data.image}
+            slug={news.id}
+            featured={news.data.featured}
+            lang={lang}
+          />
+        </div>
+      ))}
+    </div>
+
+    <div id="no-results" class="hidden text-center py-16">
+      <p class="text-gray-500">{t('ui.noResults')}</p>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const newsItems = document.querySelectorAll('.news-item');
+  const noResults = document.getElementById('no-results');
+
+  filterBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const filter = btn.getAttribute('data-filter');
+      filterBtns.forEach((b) => {
+        (b as HTMLElement).style.backgroundColor = 'white';
+        (b as HTMLElement).style.color = '#4b5563';
+        (b as HTMLElement).style.borderColor = '#e5e7eb';
+      });
+      (btn as HTMLElement).style.backgroundColor = '#1a6b3a';
+      (btn as HTMLElement).style.color = 'white';
+      (btn as HTMLElement).style.borderColor = '#1a6b3a';
+
+      let visibleCount = 0;
+      newsItems.forEach((item) => {
+        const cat = item.getAttribute('data-category');
+        if (filter === 'all' || cat === filter) {
+          (item as HTMLElement).style.display = '';
+          visibleCount++;
+        } else {
+          (item as HTMLElement).style.display = 'none';
+        }
+      });
+      if (noResults) noResults.classList.toggle('hidden', visibleCount > 0);
+    });
+  });
+</script>

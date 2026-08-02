@@ -1,0 +1,64 @@
+---
+import PageHero from '../PageHero.astro';
+import type { Lang } from '../../i18n/ui';
+import { useTranslations } from '../../i18n/utils';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+const th = lang === 'th';
+
+// Educational institutions / coordinating network
+// Source of truth: old.tsae.asia/educational_institutions/ & coordinators list
+const institutions = [
+  'มหาวิทยาลัยเกษตรศาสตร์',
+  'มหาวิทยาลัยขอนแก่น',
+  'มหาวิทยาลัยเชียงใหม่',
+  'มหาวิทยาลัยมหาสารคาม',
+  'มหาวิทยาลัยเทคโนโลยีสุรนารี',
+  'มหาวิทยาลัยแม่โจ้',
+  'มหาวิทยาลัยธรรมศาสตร์',
+  'จุฬาลงกรณ์มหาวิทยาลัย',
+  'สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง',
+  'มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ',
+  'มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน',
+  'มหาวิทยาลัยเทคโนโลยีราชมงคลธัญบุรี',
+  'มหาวิทยาลัยเทคโนโลยีราชมงคลล้านนา',
+  'มหาวิทยาลัยราชภัฏอุดรธานี',
+  'มหาวิทยาลัยราชภัฏวไลยอลงกรณ์',
+  'สำนักงานคณะกรรมการการอาชีวศึกษา',
+  'กรมวิชาการเกษตร',
+];
+---
+
+<PageHero
+  lang={lang}
+  title={t('nav.network')}
+  subtitle={th ? 'เครือข่ายสถาบันการศึกษาและหน่วยงานพันธมิตร' : 'Network of educational institutions and partners'}
+/>
+
+<div class="max-w-7xl mx-auto px-4 py-14">
+  <p class="text-gray-600 mb-8 leading-relaxed">
+    {th
+      ? 'สมาคมวิศวกรรมเกษตรแห่งประเทศไทยทำงานร่วมกับเครือข่ายสถาบันการศึกษาและหน่วยงานด้านวิศวกรรมเกษตรทั่วประเทศ เพื่อขับเคลื่อนงานวิชาการ การวิจัย และการพัฒนาบุคลากร'
+      : 'The Thai Society of Agricultural Engineering works with a nationwide network of educational institutions and agencies in agricultural engineering to advance academic work, research, and human-resource development.'}
+  </p>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {institutions.map((name) => (
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center gap-3 hover:shadow-md transition-shadow">
+        <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 text-white" style="background: linear-gradient(135deg, #c8a951, #1a6b3a);">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+        </div>
+        <span class="text-sm font-medium text-gray-800 leading-snug">{name}</span>
+      </div>
+    ))}
+  </div>
+
+  <p class="text-sm text-gray-400 mt-8">
+    {th ? 'ดูเครือข่ายผู้ประสานงานรายสถาบันได้ที่หน้า ' : 'See coordinators by institution on the '}
+    <a href={`${base}/about/coordinators`} class="text-green-700 font-medium hover:underline">{t('nav.about.coordinators')}</a>
+    {th ? '' : ' page.'}
+  </p>
+</div>

@@ -1,0 +1,408 @@
+---
+import type { Lang } from '../i18n/ui';
+import { getWatchCategories, getWatchPicks, getWatchVideos } from '../data/watchVideos';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'en' } = Astro.props;
+const isTH = lang === 'th';
+
+const sectionBadge = isTH ? 'สื่อวิดีโอ' : 'TSAE Media';
+const sectionTitle = isTH ? 'วิดีโอจากสมาคมฯ' : 'Watch & Learn';
+const sectionDesc = isTH
+  ? 'อ่านคำอธิบายสั้น ๆ แล้วเลือกเล่น — กรองได้เฉพาะประเภทที่ระบุชัดจากคลิป'
+  : 'Read the short description and play — filter only when the clip type is clear';
+const picksLabel = isTH ? 'ไม่แน่ใจ? เริ่มจากที่นี่' : 'Not sure? Start here';
+const picksDesc = isTH ? 'คลิปแนะนำ 3 รายการ — อ่านคำอธิบายสั้น ๆ แล้วกดเล่นได้เลย' : 'Three curated picks with short descriptions';
+const playlistLabel = isTH ? 'วิดีโอทั้งหมด' : 'All videos';
+const articleLabel = isTH ? 'อ่านบทความ' : 'Read article';
+const openLinkLabel = isTH ? 'เปิดลิงก์' : 'Open link';
+const scrollHint = isTH ? 'เลื่อนดูเพิ่ม' : 'Scroll for more';
+const playLabel = isTH ? 'เล่น' : 'Play';
+const filterLabel = isTH ? 'เลือกหมวด' : 'Filter by topic';
+const showingLabel = isTH ? 'แสดง' : 'Showing';
+
+const videos = getWatchVideos(lang);
+const picks = getWatchPicks(lang);
+const categories = getWatchCategories(lang);
+const thumb = (id: string) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+const featured = picks.find((v) => v.id) ?? videos.find((v) => v.id) ?? videos[0];
+
+function formatCardDate(date: string, isThai: boolean) {
+  const d = new Date(date + 'T12:00:00');
+  if (Number.isNaN(d.getTime())) return '';
+  return isThai
+    ? d.toLocaleDateString('th-TH', { month: 'short', year: '2-digit' })
+    : d.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
+}
+---
+
+<section class="video-feature py-14 lg:py-16" style="background: linear-gradient(135deg, #0d3b1e 0%, #1a6b3a 100%);">
+  <div class="max-w-6xl mx-auto px-4">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-2" style="background-color: rgba(200,169,81,0.2); color:#fde68a;">
+        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        {sectionBadge}
+      </div>
+      <h2 class="text-2xl lg:text-3xl font-bold text-white">{sectionTitle}</h2>
+      <p class="text-green-200/90 text-sm mt-1 max-w-xl">{sectionDesc}</p>
+    </div>
+
+    <!-- Quick picks -->
+    <div class="mb-8">
+      <div class="mb-3">
+        <h3 class="text-sm font-bold text-yellow-100">{picksLabel}</h3>
+        <p class="text-green-300/70 text-xs mt-0.5">{picksDesc}</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {picks.map((v) => (
+          <button
+            type="button"
+            class="yt-pick group text-left rounded-xl p-3 flex gap-3 border transition-all hover:border-yellow-200/40"
+            style="background: rgba(255,255,255,0.07); border-color: rgba(200,169,81,0.25);"
+            data-yt={v.id}
+            data-title={v.title}
+            data-meta={v.meta}
+            data-summary={v.summary}
+            data-web={v.web ?? ''}
+            data-thumb={v.id ? thumb(v.id) : ''}
+            data-category={v.category ?? ''}
+            data-cat-label={v.categoryLabel}
+          >
+            <span class="relative shrink-0 w-24 aspect-video rounded-lg overflow-hidden bg-black">
+              {v.id && <img src={thumb(v.id)} alt="" class="w-full h-full object-cover" loading="lazy" />}
+              <span class="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/10 transition-colors">
+                <span class="w-7 h-7 rounded-full flex items-center justify-center opacity-90 group-hover:opacity-100" style="background:#c8a951;">
+                  <svg class="w-3.5 h-3.5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </span>
+              </span>
+            </span>
+            <span class="min-w-0 flex-1">
+              {v.categoryLabel && (
+                <span class="inline-block text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded mb-1" style="background:rgba(200,169,81,0.25); color:#fde68a;">{v.categoryLabel}</span>
+              )}
+              <span class="block text-white text-xs font-bold leading-snug line-clamp-2 group-hover:text-yellow-100">{v.title}</span>
+              <span class="block text-green-200/80 text-[11px] mt-1 leading-snug line-clamp-2">{v.summary}</span>
+              <span class="inline-flex items-center gap-1 mt-2 text-[11px] font-semibold text-yellow-200/90">{playLabel} →</span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <!-- Player -->
+    <div class="yt-main relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl bg-black ring-1 ring-white/10 mb-4">
+      {featured.id ? (
+        <button type="button" class="yt-play group absolute inset-0 w-full h-full cursor-pointer" data-yt={featured.id} aria-label={featured.title}>
+          <img src={thumb(featured.id)} alt="" class="yt-main-thumb w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" loading="eager" />
+          <span class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></span>
+          <span class="absolute inset-0 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity">
+            <span class="flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 rounded-full shadow-2xl transition-transform duration-300 group-hover:scale-110" style="background-color:#c8a951;">
+              <svg class="w-7 h-7 lg:w-8 lg:h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </span>
+          </span>
+        </button>
+      ) : (
+        <a href={featured.href} target="_blank" rel="noopener noreferrer" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center" style="background: rgba(0,0,0,0.4);">
+          <span class="text-yellow-200 text-sm">{openLinkLabel}</span>
+        </a>
+      )}
+    </div>
+
+    <!-- Now playing -->
+    <div class="yt-now-playing mb-5 rounded-xl px-4 py-3.5" style="background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+        <div class="min-w-0 flex-1">
+          <p class="text-yellow-200/70 text-[10px] font-bold uppercase tracking-widest mb-0.5">{isTH ? 'กำลังเลือก' : 'Now selected'}</p>
+          {featured.categoryLabel && (
+            <span class="yt-now-cat inline-block text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded mb-1.5" style="background:rgba(200,169,81,0.2); color:#fde68a;">{featured.categoryLabel}</span>
+          )}
+          <h3 class="yt-now-title text-white font-bold text-sm lg:text-base leading-snug">{featured.title}</h3>
+          <p class="yt-now-summary text-green-100/85 text-xs mt-1.5 leading-relaxed">{featured.summary}</p>
+          <p class="yt-now-meta text-green-300/70 text-[11px] mt-1">{featured.meta}</p>
+        </div>
+        <div class="yt-now-actions shrink-0">
+          {featured.web && (
+            <a href={featured.web} target="_blank" rel="noopener noreferrer" class="yt-now-web inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:rgba(200,169,81,0.2); color:#fde68a;">
+              {articleLabel}
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+
+    <!-- Category filters -->
+    <div class="mb-4">
+      <p class="text-[10px] font-bold uppercase tracking-wider text-yellow-200/80 mb-2">{filterLabel}</p>
+      <div class="yt-filters flex flex-wrap gap-2">
+        {categories.map((c, i) => (
+          <button
+            type="button"
+            class={`yt-filter px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${i === 0 ? 'is-on' : ''}`}
+            data-filter={c.key}
+            style={i === 0
+              ? 'background:rgba(200,169,81,0.25); color:#fde68a; border-color:rgba(200,169,81,0.45);'
+              : 'background:rgba(255,255,255,0.06); color:#d1fae5; border-color:rgba(255,255,255,0.12);'}
+          >
+            {c.label}
+            <span class="yt-filter-count ml-1 opacity-70">({c.count})</span>
+          </button>
+        ))}
+      </div>
+      <p class="yt-filter-status text-green-300/60 text-[11px] mt-2">{showingLabel} {videos.length} / {videos.length}</p>
+    </div>
+
+    <!-- Rail -->
+    <div class="relative">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-semibold uppercase tracking-wider text-yellow-200/90">{playlistLabel}</span>
+        <span class="text-green-300/60 text-[11px] hidden sm:inline">{scrollHint}</span>
+      </div>
+
+      <button type="button" class="yt-rail-prev hidden sm:flex absolute left-0 top-[calc(50%+12px)] -translate-y-1/2 -translate-x-3 z-10 w-9 h-9 items-center justify-center rounded-full shadow-lg transition-opacity opacity-0 pointer-events-none" style="background:#c8a951; color:#fff;" aria-label="Previous">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button type="button" class="yt-rail-next hidden sm:flex absolute right-0 top-[calc(50%+12px)] -translate-y-1/2 translate-x-3 z-10 w-9 h-9 items-center justify-center rounded-full shadow-lg transition-opacity" style="background:#c8a951; color:#fff;" aria-label="Next">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+
+      <div class="yt-rail flex gap-3 overflow-x-auto pb-2 scroll-smooth snap-x snap-mandatory" tabindex="0">
+        {videos.map((v) => (
+          v.isExternal ? (
+            <a
+              href={v.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="yt-card yt-card-ext snap-start shrink-0 w-[168px] sm:w-[188px] rounded-xl overflow-hidden border border-white/10 hover:border-white/25 transition-all no-underline group"
+              data-category={v.category ?? ''}
+              style="background: rgba(255,255,255,0.05);"
+            >
+              <div class="aspect-video flex items-center justify-center" style="background: rgba(0,0,0,0.35);">
+                <svg class="w-8 h-8 text-yellow-200/80" fill="currentColor" viewBox="0 0 24 24"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h7v2H7v10h10v-5h2v7H5V5z"/></svg>
+              </div>
+              <div class="p-2.5">
+                {v.categoryLabel && (
+                  <span class="inline-block text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded mb-1.5" style="background:rgba(200,169,81,0.2); color:#fde68a;">{v.categoryLabel}</span>
+                )}
+                <p class="text-white text-xs font-semibold leading-snug line-clamp-2">{v.title}</p>
+                <p class="text-green-300/70 text-[10px] mt-1 line-clamp-2 leading-snug">{v.summary}</p>
+              </div>
+            </a>
+          ) : (
+            <button
+              type="button"
+              class={`yt-card yt-item snap-start shrink-0 w-[168px] sm:w-[188px] rounded-xl overflow-hidden border text-left transition-all group ${v.id === featured.id ? 'is-active' : 'border-white/10 hover:border-white/25'}`}
+              data-yt={v.id}
+              data-title={v.title}
+              data-meta={v.meta}
+              data-summary={v.summary}
+              data-web={v.web ?? ''}
+              data-thumb={thumb(v.id!)}
+              data-category={v.category ?? ''}
+              data-cat-label={v.categoryLabel}
+              style={v.id === featured.id ? 'background: rgba(200,169,81,0.14); border-color: rgba(200,169,81,0.45);' : 'background: rgba(255,255,255,0.05);'}
+            >
+              <div class="relative aspect-video bg-black overflow-hidden">
+                <img src={thumb(v.id!)} alt="" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+                <span class="absolute inset-0 bg-black/25 group-hover:bg-black/10 transition-colors"></span>
+                <span class="absolute bottom-1.5 right-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded" style="background:rgba(0,0,0,0.65); color:#fff;">{formatCardDate(v.date, isTH)}</span>
+              </div>
+              <div class="p-2.5">
+                {v.categoryLabel ? (
+                  <span class="inline-block text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded mb-1.5" style="background:rgba(255,255,255,0.08); color:#a7f3d0;">{v.categoryLabel}</span>
+                ) : (
+                  <span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded mb-1.5 text-green-300/70">{v.meta.split(' · ')[0]}</span>
+                )}
+                <p class="text-white text-xs font-semibold leading-snug line-clamp-2">{v.title}</p>
+                <p class="text-green-300/70 text-[10px] mt-1 line-clamp-2 leading-snug">{v.summary}</p>
+              </div>
+            </button>
+          )
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .yt-rail {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    mask-image: linear-gradient(to right, transparent, black 12px, black calc(100% - 12px), transparent);
+  }
+  .yt-rail::-webkit-scrollbar { display: none; }
+  .yt-card.is-active {
+    box-shadow: 0 0 0 1px rgba(200, 169, 81, 0.35), 0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+  .yt-card.is-hidden { display: none !important; }
+  .yt-rail-prev.is-visible, .yt-rail-next.is-visible { opacity: 1; pointer-events: auto; }
+  .yt-filter.is-on {
+    background: rgba(200, 169, 81, 0.25) !important;
+    color: #fde68a !important;
+    border-color: rgba(200, 169, 81, 0.45) !important;
+  }
+</style>
+
+<script>
+  function initVideoFeature() {
+    const articleLabel = document.documentElement.lang === 'th' ? 'อ่านบทความ' : 'Read article';
+    const showingTpl = document.documentElement.lang === 'th' ? 'แสดง' : 'Showing';
+
+    document.querySelectorAll<HTMLElement>('.video-feature').forEach((root) => {
+      const main = root.querySelector<HTMLElement>('.yt-main');
+      const rail = root.querySelector<HTMLElement>('.yt-rail');
+      const prevBtn = root.querySelector<HTMLElement>('.yt-rail-prev');
+      const nextBtn = root.querySelector<HTMLElement>('.yt-rail-next');
+      const nowTitle = root.querySelector<HTMLElement>('.yt-now-title');
+      const nowMeta = root.querySelector<HTMLElement>('.yt-now-meta');
+      const nowSummary = root.querySelector<HTMLElement>('.yt-now-summary');
+      const nowCat = root.querySelector<HTMLElement>('.yt-now-cat');
+      const nowActions = root.querySelector<HTMLElement>('.yt-now-actions');
+      const filterStatus = root.querySelector<HTMLElement>('.yt-filter-status');
+      if (!main || !rail) return;
+
+      const totalCards = root.querySelectorAll<HTMLElement>('.yt-card').length;
+      let playing = false;
+      let currentFilter = 'all';
+
+      const updateNowPlaying = (title: string, meta: string, summary: string, web: string, catLabel: string) => {
+        if (nowTitle) nowTitle.textContent = title;
+        if (nowMeta) nowMeta.textContent = meta;
+        if (nowSummary) nowSummary.textContent = summary;
+        if (nowCat) {
+          if (catLabel) {
+            nowCat.textContent = catLabel;
+            nowCat.style.display = '';
+          } else {
+            nowCat.style.display = 'none';
+          }
+        }
+        if (nowActions) {
+          nowActions.innerHTML = web
+            ? `<a href="${web}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:rgba(200,169,81,0.2); color:#fde68a;">${articleLabel}<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`
+            : '';
+        }
+      };
+
+      const setActiveCard = (item: HTMLElement) => {
+        root.querySelectorAll<HTMLElement>('.yt-item').forEach((b) => {
+          b.classList.remove('is-active');
+          b.style.background = 'rgba(255,255,255,0.05)';
+          b.style.borderColor = 'rgba(255,255,255,0.1)';
+        });
+        if (item.classList.contains('yt-item')) {
+          item.classList.add('is-active');
+          item.style.background = 'rgba(200,169,81,0.14)';
+          item.style.borderColor = 'rgba(200,169,81,0.45)';
+          item.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      };
+
+      const restoreFacade = (id: string, title: string, meta: string, summary: string, thumb: string, web: string, catLabel: string) => {
+        playing = false;
+        main.innerHTML = `
+          <button type="button" class="yt-play group absolute inset-0 w-full h-full cursor-pointer" data-yt="${id}" aria-label="${title.replace(/"/g, '&quot;')}">
+            <img src="${thumb}" alt="" class="yt-main-thumb w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
+            <span class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></span>
+            <span class="absolute inset-0 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity">
+              <span class="flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 rounded-full shadow-2xl transition-transform duration-300 group-hover:scale-110" style="background-color:#c8a951;">
+                <svg class="w-7 h-7 lg:w-8 lg:h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+            </span>
+          </button>`;
+        main.querySelector<HTMLElement>('.yt-play')?.addEventListener('click', (e) => {
+          const btn = e.currentTarget as HTMLElement;
+          if (btn.dataset.yt) play(btn.dataset.yt, title, meta, summary, thumb, web, catLabel);
+        });
+        updateNowPlaying(title, meta, summary, web, catLabel);
+      };
+
+      const play = (id: string, title: string, meta: string, summary: string, thumb: string, web: string, catLabel: string) => {
+        playing = true;
+        const iframe = document.createElement('iframe');
+        iframe.className = 'absolute inset-0 w-full h-full';
+        iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
+        iframe.title = title;
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.setAttribute('allowfullscreen', '');
+        main.innerHTML = '';
+        main.appendChild(iframe);
+        updateNowPlaying(title, meta, summary, web, catLabel);
+      };
+
+      const selectFromEl = (el: HTMLElement, autoplay = false) => {
+        const id = el.dataset.yt;
+        if (!id) return;
+        const title = el.dataset.title ?? '';
+        const meta = el.dataset.meta ?? '';
+        const summary = el.dataset.summary ?? '';
+        const web = el.dataset.web ?? '';
+        const thumbUrl = el.dataset.thumb ?? '';
+        const catLabel = el.dataset.catLabel ?? '';
+        const match = root.querySelector<HTMLElement>(`.yt-item[data-yt="${id}"]`);
+        if (match) setActiveCard(match);
+        if (autoplay || playing) {
+          play(id, title, meta, summary, thumbUrl, web, catLabel);
+        } else {
+          restoreFacade(id, title, meta, summary, thumbUrl, web, catLabel);
+        }
+      };
+
+      main.querySelector<HTMLElement>('.yt-play')?.addEventListener('click', () => {
+        const active = root.querySelector<HTMLElement>('.yt-item.is-active') ?? root.querySelector<HTMLElement>('.yt-pick');
+        if (active?.dataset.yt) selectFromEl(active, true);
+      });
+
+      root.querySelectorAll<HTMLElement>('.yt-item, .yt-pick').forEach((item) => {
+        item.addEventListener('click', () => selectFromEl(item, playing));
+      });
+
+      const applyFilter = (key: string) => {
+        currentFilter = key;
+        let visible = 0;
+        root.querySelectorAll<HTMLElement>('.yt-card').forEach((card) => {
+          const cat = card.dataset.category ?? '';
+          const show = key === 'all' || cat === key;
+          card.classList.toggle('is-hidden', !show);
+          if (show) visible += 1;
+        });
+        if (filterStatus) filterStatus.textContent = `${showingTpl} ${visible} / ${totalCards}`;
+        root.querySelectorAll<HTMLElement>('.yt-filter').forEach((btn) => {
+          const on = btn.dataset.filter === key;
+          btn.classList.toggle('is-on', on);
+          if (!on) {
+            btn.style.background = 'rgba(255,255,255,0.06)';
+            btn.style.color = '#d1fae5';
+            btn.style.borderColor = 'rgba(255,255,255,0.12)';
+          }
+        });
+        updateArrows();
+      };
+
+      root.querySelectorAll<HTMLElement>('.yt-filter').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          applyFilter(btn.dataset.filter ?? 'all');
+        });
+      });
+
+      const updateArrows = () => {
+        if (!prevBtn || !nextBtn) return;
+        const max = rail.scrollWidth - rail.clientWidth;
+        prevBtn.classList.toggle('is-visible', rail.scrollLeft > 8);
+        nextBtn.classList.toggle('is-visible', max > 8 && rail.scrollLeft < max - 8);
+      };
+
+      prevBtn?.addEventListener('click', () => rail.scrollBy({ left: -rail.clientWidth * 0.75, behavior: 'smooth' }));
+      nextBtn?.addEventListener('click', () => rail.scrollBy({ left: rail.clientWidth * 0.75, behavior: 'smooth' }));
+      rail.addEventListener('scroll', updateArrows, { passive: true });
+      updateArrows();
+      window.addEventListener('resize', updateArrows, { passive: true });
+    });
+  }
+  initVideoFeature();
+  document.addEventListener('astro:page-load', initVideoFeature);
+</script>

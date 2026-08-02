@@ -1,0 +1,81 @@
+---
+import PageHero from '../PageHero.astro';
+import type { Lang } from '../../i18n/ui';
+import { useTranslations } from '../../i18n/utils';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const th = lang === 'th';
+
+// Source of truth: old.tsae.asia certification menu
+const docs = [
+  {
+    id: 'framework',
+    title: t('nav.cert.framework'),
+    full: 'กรอบความสามารถด้านวิศวกรรมของวิศวกร สาขาวิศวกรรมเกษตร',
+    href: '/downloads/TSAE-cert-framework-capabilities.pdf',
+  },
+  {
+    id: 'guideline',
+    title: t('nav.cert.guideline'),
+    full: 'คู่มือการรับรองความรู้ความชำนาญในการประกอบวิชาชีพวิศวกรรม (17 สาขา)',
+    href: '/downloads/TSAE-cert-handbook-17-branches.pdf',
+  },
+  {
+    id: 'register17',
+    title: t('nav.cert.register17'),
+    full: 'คู่มือการใช้งานบริการขึ้นทะเบียนใบรับรอง 17 สาขา',
+    href: '/downloads/TSAE-cert-register17-user-guide.pdf',
+  },
+  {
+    id: 'assessment',
+    title: t('nav.cert.assessment'),
+    full: th
+      ? 'การประเมินเพื่อรับใบรับรองความรู้ความชำนาญในการประกอบวิชาชีพวิศวกรรมเกษตร'
+      : 'Assessment for Certification of Professional Competency in Agricultural Engineering',
+    href: '/downloads/TSAE-certification-assessment.pdf',
+  },
+  {
+    id: 'scope',
+    title: th ? 'ขอบเขตประเภทงาน' : 'Scope of Work Categories',
+    full: th
+      ? 'ขอบเขตประเภทงานวิศวกรรมเกษตร — รายการขอบเขตงานที่ครอบคลุมโดยใบรับรองความรู้ความชำนาญ'
+      : 'Scope of agricultural engineering work categories covered by the certification',
+    href: '/downloads/TSAE-cert-scope-agricultural-engineering.pdf',
+  },
+];
+---
+
+<PageHero
+  lang={lang}
+  title={t('nav.certification')}
+  subtitle={th ? 'การรับรองความรู้ความชำนาญในการประกอบวิชาชีพวิศวกรรมเกษตร' : 'Certification of professional competency in agricultural engineering'}
+/>
+
+<div class="max-w-7xl mx-auto px-4 py-14">
+  <p class="text-gray-600 mb-8 leading-relaxed">
+    {th
+      ? 'เอกสารและคู่มือที่เกี่ยวข้องกับการรับรองความรู้ความชำนาญในการประกอบวิชาชีพวิศวกรรมเกษตร สามารถดาวน์โหลดเอกสารแต่ละรายการได้ด้านล่าง'
+      : 'Documents and handbooks related to the certification of professional competency in agricultural engineering. Download each document below.'}
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {docs.map((d) => (
+      <div id={d.id} class="scroll-mt-24 bg-white rounded-2xl p-6 shadow-md border border-gray-100">
+        <div class="flex items-start gap-4">
+          <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-white" style="background-color: #c0392b;">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+          </div>
+          <div class="flex-1">
+            <h2 class="font-semibold text-gray-900 leading-snug">{d.full}</h2>
+            <a href={d.href} target="_blank" rel="noopener" class="inline-flex items-center gap-2 mt-3 px-4 py-2 text-sm font-medium rounded-lg text-white transition-transform hover:scale-105" style="background-color: #1a6b3a;">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              {th ? 'ดาวน์โหลด PDF' : 'Download PDF'}
+            </a>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>

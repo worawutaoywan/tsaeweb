@@ -1,0 +1,10 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import ProceedingPage from '../../../components/pages/ProceedingPage.astro';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+<Layout title={t('proceeding.title')} description={t('proceeding.subtitle')} lang={lang}>
+  <ProceedingPage lang={lang} />
+</Layout>

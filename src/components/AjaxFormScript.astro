@@ -1,0 +1,63 @@
+---
+// Shared client-side handler for simple AJAX forms (training / membership /
+// contact). Any <form class="tsae-ajax-form" action="/api/submit/..."> on the
+// page is intercepted, posted as FormData, and on success the form is hidden
+// and the sibling .tsae-ajax-success block is shown. Errors are surfaced in the
+// form's .ajax-error element.
+---
+<script>
+  function initAjaxForms() {
+    document.querySelectorAll<HTMLFormElement>('.tsae-ajax-form').forEach((form) => {
+      if (form.dataset.bound) return;
+      form.dataset.bound = '1';
+
+      const btn = form.querySelector<HTMLButtonElement>('.ajax-submit');
+      const errBox = form.querySelector<HTMLElement>('.ajax-error');
+      const success = form.parentElement?.querySelector<HTMLElement>('.tsae-ajax-success');
+      const sendingText = form.getAttribute('data-sending') || 'Sending…';
+      const defaultText = btn?.textContent?.trim() || 'Submit';
+      const msgErr = form.getAttribute('data-err') || 'Something went wrong. Please try again.';
+      const msgNet = form.getAttribute('data-net') || msgErr;
+
+      const showError = (text: string) => {
+        if (errBox) {
+          errBox.textContent = text;
+          errBox.classList.remove('hidden');
+          errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      };
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (errBox) errBox.classList.add('hidden');
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+        if (btn) { btn.disabled = true; btn.textContent = sendingText; }
+        try {
+          const fd = new FormData(form);
+          const tokenInput = form.querySelector<HTMLInputElement>('input[name="form_token"]');
+          if (tokenInput) fd.set('form_token', tokenInput.value);
+          const res = await fetch(form.action, {
+            method: 'POST',
+            body: fd,
+          });
+          if (res.ok) {
+            form.classList.add('hidden');
+            success?.classList.remove('hidden');
+            success?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+          }
+          showError(msgErr);
+          if (btn) { btn.disabled = false; btn.textContent = defaultText; }
+        } catch (_err) {
+          showError(msgNet);
+          if (btn) { btn.disabled = false; btn.textContent = defaultText; }
+        }
+      });
+    });
+  }
+  initAjaxForms();
+  document.addEventListener('astro:page-load', initAjaxForms);
+</script>

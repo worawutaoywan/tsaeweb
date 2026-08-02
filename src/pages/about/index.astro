@@ -1,0 +1,152 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getLangFromUrl, useTranslations } from '../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+---
+
+<Layout title={t('about.title')} description={t('about.subtitle')} lang={lang}>
+  <!-- Page Header -->
+  <div class="py-12" style="background: linear-gradient(135deg, #0d3b1e, #1a6b3a);">
+    <div class="max-w-7xl mx-auto px-4">
+      <nav class="flex items-center gap-2 text-sm text-green-300 mb-4">
+        <a href={`${base}/`} class="hover:text-white transition-colors">{t('ui.home')}</a>
+        <span>/</span>
+        <span class="text-white">{t('nav.about')}</span>
+      </nav>
+      <h1 class="text-4xl font-bold text-white mb-2">{t('about.title')}</h1>
+      <p class="text-green-200">{t('about.subtitle')}</p>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 py-16">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <!-- Sidebar -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-xl shadow-md overflow-hidden sticky top-24">
+          <div class="p-1" style="background: linear-gradient(135deg, #1a6b3a, #c8a951);"></div>
+          <div class="p-6">
+            <h3 class="font-bold text-gray-900 mb-4">{t('about.menu')}</h3>
+            <nav class="space-y-1">
+              {[
+                { href: `${base}/about`, label: t('about.history'), active: true },
+                { href: `${base}/about/committee`, label: t('about.committee') },
+                { href: `${base}/about/regulations`, label: t('about.regulations') },
+              ].map((item) => (
+                <a
+                  href={item.href}
+                  class={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${item.active ? 'text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+                  style={item.active ? 'background-color: #1a6b3a;' : ''}
+                >
+                  <span style={item.active ? 'color: #c8a951;' : 'color: #9ca3af;'}>›</span>
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+          </div>
+
+          <!-- Quick Info -->
+          <div class="border-t border-gray-100 p-6">
+            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">{t('about.info')}</h4>
+            <div class="space-y-3 text-sm">
+              <div>
+                <span class="text-gray-500">{lang === 'th' ? 'ก่อตั้ง' : 'Founded'}:</span>
+                <span class="text-gray-800 font-medium ml-2">{lang === 'th' ? '19 ก.พ. พ.ศ. 2519' : '19 Feb 1976'}</span>
+              </div>
+              <div>
+                <span class="text-gray-500">{lang === 'th' ? 'ต่อทะเบียนสมาคม' : 'Re-registered'}:</span>
+                <span class="text-gray-800 font-medium ml-2">{lang === 'th' ? '21 พ.ย. พ.ศ. 2539' : '21 Nov 1996'}</span>
+              </div>
+              <div>
+                <span class="text-gray-500">{lang === 'th' ? 'เครือข่ายสากล' : 'Intl. Network'}:</span>
+                <span class="text-gray-800 font-medium ml-2">AAAE · CIGR</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="lg:col-span-2 space-y-12">
+        <!-- History -->
+        <div>
+          <h2 class="text-2xl font-bold mb-6 pb-3 border-b-2" style="color: #1a6b3a; border-color: #c8a951;">{t('about.history')}</h2>
+          <div class="prose max-w-none text-gray-700 leading-relaxed space-y-4">
+            <p>
+              สมาคมวิศวกรรมเกษตรแห่งประเทศไทย (Thai Society of Agricultural Engineering – TSAE) ก่อตั้งเมื่อวันที่ 19 กุมภาพันธ์ พ.ศ. 2519 โดย ม.ร.ว.เทพฤทธิ์ เทวกุล นายชัชวาลย์ ทศรัตน์ และอาจารย์นคร บุญญผลานันท์ เพื่อส่งเสริมการศึกษา วิจัย และเผยแพร่วิทยาการทางวิศวกรรมเกษตร ชีววิศวกรรม และอุตสาหกรรมที่เกี่ยวข้อง
+            </p>
+            <p>
+              ในอดีตสมาคมฯ ได้ทำประโยชน์ต่อวงการเกษตรเป็นอันมาก ทั้งการทดสอบเครื่องจักรกลเกษตร การจัดสัมมนาวิชาการ การจัดทำวารสารวิศวกรรมเกษตร และการร่างมาตรฐานผลิตภัณฑ์อุตสาหกรรมด้านเครื่องจักรกลเกษตร ต่อมาได้หยุดดำเนินการตั้งแต่ปี พ.ศ. 2533 และได้รับการรื้อฟื้นโดยต่อทะเบียนสมาคมฯ เมื่อวันที่ 21 พฤศจิกายน พ.ศ. 2539 ดำเนินงานต่อเนื่องมาจนถึงปัจจุบัน
+            </p>
+            <p>
+              สมาคมเป็นสมาชิกของ Asian Association for Agricultural Engineering (AAAE) และมีความสัมพันธ์อันดีกับองค์กรวิศวกรรมเกษตรในเอเชียและทั่วโลก โดยทำหน้าที่ประสานความร่วมมือทางวิชาการระหว่างภาครัฐและภาคเอกชน ให้คำปรึกษาและบริการทางวิชาการ จัดสัมมนา และจัดทำวารสารวิชาการอย่างต่อเนื่อง
+            </p>
+          </div>
+        </div>
+
+        <!-- Vision & Mission -->
+        <div>
+          <h2 class="text-2xl font-bold mb-6 pb-3 border-b-2" style="color: #1a6b3a; border-color: #c8a951;">{t('about.vision')}</h2>
+
+          <div class="p-6 rounded-xl mb-6 border-l-4" style="background: linear-gradient(to right, #f0faf4, #ffffff); border-color: #1a6b3a;">
+            <h3 class="text-lg font-bold mb-3" style="color: #1a6b3a;">วิสัยทัศน์ (Vision)</h3>
+            <p class="text-gray-700">
+              "เป็นองค์กรวิชาชีพวิศวกรรมเกษตรชั้นนำในภูมิภาคอาเซียน ที่ขับเคลื่อนนวัตกรรมและความยั่งยืนของภาคการเกษตรไทย"
+            </p>
+            <p class="text-gray-500 text-sm mt-2 italic">
+              "To be the leading agricultural engineering professional organization in ASEAN, driving innovation and sustainability for Thai agriculture."
+            </p>
+          </div>
+
+          <div class="p-6 rounded-xl border-l-4" style="background: linear-gradient(to right, #fffbf0, #ffffff); border-color: #c8a951;">
+            <h3 class="text-lg font-bold mb-4" style="color: #c8a951;">พันธกิจ (Mission)</h3>
+            <ul class="space-y-3">
+              {[
+                'ส่งเสริมการวิจัยและพัฒนาด้านวิศวกรรมเกษตร โดยสนับสนุนการตีพิมพ์เผยแพร่ผลงานวิจัยผ่านวารสาร สวกท.',
+                'จัดประชุมวิชาการและสัมมนาทั้งระดับชาติและนานาชาติ เพื่อแลกเปลี่ยนความรู้และประสบการณ์',
+                'พัฒนาทรัพยากรมนุษย์ด้านวิศวกรรมเกษตรผ่านการอบรม การศึกษาดูงาน และโปรแกรมการเรียนรู้ต่างๆ',
+                'สร้างเครือข่ายและความร่วมมือกับองค์กรวิศวกรรมเกษตรระดับนานาชาติ',
+                'ส่งเสริมการนำเทคโนโลยีวิศวกรรมเกษตรไปใช้เพื่อเพิ่มผลผลิตและความยั่งยืนของภาคเกษตร',
+              ].map((mission) => (
+                <li class="flex items-start gap-3 text-gray-700">
+                  <svg class="w-5 h-5 mt-0.5 flex-shrink-0" style="color: #c8a951;" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                  {mission}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <!-- Timeline -->
+        <div>
+          <h2 class="text-2xl font-bold mb-6 pb-3 border-b-2" style="color: #1a6b3a; border-color: #c8a951;">ไทม์ไลน์ประวัติสมาคม</h2>
+          <div class="relative">
+            <div class="absolute left-6 top-0 bottom-0 w-0.5" style="background-color: #1a6b3a; opacity: 0.3;"></div>
+            <div class="space-y-6">
+              {[
+                { year: '2519', event: 'ก่อตั้งสมาคมวิศวกรรมเกษตรแห่งประเทศไทย (19 ก.พ.) โดย ม.ร.ว.เทพฤทธิ์ เทวกุล, นายชัชวาลย์ ทศรัตน์ และอาจารย์นคร บุญญผลานันท์' },
+                { year: '2533', event: 'สมาคมฯ หยุดดำเนินการชั่วคราว' },
+                { year: '2539', event: 'รื้อฟื้นและต่อทะเบียนสมาคมฯ (21 พ.ย.) ดำเนินงานต่อเนื่องจนถึงปัจจุบัน' },
+                { year: '2569', event: 'จัดการประชุมวิชาการระดับชาติ ครั้งที่ 27 และระดับนานาชาติ ครั้งที่ 19' },
+              ].map((item) => (
+                <div class="relative flex items-start gap-6 pl-16">
+                  <div class="absolute left-0 w-12 h-12 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background-color: #1a6b3a;">
+                    {item.year.length > 4 ? '...' : item.year}
+                  </div>
+                  <div class="flex-1 pb-4">
+                    <span class="text-sm font-bold" style="color: #c8a951;">{item.year}</span>
+                    <p class="text-gray-700 text-sm mt-1">{item.event}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

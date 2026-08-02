@@ -1,0 +1,138 @@
+---
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const isTH = lang === 'th';
+
+const label = isTH ? 'ค้นหา' : 'Search';
+const placeholder = isTH ? 'ค้นหาในเว็บไซต์…' : 'Search the website…';
+const zeroResults = isTH ? 'ไม่พบผลลัพธ์สำหรับ [SEARCH_TERM]' : 'No results for [SEARCH_TERM]';
+const clearSearch = isTH ? 'ล้าง' : 'Clear';
+const loadMore = isTH ? 'ดูผลลัพธ์เพิ่มเติม' : 'Load more results';
+const searching = isTH ? 'กำลังค้นหา [SEARCH_TERM]…' : 'Searching for [SEARCH_TERM]…';
+const oneResult = isTH ? '[COUNT] ผลลัพธ์สำหรับ [SEARCH_TERM]' : '[COUNT] result for [SEARCH_TERM]';
+const manyResults = isTH ? '[COUNT] ผลลัพธ์สำหรับ [SEARCH_TERM]' : '[COUNT] results for [SEARCH_TERM]';
+---
+
+<!-- Trigger button -->
+<button
+  type="button"
+  id="tsae-search-open"
+  class="inline-flex items-center gap-1.5 h-9 px-3 text-xs font-semibold rounded-lg border text-gray-500 hover:text-green-800 transition-colors"
+  style="border-color: #e5e7eb;"
+  aria-label={label}
+>
+  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+  </svg>
+  <span class="hidden lg:inline">{label}</span>
+</button>
+
+<!-- Modal -->
+<div id="tsae-search-modal" class="fixed inset-0 z-[100] hidden" role="dialog" aria-modal="true" aria-label={label}>
+  <div id="tsae-search-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+  <div class="relative mx-auto mt-[8vh] w-[92%] max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+    <div class="flex items-center justify-between px-5 py-3.5 border-b border-gray-100">
+      <h2 class="text-sm font-bold" style="color:#1a6b3a;">{label}</h2>
+      <button type="button" id="tsae-search-close" class="h-8 w-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors" aria-label={isTH ? 'ปิด' : 'Close'}>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+    <div class="p-4 max-h-[70vh] overflow-y-auto">
+      <div id="tsae-search"></div>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  /* Pagefind UI theming to match TSAE brand */
+  #tsae-search {
+    --pagefind-ui-primary: #1a6b3a;
+    --pagefind-ui-text: #1f2937;
+    --pagefind-ui-background: #ffffff;
+    --pagefind-ui-border: #e5e7eb;
+    --pagefind-ui-tag: #f0faf4;
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 12px;
+    --pagefind-ui-font: inherit;
+  }
+</style>
+
+<script define:vars={{ placeholder, zeroResults, clearSearch, loadMore, searching, oneResult, manyResults }}>
+  (function () {
+    const openBtn = document.getElementById('tsae-search-open');
+    const modal = document.getElementById('tsae-search-modal');
+    const closeBtn = document.getElementById('tsae-search-close');
+    const backdrop = document.getElementById('tsae-search-backdrop');
+    if (!openBtn || !modal) return;
+
+    let initialized = false;
+
+    function loadAsset(tag, attrs) {
+      return new Promise((resolve, reject) => {
+        const el = document.createElement(tag);
+        Object.assign(el, attrs);
+        el.onload = resolve;
+        el.onerror = reject;
+        document.head.appendChild(el);
+      });
+    }
+
+    async function initSearch() {
+      if (initialized) return;
+      initialized = true;
+      try {
+        await loadAsset('link', { rel: 'stylesheet', href: '/pagefind/pagefind-ui.css' });
+        await loadAsset('script', { src: '/pagefind/pagefind-ui.js', type: 'text/javascript' });
+        // eslint-disable-next-line no-undef
+        new PagefindUI({
+          element: '#tsae-search',
+          showSubResults: true,
+          showImages: false,
+          pageSize: 6,
+          translations: {
+            placeholder,
+            clear_search: clearSearch,
+            load_more: loadMore,
+            search_label: placeholder,
+            zero_results: zeroResults,
+            searching,
+            one_result: oneResult,
+            many_results: manyResults,
+          },
+        });
+      } catch (e) {
+        const c = document.getElementById('tsae-search');
+        if (c) c.innerHTML = '<p style="color:#6b7280;font-size:14px;padding:12px">Search is unavailable.</p>';
+      }
+    }
+
+    function open() {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      initSearch().then(() => {
+        const input = modal.querySelector('input');
+        if (input) setTimeout(() => input.focus(), 60);
+      });
+    }
+    function close() {
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    openBtn.addEventListener('click', open);
+    closeBtn?.addEventListener('click', close);
+    backdrop?.addEventListener('click', close);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.classList.contains('hidden')) close();
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        modal.classList.contains('hidden') ? open() : close();
+      }
+    });
+  })();
+</script>

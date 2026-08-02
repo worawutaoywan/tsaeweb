@@ -9,9 +9,19 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "deploy": "bash deploy.sh web",
+    "deploy:api": "bash deploy.sh api",
+    "deploy:all": "bash deploy.sh all"
   },
   "dependencies": {
-    "astro": "^6.4.2"
+    "@astrojs/sitemap": "^3.7.3",
+    "@tailwindcss/vite": "^4.3.0",
+    "astro": "^6.4.2",
+    "tailwindcss": "^4.3.0"
+  },
+  "devDependencies": {
+    "astro-pagefind": "^2.0.0",
+    "pagefind": "^1.5.2"
   }
 }

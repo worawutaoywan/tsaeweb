@@ -1,0 +1,10 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CommitteePage from '../../../components/pages/CommitteePage.astro';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+<Layout title={t('about.committee')} description={t('about.committeeTitle')} lang={lang}>
+  <CommitteePage lang={lang} />
+</Layout>

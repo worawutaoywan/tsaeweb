@@ -1,0 +1,9 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SitemapPage from '../../components/pages/SitemapPage.astro';
+import { getLangFromUrl } from '../../i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+---
+<Layout title={lang === 'th' ? 'แผนผังเว็บไซต์' : 'Sitemap'} lang={lang}>
+  <SitemapPage lang={lang} />
+</Layout>

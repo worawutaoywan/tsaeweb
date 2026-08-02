@@ -1,0 +1,185 @@
+---
+import PageHero from '../PageHero.astro';
+import type { Lang } from '../../i18n/ui';
+import { useTranslations } from '../../i18n/utils';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+const th = lang === 'th';
+
+const types = [
+  { code: 'ก.', name: th ? 'สมาชิกกิตติมศักดิ์' : 'Honorary Member', desc: th ? 'ผู้ทรงคุณวุฒิที่สมาคมเชิญเป็นสมาชิกกิตติมศักดิ์' : 'Distinguished persons invited by the association' },
+  { code: 'น.', name: th ? 'สมาชิกนิติบุคคล' : 'Corporate Member', desc: th ? 'องค์กร บริษัท หรือหน่วยงานที่เป็นสมาชิก' : 'Companies and organizations' },
+  { code: 'สช.', name: th ? 'สมาชิกสามัญตลอดชีพ' : 'Life Member', desc: th ? 'สมาชิกสามัญที่ชำระค่าบำรุงแบบตลอดชีพ' : 'Ordinary members with lifetime dues' },
+  { code: 'ส.', name: th ? 'สมาชิกสามัญ' : 'Ordinary Member', desc: th ? 'บุคคลทั่วไปที่มีคุณสมบัติตามข้อบังคับ' : 'Individuals qualified under the regulations' },
+  { code: 'ภ.', name: th ? 'สมาชิกภาคี' : 'Associate Member', desc: th ? 'นิสิต นักศึกษา และผู้สนใจ' : 'Students and interested persons' },
+];
+---
+
+<PageHero
+  lang={lang}
+  title={t('nav.about.members')}
+  subtitle={th ? 'ประเภทสมาชิกและการตรวจสอบสถานะ' : 'Membership types and status lookup'}
+  crumbs={[{ label: t('nav.about'), href: `${base}/about` }]}
+/>
+
+<div class="max-w-7xl mx-auto px-4 py-14">
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-12">
+    {types.map((m) => (
+      <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 flex items-start gap-4">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-white font-bold" style="background: linear-gradient(135deg, #c8a951, #1a6b3a);">{m.code}</div>
+        <div>
+          <h3 class="font-semibold text-gray-900">{m.name}</h3>
+          <p class="text-sm text-gray-500 mt-1 leading-relaxed">{m.desc}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <!-- Member search -->
+  <section class="mb-10" id="member-search">
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+      <div class="px-6 py-5 border-b border-gray-100" style="background: linear-gradient(135deg, #f0fdf4, #fff);">
+        <h2 class="text-xl font-bold" style="color: #1a6b3a;">
+          {th ? 'ค้นหาสมาชิก' : 'Member Lookup'}
+        </h2>
+        <p class="text-sm text-gray-500 mt-1">
+          {th
+            ? 'ค้นหาด้วยรหัสสมาชิกหรือชื่อ-นามสกุล · แสดงเฉพาะรหัสและชื่อ รายละเอียดอื่นดูได้หลังเข้าสู่ระบบ'
+            : 'Search by member code or name · Public results show code and name only; sign in for full details'}
+        </p>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input
+            type="search"
+            id="member-q"
+            class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-600/30 focus:border-green-600"
+            placeholder={th ? 'รหัสสมาชิก หรือ ชื่อ-นามสกุล…' : 'Member code or name…'}
+            autocomplete="off"
+          />
+        </div>
+
+        <p id="member-count" class="text-sm text-gray-500"></p>
+
+        <div class="overflow-x-auto rounded-xl border border-gray-100">
+          <table class="w-full text-sm" id="member-table">
+            <thead>
+              <tr class="text-left text-xs uppercase tracking-wide text-gray-500" style="background:#f8faf9;">
+                <th class="px-4 py-3 font-semibold">{th ? 'รหัส' : 'Code'}</th>
+                <th class="px-4 py-3 font-semibold">{th ? 'ชื่อ-นามสกุล' : 'Name'}</th>
+              </tr>
+            </thead>
+            <tbody id="member-results"></tbody>
+          </table>
+        </div>
+        <p id="member-empty" class="hidden text-center py-10 text-gray-400 text-sm">
+          {th ? 'ไม่พบสมาชิกที่ตรงกับคำค้นหา' : 'No members match your search'}
+        </p>
+        <p id="member-hint" class="text-center py-8 text-gray-400 text-sm">
+          {th ? 'พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหา' : 'Type at least 2 characters to search'}
+        </p>
+      </div>
+    </div>
+
+    <p class="text-xs text-gray-400 mt-3 leading-relaxed">
+      {th
+        ? 'ข้อมูลสาธารณะแสดงเฉพาะรหัสสมาชิกและชื่อ-นามสกุล สมาชิกเข้าสู่ระบบเพื่อดูและอัปเดตข้อมูลของตนเอง'
+        : 'Public results show member code and name only. Members can sign in to view and update their full profile.'}
+      {' · '}
+      <a href="/api/member/login" class="text-green-700 hover:underline font-medium">
+        {th ? 'สมาชิกเข้าสู่ระบบเพื่ออัปเดตข้อมูล' : 'Members: sign in to update your profile'}
+      </a>
+    </p>
+  </section>
+
+  <div class="flex flex-wrap gap-3">
+  <a href={`${base}/membership`} class="inline-flex items-center gap-2 px-5 py-3 text-white font-semibold rounded-xl transition-transform hover:scale-105" style="background-color: #c8a951;">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+    {th ? 'สมัคร / ต่ออายุสมาชิก' : 'Apply / Renew Membership'}
+  </a>
+</div>
+
+<script define:vars={{ th }}>
+  const qEl = document.getElementById('member-q');
+  const tbody = document.getElementById('member-results');
+  const countEl = document.getElementById('member-count');
+  const emptyEl = document.getElementById('member-empty');
+  const hintEl = document.getElementById('member-hint');
+  const tableEl = document.getElementById('member-table');
+  if (!qEl || !tbody) return;
+
+  const MAX = 50;
+  let pending = 0;
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderRows(results) {
+    const total = results.length;
+    const shown = results.slice(0, MAX);
+    countEl.textContent = total > MAX
+      ? (th ? `พบ ${total} รายการ (แสดง ${MAX} รายการแรก)` : `${total} found (showing first ${MAX})`)
+      : (th ? `พบ ${total} รายการ` : `${total} found`);
+
+    if (!shown.length) {
+      tbody.innerHTML = '';
+      emptyEl?.classList.remove('hidden');
+      return;
+    }
+    emptyEl?.classList.add('hidden');
+    tbody.innerHTML = shown.map((m, i) => `
+      <tr class="border-t border-gray-50 ${i % 2 ? 'bg-gray-50/50' : ''} hover:bg-green-50/40 transition-colors">
+        <td class="px-4 py-3 font-mono font-semibold whitespace-nowrap" style="color:#1a6b3a">${esc(m.code)}</td>
+        <td class="px-4 py-3 font-medium text-gray-900">${esc(m.name)}</td>
+      </tr>
+    `).join('');
+  }
+
+  async function search() {
+    const q = (qEl.value || '').trim();
+
+    if (q.length < 2) {
+      tbody.innerHTML = '';
+      countEl.textContent = '';
+      emptyEl?.classList.add('hidden');
+      hintEl?.classList.remove('hidden');
+      tableEl?.classList.add('hidden');
+      return;
+    }
+    hintEl?.classList.add('hidden');
+    tableEl?.classList.remove('hidden');
+
+    const reqId = ++pending;
+    countEl.textContent = th ? 'กำลังค้นหา…' : 'Searching…';
+    try {
+      const params = new URLSearchParams({ limit: String(MAX) });
+      params.set('q', q);
+      const res = await fetch(`/api/members/search?${params}`);
+      if (!res.ok) throw new Error('api');
+      const data = await res.json();
+      if (reqId !== pending) return;
+      renderRows(data.items || []);
+    } catch {
+      if (reqId !== pending) return;
+      tbody.innerHTML = '';
+      countEl.textContent = '';
+      emptyEl?.classList.remove('hidden');
+    }
+  }
+
+  let timer;
+  const debounce = () => { clearTimeout(timer); timer = setTimeout(search, 250); };
+  qEl.addEventListener('input', debounce);
+
+  if (location.hash === '#member-search' || new URLSearchParams(location.search).has('q')) {
+    const preset = new URLSearchParams(location.search).get('q');
+    if (preset) qEl.value = preset;
+    search();
+  }
+</script>

@@ -1,0 +1,606 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import RegisterForm from '../../components/RegisterForm.astro';
+
+const U = '/wp-uploads/2026';
+
+const topics = [
+  { img: `${U}/01/b-01.png`, title: 'Plant, Animal & Aquacultural Production Engineering' },
+  { img: `${U}/01/b-02.png`, title: 'Land and Water Engineering' },
+  { img: `${U}/01/b-03.png`, title: 'Agro-Processing & Food Engineering' },
+  { img: `${U}/01/b-04.png`, title: 'Non-Food Biological Materials Engineering' },
+  { img: `${U}/01/b-05.png`, title: 'Information Technology for Agricultural Engineering' },
+  { img: `${U}/01/b-06.png`, title: 'Energy and Biomass Engineering' },
+];
+
+const programDay1 = {
+  date: '20 กรกฎาคม 2569',
+  special: {
+    title: 'ยุทธศาสตร์การพัฒนาอุตสาหกรรมเครื่องจักรกลการเกษตรของประเทศไทย',
+    speaker: 'คุณดาเรศร์ กิตติโยภาส',
+    role: 'นายกสมาคมวิศวกรรมเกษตรแห่งประเทศไทย',
+  },
+  talks: [
+    {
+      title: 'ANTAM มาตรฐานสากลตัวเปลี่ยนเกม ผลกระทบสำคัญต่อผู้ผลิต–ผู้จำหน่ายเครื่องจักรกลการเกษตรไทย',
+      speaker: 'คุณวิบูลย์ เทพเพนทร์',
+      role: 'อุปนายกสมาคมวิศวกรรมเกษตรแห่งประเทศไทย',
+    },
+    {
+      title: 'พร้อมหรือยัง? เปิดเส้นทางการจัดตั้งหน่วยตรวจสอบเครื่องจักรกลเกษตรสู่มาตรฐาน ANTAM',
+      speaker: 'ดร.นิธิรงค์ พงษ์พานิชย์',
+      role: 'หัวหน้าศูนย์เครื่องจักรกลการเกษตรแห่งชาติ',
+    },
+    {
+      title: 'มาตรฐาน ANTAM TESTING CODE',
+      speaker: 'ดร.เวียง อากรชี',
+      role: 'ผู้อำนวยการกลุ่มวิจัยวิศวกรรมหลังการเก็บเกี่ยวและแปรรูป กรมวิชาการเกษตร',
+    },
+    {
+      title: 'แนวทางการนำมาตรฐาน ISO มาใช้ในรูปแบบเหมือนกันทุกประการ ในการกำหนดมาตรฐานอุตสาหกรรมเครื่องจักรกลการเกษตรไทย',
+      speaker: 'ดร.นวลนภา ไชยสุวรรณ',
+      role: 'สำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม',
+    },
+  ],
+};
+
+const programDay2 = {
+  date: '21 กรกฎาคม 2569',
+  forumTitle: 'การเสวนา เรื่อง “การเข้าถึงแหล่งทุนการวิจัยพัฒนานวัตกรรมการเกษตร: ความคาดหวังของแหล่งทุน”',
+  forumSpeakers: [
+    'สำนักงานพัฒนาการวิจัยการเกษตร (องค์การมหาชน) — สวก.',
+    'สำนักงานนวัตกรรมแห่งชาติ (องค์การมหาชน) — สนช.',
+    'สำนักงานการวิจัยแห่งชาติ — วช.',
+  ],
+  note: 'พร้อมเข้าร่วม Session สำคัญ: การนำเสนอบทความวิจัย การประชุมวิชาการสมาคมวิศวกรรมเกษตรแห่งประเทศไทย ระดับชาติ ครั้งที่ 27',
+};
+
+const programUrl = '/downloads/TSAE2026-national-program.pdf?v=20260719';
+const proceedingUrl = '/downloads/TSAE2026-national-proceeding.pdf';
+
+const importantDates = [
+  { label: 'วันสุดท้ายของการส่งบทคัดย่อ / บทความฉบับสมบูรณ์', date: '15 มิถุนายน 2569' },
+  { label: 'แจ้งผลการพิจารณาบทคัดย่อ / บทความฉบับสมบูรณ์', date: '30 มิถุนายน 2569' },
+  { label: 'วันสุดท้ายของการส่งบทความฉบับสมบูรณ์ (ฉบับแก้ไข)', date: '15 กรกฎาคม 2569' },
+  { label: 'วันสุดท้ายของการชำระค่าลงทะเบียนล่วงหน้า', date: '30 มิถุนายน 2569' },
+  { label: 'วันจัดประชุมวิชาการ TSAE ระดับชาติ', date: '20 – 21 กรกฎาคม 2569', highlight: true },
+];
+
+const fees = [
+  { who: 'นักศึกษา', early: '3,000 บาท', regular: '4,000 บาท' },
+  { who: 'บุคคลทั่วไป (นำเสนอบทความ)', early: '7,000 บาท', regular: '9,000 บาท' },
+  { who: 'สมาชิกสมาคมวิศวกรรมเกษตรแห่งประเทศไทย', early: '5,000 บาท', regular: '7,000 บาท' },
+];
+
+const submitUrl = 'https://easychair.org/conferences/?conf=tsae2026';
+const posterUrl = '/images/conf/tsae2026-national-program.png';
+
+const subNav = [
+  { href: '#program', label: 'กำหนดการ' },
+  { href: '#dates', label: 'กำหนดการสำคัญ' },
+  { href: '#fees', label: 'ค่าลงทะเบียน' },
+  { href: '#guidelines', label: 'การส่งบทความ' },
+  { href: '#presentation', label: 'การนำเสนอ' },
+  { href: '#register', label: 'ลงทะเบียนเข้าร่วม' },
+  { href: '#committees', label: 'คณะกรรมการ' },
+];
+
+// คำแนะนำการส่งบทความ (Author Guidelines)
+const guidelinesPrep = [
+  'บทความต้นฉบับต้องไม่มีเนื้อหาที่อยู่ในระหว่างการพิจารณาโดยวารสารหรืองานประชุมวิชาการอื่น',
+  'เตรียมต้นฉบับตามรูปแบบบทความที่การประชุมกำหนด (ดาวน์โหลดแม่แบบบทความได้จากระบบ EasyChair)',
+  'ผู้ประสงค์ส่งเฉพาะบทคัดย่อ ให้ใช้แม่แบบเดียวกันโดยตัดส่วนประกอบอื่นออก',
+  'บทความฉบับเต็มควรมีความยาว 6–12 หน้า และมีเอกสารอ้างอิง 10–15 รายการ',
+];
+const guidelinesSubmit = [
+  'ส่งต้นฉบับบทความ/บทคัดย่อ ผ่านระบบ EasyChair',
+  'ผู้ใช้ระบบ EasyChair ครั้งแรก สามารถศึกษาวิธีการใช้งานได้จากคู่มือแนะนำขั้นตอนการส่งบทความ',
+  'การส่งบทความขอให้ส่งทั้งไฟล์ Word และไฟล์ PDF',
+];
+const guidelinesReview = [
+  'บทความจะได้รับการประเมินแบบ double-blind โดยผู้ทรงคุณวุฒิอย่างน้อย 2 ท่าน',
+  'แจ้งผลการประเมินผ่านระบบ EasyChair หากมีการแก้ไข ขอให้แก้ไขพร้อมแนบแบบฟอร์มรายละเอียดการแก้ไข',
+  'เมื่อส่งฉบับแก้ไขพร้อมแบบฟอร์มแล้ว จะได้รับจดหมายตอบรับภายใน 1 สัปดาห์',
+  'บทความคุณภาพดีเยี่ยมจะได้รับรางวัลบทความยอดเยี่ยม (Best Paper Award) และมีโอกาสตีพิมพ์ในวารสารสมาคมวิศวกรรมเกษตรแห่งประเทศไทย',
+];
+
+// ข้อกำหนดการนำเสนอ (Presentation Requirements) — เฉพาะกติกาที่ใช้ได้จริงสำหรับงานออนไซต์
+const presentOral = [
+  'การนำเสนอด้วยวาจาใช้เวลารวม 15 นาที (นำเสนอ 10 นาที และถาม–ตอบ 5 นาที)',
+  'มีสัญญาณเตือนเมื่อใกล้หมดเวลา และสัญญาณครั้งที่สองเพื่อให้สรุปและเข้าสู่ช่วงถาม–ตอบ',
+  'แต่ละห้องมีจอภาพ โปรเจ็กเตอร์ LCD และแล็ปท็อปที่ติดตั้ง Microsoft PowerPoint — ผู้บรรยายต้องอัปโหลดไฟล์ก่อนเริ่มอย่างน้อย 15 นาที',
+  'ผู้บรรยายทุกคนต้องจัดเตรียมไฟล์ PDF สำรองเพิ่มเติมจากไฟล์ต้นฉบับ เพื่อเลี่ยงปัญหาความเข้ากันได้',
+];
+const presentPoster = [
+  'ขนาดโปสเตอร์ที่กำหนด: 60 ซม. (กว้าง) × 160 ซม. (สูง) หนึ่งหัวข้อต่อหนึ่งแผ่น',
+  'ต้องระบุชื่อเรื่อง ชื่อและสังกัดของผู้เขียนทุกคน บทนำ วิธีการวิจัย ผลลัพธ์ สรุป และเอกสารอ้างอิง',
+  'ต้องมีโลโก้ของการประชุมและโลโก้ของสมาคมวิศวกรรมเกษตรแห่งประเทศไทย',
+  'การนำเสนอโปสเตอร์ใช้เวลา 10 นาที (นำเสนอ 5 นาที และถาม–ตอบ 5 นาที)',
+];
+
+// คณะกรรมการวิชาการ (Scientific Committee)
+const committeeAcademic = [
+  { name: 'Prof. Dr. Abdul Rashid Bin Mohamed Shariff', inst: 'Universiti Putra Malaysia, Malaysia' },
+  { name: 'Prof. Dr. Bim Prasad Shrestha', inst: 'Kathmandu University, Nepal' },
+  { name: 'Prof. Dr. Chang, Yaw-Nan (Nelson)', inst: 'National Formosa University, Taiwan' },
+  { name: 'Dr. Martin Boruvka', inst: 'Technical University of Liberec, Czech Republic' },
+  { name: 'Dr. Muhammad Hazwan Hamzah', inst: 'Universiti Putra Malaysia, Malaysia' },
+  { name: 'Prof. Dr. Munehiro Tanaka', inst: 'Saga University, Japan' },
+  { name: 'Assoc. Prof. Dr. Norhashila Binti Hashim', inst: 'Universiti Putra Malaysia, Malaysia' },
+  { name: 'Prof. Dr. Rosnah Shamsudin', inst: 'Universiti Putra Malaysia, Malaysia' },
+  { name: 'Prof. Dr. Shyam Sablani', inst: 'Washington State University, USA' },
+  { name: 'Prof. Dr. Tri Ratna Bajracharya', inst: 'RIFS Research Institute Sustainability at GFZ, Potsdam, Germany' },
+  { name: 'Prof. Dr. Vijaya G.S. Raghavan', inst: 'McGill University, Canada' },
+  { name: 'Prof. Dr. Wouter Saeys', inst: 'KU Leuven, Belgium' },
+  { name: 'Prof. Dr. Xiao Dong Chen', inst: 'Tsinghua Shenzhen International Graduate School, China' },
+  { name: 'Prof. Dr. Anupun Terdwongworakul', inst: 'Kasetsart University, Thailand' },
+  { name: 'Assoc. Prof. Dr. Areeya Rittima', inst: 'Mahidol University, Thailand' },
+  { name: 'Prof. Dr. Panmanas Sirisomboon', inst: "King Mongkut's Institute of Technology Ladkrabang, Thailand" },
+  { name: 'Assoc. Prof. Dr. Prathuang Usaborisut', inst: 'Kasetsart University, Thailand' },
+  { name: 'Prof. Dr. Sakamon Devahastin', inst: "King Mongkut's University of Technology Thonburi, Thailand" },
+  { name: 'Assoc. Prof. Dr. Tiraporn Junyusen', inst: 'Suranaree University of Technology, Thailand' },
+];
+
+// คณะกรรมการดำเนินการ (Organizing Committee) — สมาคมวิศวกรรมเกษตรแห่งประเทศไทย
+const committeeOrganizing = [
+  'Dr. Dares Kittiyopas',
+  'Mr. Pramote Klainetr',
+  'Mr. Viboon Thepent',
+  'Mr. Cherawat Munkit',
+  'Dr. Wuttiphol Chansrakoo',
+  'Ms. Chanyanuch Pan-iam',
+  'Asst. Prof. Dr. Jittimon Wongsa',
+  'Asst. Prof. Dr. Rawin Surbkar',
+  'Dr. Anuchit Chamsing',
+  'Mr. Wachirasiri Tavidech',
+  'Assoc. Prof. Dr. Watcharapol Chayaprasert',
+  'Assoc. Prof. Dr. Jetsada Posom',
+  'Prof. Dr. Sakamon Devahastin',
+  'Assoc. Prof. Dr. Tawarat Treeamnuk',
+  'Assoc. Prof. Sirinad Noypitak',
+  'Asst. Prof. Dr. Sirasa Thangdee',
+  'Asst. Prof. Sawanit Aichayanich',
+  'Asst. Prof. Dr. Vasu Udompetaikul',
+  'Asst. Prof. Dr. Danuwat Thangdee',
+];
+---
+
+<Layout title="ประชุมวิชาการระดับชาติ ครั้งที่ 27 (TSAE 2026)" description="การประชุมวิชาการสมาคมวิศวกรรมเกษตรแห่งประเทศไทย ระดับชาติ ครั้งที่ 27 วันที่ 20–21 กรกฎาคม 2569 ณ กรมส่งเสริมการเกษตร" lang="th" hideLangSwitch={true}>
+  <!-- HERO -->
+  <section class="relative overflow-hidden" style="background: linear-gradient(135deg, #0d3b1e 0%, #1a6b3a 55%, #124d2a 100%);">
+    <div class="relative max-w-6xl mx-auto px-4 py-20 lg:py-24 text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium mb-5 border border-yellow-300/40" style="background-color: rgba(200,169,81,0.2); color:#fde68a;">
+        การประชุมวิชาการระดับชาติ ครั้งที่ 27
+      </div>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-4">TSAE 2026</h1>
+      <p class="text-lg sm:text-2xl font-light text-green-100 max-w-3xl mx-auto mb-2">
+        การประชุมวิชาการสมาคมวิศวกรรมเกษตรแห่งประเทศไทย ระดับชาติ
+      </p>
+      <p class="text-xl sm:text-2xl font-semibold mb-6" style="color:#fde68a;">
+        “วิศวกรรมเกษตรแห่งอนาคตในระเบียบโลกใหม่”
+      </p>
+      <div class="flex flex-wrap justify-center gap-x-8 gap-y-2 text-green-50 mb-8">
+        <span class="inline-flex items-center gap-2"><svg class="w-5 h-5" style="color:#c8a951" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>20 – 21 กรกฎาคม 2569</span>
+        <span class="inline-flex items-center gap-2"><svg class="w-5 h-5" style="color:#c8a951" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>ห้องประชุม 7 ชั้น 5 อาคาร 1 กรมส่งเสริมการเกษตร</span>
+      </div>
+
+      <!-- Countdown -->
+      <div id="countdown" data-target="2026-07-20T08:30:00+07:00" class="flex justify-center gap-3 sm:gap-4 mb-8">
+        {[['days','วัน'],['hours','ชั่วโมง'],['minutes','นาที'],['seconds','วินาที']].map(([u,label]) => (
+          <div class="w-20 sm:w-24 rounded-xl py-3 px-2" style="background-color: rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15);">
+            <div class="text-3xl sm:text-4xl font-extrabold text-white" data-cd={u}>--</div>
+            <div class="text-[11px] tracking-wide text-green-200">{label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href={submitUrl} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-7 py-3.5 font-bold rounded-xl text-white shadow-lg transition-transform hover:scale-105" style="background-color:#c8a951;">
+          ส่งบทความ
+        </a>
+        <a href={posterUrl} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-7 py-3.5 font-bold rounded-xl border-2 border-white/60 text-white hover:bg-white/10 transition-colors">
+          โปสเตอร์งานประชุม
+        </a>
+        <a href={programUrl} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-7 py-3.5 font-bold rounded-xl border-2 border-white/60 text-white hover:bg-white/10 transition-colors">
+          กำหนดการ
+        </a>
+        <a href={proceedingUrl} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-7 py-3.5 font-bold rounded-xl border-2 border-white/60 text-white hover:bg-white/10 transition-colors">
+          Proceeding
+        </a>
+        <a href="#register" class="inline-flex items-center gap-2 px-7 py-3.5 font-bold rounded-xl text-white shadow-lg transition-transform hover:scale-105" style="background-color:#1a6b3a; border:2px solid rgba(255,255,255,0.5);">
+          ลงทะเบียนเข้าร่วม
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUB NAV -->
+  <nav class="bg-white border-b border-gray-200 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-4">
+      <p class="text-center text-xs font-bold uppercase tracking-widest mb-3" style="color:#1a6b3a;">ไปยังหัวข้อ</p>
+      <ul class="flex flex-wrap justify-center gap-2.5 sm:gap-3 text-sm font-semibold">
+        {subNav.map((n) => (
+          <li>
+            <a href={n.href} class="inline-block px-5 py-2.5 rounded-full text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md" style="background-color:#1a6b3a;" onmouseover="this.style.backgroundColor='#13502b';" onmouseout="this.style.backgroundColor='#1a6b3a';">{n.label}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </nav>
+
+  <!-- INTRO -->
+  <section class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h2 class="text-3xl font-bold mb-6" style="color:#1a6b3a;">เกี่ยวกับการประชุม</h2>
+      <p class="text-gray-600 leading-relaxed text-lg">
+        สมาคมวิศวกรรมเกษตรแห่งประเทศไทย จัดการประชุมวิชาการระดับชาติ ครั้งที่ 27 ภายใต้แนวคิด
+        “วิศวกรรมเกษตรแห่งอนาคตในระเบียบโลกใหม่” เพื่อเป็นเวทีนำเสนอและแลกเปลี่ยนผลงานวิจัย
+        องค์ความรู้ และนวัตกรรมด้านวิศวกรรมเกษตร ระหว่างนักวิจัย คณาจารย์ นิสิตนักศึกษา ภาคอุตสาหกรรม
+        และผู้สนใจทั่วไป โดยจัดขึ้นในวันที่ 20–21 กรกฎาคม 2569 ณ กรมส่งเสริมการเกษตร
+      </p>
+      <div class="mt-8">
+        <img src={`${U}/04/TSAE2026NationalConf-banner-1024x272.png`} alt="หน่วยงานสนับสนุน: สวก. (ARDA), วช. (NRCT), TSAE, สนช. (NIA)" class="max-w-full mx-auto" loading="lazy" />
+      </div>
+    </div>
+  </section>
+
+  <!-- TOPICS -->
+  <section class="py-16" style="background-color:#f6faf7;">
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-10 text-center" style="color:#1a6b3a;">หัวข้อการประชุม</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {topics.map((tp) => (
+          <div class="rounded-2xl overflow-hidden shadow-md bg-white hover:shadow-xl transition-shadow">
+            <img src={tp.img} alt={tp.title} class="w-full h-32 object-cover" loading="lazy" />
+            <div class="p-4">
+              <p class="font-semibold text-gray-800">{tp.title}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGRAM / AGENDA -->
+  <section id="program" class="py-16 bg-white scroll-mt-28">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="text-center mb-3">
+        <h2 class="text-3xl font-bold mb-2" style="color:#1a6b3a;">กำหนดการการประชุม</h2>
+        <p class="text-gray-500">บรรยายพิเศษและเสวนาวิชาการ ตลอด 2 วัน ณ ห้องประชุม 7 ชั้น 5 อาคาร 1 กรมส่งเสริมการเกษตร</p>
+      </div>
+      <div class="flex justify-center mb-8">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold" style="background-color:#eef6f0; color:#1a6b3a; border:1px solid #cce5d6;">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          เข้าร่วมรับฟังการบรรยายและเสวนา โดยไม่เสียค่าใช้จ่าย
+        </span>
+      </div>
+
+      <div class="flex justify-center mb-12">
+        <div class="flex flex-col sm:flex-row items-center gap-6 rounded-2xl border bg-white p-5 sm:p-7 shadow-md max-w-2xl" style="border-color:#cce5d6;">
+          <div class="rounded-2xl p-3 shrink-0" style="background-color:#f6faf7; border:1px solid #e3efe8;">
+            <img src="/images/conf/national-register-qr.png" alt="QR สำหรับลงทะเบียนเข้าร่วมรับฟังการบรรยายและเสวนา" width="176" height="176" class="w-40 h-40 sm:w-44 sm:h-44" loading="lazy" />
+          </div>
+          <div class="text-center sm:text-left">
+            <div class="text-xs font-bold uppercase tracking-wide mb-1.5" style="color:#a8892f;">ลงทะเบียนเข้าร่วม</div>
+            <p class="text-xl font-bold text-gray-900 leading-snug mb-1.5">สแกน QR เพื่อลงทะเบียน</p>
+            <p class="text-sm text-gray-600 leading-relaxed mb-4">รับฟังการบรรยายและเสวนาตลอด 2 วัน<br class="hidden sm:block" /> โดยไม่เสียค่าใช้จ่าย</p>
+            <a href="https://forms.gle/ABWyMp6CCYyojger9" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-white text-sm font-semibold transition-colors" style="background-color:#1a6b3a;" onmouseover="this.style.backgroundColor='#124d2a'" onmouseout="this.style.backgroundColor='#1a6b3a'">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              ลงทะเบียนออนไลน์
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <!-- Day 1 -->
+        <div class="rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 text-white font-bold text-lg flex items-center gap-3" style="background:linear-gradient(135deg,#1a6b3a,#0d3b1e);">
+            <span class="inline-flex items-center justify-center w-9 h-9 rounded-full text-sm" style="background-color:rgba(255,255,255,0.18);">วันที่ 1</span>
+            {programDay1.date}
+          </div>
+          <div class="p-6 space-y-5">
+            <div class="rounded-xl p-4" style="background-color:#fbf6e9; border:1px solid #efe2bf;">
+              <div class="text-xs font-bold uppercase tracking-wide mb-1" style="color:#a8892f;">บรรยายพิเศษ</div>
+              <p class="font-semibold text-gray-800 leading-snug">“{programDay1.special.title}”</p>
+              <p class="text-sm text-gray-600 mt-2">โดย <span class="font-semibold text-gray-800">{programDay1.special.speaker}</span></p>
+              <p class="text-xs text-gray-500">{programDay1.special.role}</p>
+            </div>
+            <div>
+              <div class="text-xs font-bold uppercase tracking-wide mb-3" style="color:#1a6b3a;">รับฟังการบรรยาย</div>
+              <ul class="space-y-4">
+                {programDay1.talks.map((tk, i) => (
+                  <li class="flex gap-3">
+                    <span class="shrink-0 w-7 h-7 rounded-full text-white text-sm font-bold flex items-center justify-center mt-0.5" style="background-color:#c8a951;">{i+1}</span>
+                    <div>
+                      <p class="text-gray-800 font-medium leading-snug">{tk.title}</p>
+                      <p class="text-sm text-gray-600 mt-1">โดย <span class="font-semibold text-gray-800">{tk.speaker}</span></p>
+                      <p class="text-xs text-gray-500">{tk.role}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Day 2 -->
+        <div class="rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 text-white font-bold text-lg flex items-center gap-3" style="background:linear-gradient(135deg,#a8892f,#7a6320);">
+            <span class="inline-flex items-center justify-center w-9 h-9 rounded-full text-sm" style="background-color:rgba(255,255,255,0.2);">วันที่ 2</span>
+            {programDay2.date}
+          </div>
+          <div class="p-6 space-y-5">
+            <div class="rounded-xl p-4" style="background-color:#f6faf7; border:1px solid #d9ece0;">
+              <div class="text-xs font-bold uppercase tracking-wide mb-1" style="color:#1a6b3a;">การเสวนา</div>
+              <p class="font-semibold text-gray-800 leading-snug">{programDay2.forumTitle}</p>
+              <p class="text-sm text-gray-600 mt-3">โดย วิทยากรจาก</p>
+              <ul class="mt-2 space-y-2">
+                {programDay2.forumSpeakers.map((sp) => (
+                  <li class="flex gap-2.5 text-sm text-gray-700">
+                    <span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span>
+                    <span>{sp}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div class="rounded-xl p-4 flex gap-3" style="background-color:#fbf6e9; border:1px solid #efe2bf;">
+              <svg class="w-5 h-5 shrink-0 mt-0.5" style="color:#a8892f;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+              <p class="text-sm text-gray-700 leading-snug">{programDay2.note}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- IMPORTANT DATES -->
+  <section id="dates" class="py-16 scroll-mt-28" style="background:linear-gradient(135deg,#0d3b1e,#1a6b3a);">
+    <div class="max-w-3xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-10 text-center text-white">กำหนดการสำคัญ</h2>
+      <div class="space-y-3">
+        {importantDates.map((d) => (
+          <div class="flex items-center justify-between gap-4 rounded-xl px-5 py-4" style={`background-color: ${d.highlight ? 'rgba(200,169,81,0.25)' : 'rgba(255,255,255,0.08)'}; border:1px solid rgba(255,255,255,0.12);`}>
+            <span class="text-green-50">{d.label}</span>
+            <span class="font-bold whitespace-nowrap" style={d.highlight ? 'color:#fde68a;' : 'color:#ffffff;'}>{d.date}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- REGISTRATION FEES -->
+  <section id="fees" class="py-16 bg-white scroll-mt-28">
+    <div class="max-w-3xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-3 text-center" style="color:#1a6b3a;">อัตราค่าลงทะเบียน</h2>
+      <p class="text-center text-gray-500 mb-10">อัตราล่วงหน้า ภายในวันที่ 30 มิถุนายน 2569</p>
+      <div class="rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
+        <table class="w-full text-sm min-w-[480px]">
+          <thead>
+            <tr class="text-gray-500 text-left" style="background-color:#f6faf7;">
+              <th class="px-4 py-3 font-medium">ประเภทผู้ลงทะเบียน</th>
+              <th class="px-4 py-3 font-medium">ภายใน 30 มิ.ย. 69</th>
+              <th class="px-4 py-3 font-medium">หลัง 30 มิ.ย. 69</th>
+            </tr>
+          </thead>
+          <tbody>
+            {fees.map((r) => (
+              <tr class="border-t border-gray-100">
+                <td class="px-4 py-3 font-medium text-gray-800 whitespace-nowrap">{r.who}</td>
+                <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{r.early}</td>
+                <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{r.regular}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="text-sm text-gray-500 mt-6 text-center">
+        ผู้ที่ลงทะเบียนประเภทบุคคลทั่วไป รับสิทธิ์ในการสมัครสมาชิกสมาคมวิศวกรรมเกษตรแห่งประเทศไทย (ตลอดชีพ) ฟรี
+      </p>
+    </div>
+  </section>
+
+  <!-- AUTHOR GUIDELINES -->
+  <section id="guidelines" class="py-16 scroll-mt-28" style="background-color:#f6faf7;">
+    <div class="max-w-5xl mx-auto px-4">
+      <div class="text-center mb-10">
+        <h2 class="text-3xl font-bold mb-2" style="color:#1a6b3a;">การส่งบทความ</h2>
+        <p class="text-gray-500 max-w-3xl mx-auto">ผู้สนใจสามารถส่งผลงานเข้าร่วมนำเสนอทั้งแบบบรรยายและโปสเตอร์ โดยส่งบทความฉบับเต็มหรือเฉพาะบทคัดย่อ ผ่านระบบ EasyChair</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2"><span class="w-7 h-7 rounded-full text-white text-sm flex items-center justify-center" style="background-color:#1a6b3a;">1</span>การเตรียมต้นฉบับ</h3>
+          <ul class="space-y-2.5 text-sm text-gray-600">
+            {guidelinesPrep.map((g) => (
+              <li class="flex gap-2"><span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span><span>{g}</span></li>
+            ))}
+          </ul>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2"><span class="w-7 h-7 rounded-full text-white text-sm flex items-center justify-center" style="background-color:#1a6b3a;">2</span>การส่งบทความ</h3>
+          <ul class="space-y-2.5 text-sm text-gray-600">
+            {guidelinesSubmit.map((g) => (
+              <li class="flex gap-2"><span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span><span>{g}</span></li>
+            ))}
+          </ul>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2"><span class="w-7 h-7 rounded-full text-white text-sm flex items-center justify-center" style="background-color:#1a6b3a;">3</span>การรีวิวบทความ</h3>
+          <ul class="space-y-2.5 text-sm text-gray-600">
+            {guidelinesReview.map((g) => (
+              <li class="flex gap-2"><span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span><span>{g}</span></li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <div class="text-center mt-8">
+        <a href={submitUrl} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-7 py-3.5 font-bold rounded-xl text-white shadow transition-transform hover:scale-105" style="background-color:#c8a951;">ส่งบทความผ่าน EasyChair</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRESENTATION REQUIREMENTS -->
+  <section id="presentation" class="py-16 bg-white scroll-mt-28">
+    <div class="max-w-5xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-10 text-center" style="color:#1a6b3a;">ข้อกำหนดการนำเสนอ</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 font-bold text-white flex items-center gap-2" style="background:linear-gradient(135deg,#1a6b3a,#0d3b1e);">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+            การนำเสนอภาคบรรยาย (Oral)
+          </div>
+          <ul class="p-6 space-y-3 text-sm text-gray-600">
+            {presentOral.map((p) => (
+              <li class="flex gap-2.5"><span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span><span>{p}</span></li>
+            ))}
+          </ul>
+        </div>
+        <div class="rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 font-bold text-white flex items-center gap-2" style="background:linear-gradient(135deg,#a8892f,#7a6320);">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v9a1 1 0 01-1 1h-6l-4 4v-4H5a1 1 0 01-1-1V5z"/></svg>
+            การนำเสนอภาคโปสเตอร์ (Poster)
+          </div>
+          <ul class="p-6 space-y-3 text-sm text-gray-600">
+            {presentPoster.map((p) => (
+              <li class="flex gap-2.5"><span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span><span>{p}</span></li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <!-- Non-presenting registration -->
+      <div id="register" class="mt-10 scroll-mt-28">
+        <div class="rounded-2xl p-6 sm:p-8 mb-6" style="background-color:#f6faf7; border:1px solid #d9ece0;">
+          <h3 class="text-xl font-bold mb-2" style="color:#1a6b3a;">ลงทะเบียนผู้เข้าร่วมที่ไม่นำเสนอผลงาน</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            ยินดีต้อนรับผู้ที่ประสงค์เข้าร่วมการประชุมโดยไม่นำเสนอผลงาน ค่าลงทะเบียนรวม
+            <span class="font-semibold text-gray-800"> อาหาร 2 มื้อ และพักเบรกกาแฟ</span>
+            พร้อมสิทธิ์เข้าฟังทุกช่วงของการประชุม รวมถึงการบรรยายพิเศษตามกำหนดการ
+            กรุณากรอกแบบฟอร์มด้านล่างและแนบหลักฐานการชำระเงิน
+          </p>
+        </div>
+
+        <!-- Payment / bank account -->
+        <div class="rounded-2xl bg-white shadow-sm border border-gray-100 overflow-hidden mb-6">
+          <div class="px-6 py-4 font-bold text-white flex items-center gap-2" style="background:linear-gradient(135deg,#1a6b3a,#0d3b1e);">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            การชำระเงิน
+          </div>
+          <div class="p-6">
+            <p class="text-sm text-gray-600 mb-5">ชำระค่าลงทะเบียนด้วยเงินสดหรือโอนเงิน เข้าบัญชีธนาคารตามรายละเอียดด้านล่าง จากนั้นแนบหลักฐานการชำระเงินในแบบฟอร์มลงทะเบียน</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 rounded-xl border border-gray-100 overflow-hidden">
+              <div class="flex items-center justify-center p-6" style="background-color:#138f2d;">
+                <div class="text-center text-white">
+                  <div class="text-4xl font-black leading-none">K</div>
+                  <div class="text-[11px] font-semibold tracking-widest mt-1">KASIKORNBANK</div>
+                </div>
+              </div>
+              <dl class="sm:col-span-2 p-6 space-y-3 text-sm">
+                <div><dt class="text-gray-500">ธนาคาร</dt><dd class="font-semibold text-gray-900">ธนาคารกสิกรไทย สาขาบางเขน</dd></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div><dt class="text-gray-500">ชื่อบัญชี</dt><dd class="font-semibold text-gray-900">THAI SOCIETY OF AGRICULTURAL ENGINEERING<br/><span class="text-gray-500 font-normal">(สมาคมวิศวกรรมเกษตรแห่งประเทศไทย)</span></dd></div>
+                  <div><dt class="text-gray-500">เลขที่บัญชี</dt><dd class="font-bold text-lg" style="color:#1a6b3a;">694-2-01262-2</dd></div>
+                </div>
+                <div><dt class="text-gray-500">รหัส SWIFT (กรณีโอนจากต่างประเทศ)</dt><dd class="font-semibold text-gray-900">KASITHBK</dd></div>
+              </dl>
+            </div>
+            <ul class="mt-5 space-y-2 text-sm text-gray-600">
+              <li class="flex gap-2"><span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span><span>ผู้เข้าร่วมเป็นผู้รับผิดชอบค่าธรรมเนียมการโอนทั้งหมด</span></li>
+              <li class="flex gap-2"><span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span><span>ค่าลงทะเบียนที่ชำระแล้วไม่สามารถขอคืนได้ในทุกกรณี</span></li>
+              <li class="flex gap-2"><span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span><span>กรุณาแนบหลักฐานการชำระเงินในแบบฟอร์มลงทะเบียนด้านล่าง</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <RegisterForm conf="national" lang="th" />
+      </div>
+    </div>
+  </section>
+
+  <!-- COMMITTEES -->
+  <section id="committees" class="py-16 scroll-mt-28" style="background-color:#f6faf7;">
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-10 text-center" style="color:#1a6b3a;">คณะกรรมการ</h2>
+
+      <h3 class="text-xl font-bold mb-5" style="color:#1a6b3a;">คณะกรรมการวิชาการ</h3>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto mb-12">
+        <table class="w-full text-sm min-w-[560px]">
+          <thead>
+            <tr class="text-left text-gray-500" style="background-color:#f1f5f2;">
+              <th class="px-4 py-3 font-medium w-[40%]">รายชื่อ</th>
+              <th class="px-4 py-3 font-medium">สังกัด</th>
+            </tr>
+          </thead>
+          <tbody>
+            {committeeAcademic.map((c) => (
+              <tr class="border-t border-gray-100 align-top">
+                <td class="px-4 py-3 font-medium text-gray-800 whitespace-nowrap">{c.name}</td>
+                <td class="px-4 py-3 text-gray-600">{c.inst}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="text-xl font-bold mb-2" style="color:#1a6b3a;">คณะกรรมการดำเนินการ</h3>
+      <p class="text-sm text-gray-500 mb-5">สมาคมวิศวกรรมเกษตรแห่งประเทศไทย (Thai Society of Agricultural Engineering)</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {committeeOrganizing.map((name) => (
+          <div class="bg-white rounded-xl border border-gray-100 px-4 py-3 text-sm text-gray-800 flex items-center gap-2.5">
+            <span class="shrink-0 w-2 h-2 rounded-full" style="background-color:#c8a951;"></span>
+            {name}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- POSTER + CTA -->
+  <section class="py-16 bg-white">
+    <div class="max-w-5xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+      <a href={posterUrl} target="_blank" rel="noopener" class="block rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow">
+        <img src={posterUrl} alt="กำหนดการการประชุมวิชาการระดับชาติ ครั้งที่ 27 (20–21 กรกฎาคม 2569)" class="w-full" loading="lazy" />
+      </a>
+      <div>
+        <h2 class="text-3xl font-bold mb-4" style="color:#1a6b3a;">ร่วมส่งบทความและเข้าร่วมงาน</h2>
+        <p class="text-gray-600 mb-6 leading-relaxed">
+          ส่งบทความวิชาการผ่านระบบ EasyChair และเข้าร่วมการประชุมวิชาการสมาคมวิศวกรรมเกษตรแห่งประเทศไทย
+          ระดับชาติ ครั้งที่ 27 ดูรายละเอียดเพิ่มเติมได้จากโปสเตอร์งานประชุม
+        </p>
+        <div class="flex flex-wrap gap-3 mb-8">
+          <a href={submitUrl} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-6 py-3 font-bold rounded-xl text-white shadow transition-transform hover:scale-105" style="background-color:#c8a951;">ส่งบทความ</a>
+          <a href="/membership" class="inline-flex items-center gap-2 px-6 py-3 font-bold rounded-xl border-2 transition-colors" style="border-color:#1a6b3a; color:#1a6b3a;">สมัครสมาชิก</a>
+        </div>
+        <div class="text-sm text-gray-500 space-y-1">
+          <p><span class="font-semibold text-gray-700">ติดต่อ:</span> <a href="mailto:center@tsae.asia" class="hover:text-green-700">center@tsae.asia</a></p>
+          <p><span class="font-semibold text-gray-700">โทร:</span> 081-807-2458</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  function initCountdown() {
+    const el = document.getElementById('countdown');
+    if (!el) return;
+    const target = new Date(el.dataset.target || '').getTime();
+    if (!target) return;
+    const set = (u: string, v: number) => {
+      const node = el.querySelector(`[data-cd="${u}"]`);
+      if (node) node.textContent = String(v).padStart(2, '0');
+    };
+    const tick = () => {
+      const diff = target - Date.now();
+      if (diff <= 0) { set('days',0); set('hours',0); set('minutes',0); set('seconds',0); return; }
+      set('days', Math.floor(diff / 86400000));
+      set('hours', Math.floor((diff % 86400000) / 3600000));
+      set('minutes', Math.floor((diff % 3600000) / 60000));
+      set('seconds', Math.floor((diff % 60000) / 1000));
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
+  initCountdown();
+  document.addEventListener('astro:page-load', initCountdown);
+</script>

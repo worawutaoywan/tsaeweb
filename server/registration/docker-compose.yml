@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+  registration:
+    build: .
+    container_name: tsae_registration
+    ports:
+      - "127.0.0.1:8090:8000"
+    environment:
+      DATA_DIR: /data
+      CMS_UPLOADS_DIR: /uploads
+      CMS_UPLOADS_URL: /uploads
+      ADMIN_USER: ${ADMIN_USER}
+      ADMIN_PASS: ${ADMIN_PASS}
+      SECRET_KEY: ${SECRET_KEY}
+      SMTP_HOST: ${SMTP_HOST:-smtpout.secureserver.net}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-center@tsae.asia}
+      SITE_URL: ${SITE_URL:-https://www.tsae.asia}
+      MAX_FILE_BYTES: "47185920"
+      MAX_MEDIA_BYTES: "52428800"
+    volumes:
+      - ./data:/data
+      - /var/www/tsae_web/uploads:/uploads
+    restart: always

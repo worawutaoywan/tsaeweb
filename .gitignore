@@ -1,10 +1,26 @@
 # build output
 dist/
+wp-uploads/
 # generated types
 .astro/
 
 # dependencies
 node_modules/
+
+# Python generated files
+__pycache__/
+*.py[cod]
+
+# Runtime databases, uploads, and private member data
+server/registration/data/
+server/registration/uploads/
+*.db
+*.sqlite
+*.sqlite3
+src/data/members.json
+data/*.xlsx
+data/*.pdf
+data/*.png
 
 # logs
 npm-debug.log*

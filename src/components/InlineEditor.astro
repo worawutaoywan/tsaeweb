@@ -1,0 +1,449 @@
+---
+/**
+ * Brizy-like inline editor for STATIC page-builder pages (data/cms/pages.json).
+ * Loads only when an admin is logged in and the current page carries [data-cms-page].
+ * Time-series content (news/events/hero) is edited in the separate CMS, not here.
+ */
+---
+
+<div id="tsae-ie-bar" class="tsae-ie-hidden" aria-hidden="true">
+  <div class="tsae-ie-bar-inner">
+    <span class="tsae-ie-brand">แก้ไขหน้า (Inline)</span>
+    <span id="tsae-ie-status" class="tsae-ie-status"></span>
+    <div class="tsae-ie-actions">
+      <button type="button" id="tsae-ie-add" class="tsae-ie-btn">+ เพิ่มบล็อก</button>
+      <button type="button" id="tsae-ie-save" class="tsae-ie-btn tsae-ie-btn-primary">บันทึก</button>
+      <button type="button" id="tsae-ie-cancel" class="tsae-ie-btn">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add-block picker -->
+<div id="tsae-ie-picker" class="tsae-ie-modal tsae-ie-hidden" role="dialog" aria-modal="true">
+  <div class="tsae-ie-modal-card">
+    <div class="tsae-ie-modal-head">
+      <strong>เลือกชนิดบล็อก</strong>
+      <button type="button" class="tsae-ie-x" data-ie-close>&times;</button>
+    </div>
+    <div class="tsae-ie-picker-grid">
+      <button type="button" data-newtype="heading">หัวข้อ</button>
+      <button type="button" data-newtype="richtext">ข้อความ</button>
+      <button type="button" data-newtype="image">รูปภาพ</button>
+      <button type="button" data-newtype="cta">ปุ่มลิงก์</button>
+      <button type="button" data-newtype="file">ไฟล์ดาวน์โหลด</button>
+      <button type="button" data-newtype="alert">กล่องแจ้งเตือน</button>
+      <button type="button" data-newtype="spacer">เว้นระยะ</button>
+      <button type="button" data-newtype="html">HTML</button>
+    </div>
+  </div>
+</div>
+
+<!-- Media picker -->
+<div id="tsae-ie-media" class="tsae-ie-modal tsae-ie-hidden" role="dialog" aria-modal="true">
+  <div class="tsae-ie-modal-card tsae-ie-modal-lg">
+    <div class="tsae-ie-modal-head">
+      <strong>เลือกรูปภาพ</strong>
+      <button type="button" class="tsae-ie-x" data-ie-close>&times;</button>
+    </div>
+    <div class="tsae-ie-media-tools">
+      <input type="text" id="tsae-ie-media-url" placeholder="วาง URL รูป เช่น /wp-uploads/... หรือ /images/..." />
+      <button type="button" id="tsae-ie-media-use">ใช้ URL นี้</button>
+    </div>
+    <div id="tsae-ie-media-grid" class="tsae-ie-media-grid"></div>
+  </div>
+</div>
+
+<style is:global>
+  :root { --ie-green: #0f5a30; }
+
+  .tsae-ie-hidden { display: none !important; }
+
+  #tsae-ie-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 400;
+    background: linear-gradient(90deg, #0b3d21, #14532d);
+    color: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.25);
+  }
+  .tsae-ie-bar-inner {
+    max-width: 1280px; margin: 0 auto; padding: 8px 16px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .tsae-ie-brand { font-weight: 800; }
+  .tsae-ie-status { font-size: 12px; opacity: .85; flex: 1; min-width: 80px; }
+  .tsae-ie-actions { display: flex; gap: 8px; margin-left: auto; }
+  .tsae-ie-btn {
+    padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    border: 1px solid rgba(255,255,255,.4); background: rgba(255,255,255,.12);
+    color: #fff; cursor: pointer; font-family: inherit;
+  }
+  .tsae-ie-btn:hover { background: rgba(255,255,255,.22); }
+  .tsae-ie-btn-primary { background: #fff; color: var(--ie-green); border-color: #fff; }
+  .tsae-ie-btn-primary:hover { background: #ecfdf3; }
+
+  body.tsae-ie-active { padding-top: 46px !important; }
+  body.tsae-ie-active header.sticky { top: 46px !important; }
+
+  /* Block affordances */
+  body.tsae-ie-active [data-block] {
+    position: relative;
+    outline: 1px dashed transparent;
+    transition: outline-color .15s;
+    border-radius: 6px;
+  }
+  body.tsae-ie-active [data-block]:hover {
+    outline-color: #4ade80;
+  }
+  body.tsae-ie-active [data-block].tsae-ie-selected {
+    outline: 2px solid #16a34a;
+    outline-offset: 2px;
+  }
+  body.tsae-ie-active [data-edit-field] {
+    cursor: text;
+  }
+  body.tsae-ie-active [data-edit-field]:focus {
+    outline: 2px solid #16a34a; outline-offset: 2px; border-radius: 4px;
+  }
+  body.tsae-ie-active [data-cms-field] {
+    cursor: text; outline: 1px dashed transparent; border-radius: 4px;
+  }
+  body.tsae-ie-active [data-cms-field]:hover { outline-color: rgba(255,255,255,.6); }
+  body.tsae-ie-active [data-cms-field]:focus { outline: 2px solid #fff; }
+
+  /* per-block floating toolbar */
+  .tsae-ie-block-tools {
+    position: absolute; top: -14px; right: 6px; z-index: 20;
+    display: flex; gap: 4px; background: #16a34a; padding: 3px 5px;
+    border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  }
+  .tsae-ie-block-tools button {
+    width: 26px; height: 26px; border: none; border-radius: 6px;
+    background: rgba(255,255,255,.15); color: #fff; cursor: pointer;
+    font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center;
+  }
+  .tsae-ie-block-tools button:hover { background: rgba(255,255,255,.35); }
+
+  /* Modals */
+  .tsae-ie-modal {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(15,23,42,.55); display: flex;
+    align-items: center; justify-content: center; padding: 12px;
+  }
+  .tsae-ie-modal.tsae-ie-hidden { display: none !important; }
+  .tsae-ie-modal-card {
+    background: #fff; border-radius: 14px; width: 100%; max-width: 420px;
+    max-height: 90vh; overflow: auto; box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  }
+  .tsae-ie-modal-lg { max-width: 760px; }
+  .tsae-ie-modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; border-bottom: 1px solid #eef2f0; color: #0f172a;
+  }
+  .tsae-ie-x { border: none; background: none; font-size: 22px; cursor: pointer; color: #64748b; }
+  .tsae-ie-picker-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; padding: 18px;
+  }
+  .tsae-ie-picker-grid button {
+    padding: 14px; border: 1px solid #e2e8f0; border-radius: 10px;
+    background: #f8fafc; cursor: pointer; font-weight: 600; color: #0f172a; font-family: inherit;
+    min-height: 56px; display: flex; align-items: center; justify-content: center; text-align: center;
+  }
+  .tsae-ie-picker-grid button:hover { background: #ecfdf3; border-color: #16a34a; }
+  .tsae-ie-media-tools { display: flex; gap: 8px; padding: 14px 18px; }
+  .tsae-ie-media-tools input {
+    flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;
+  }
+  .tsae-ie-media-tools button {
+    padding: 8px 14px; border: none; border-radius: 8px; background: var(--ie-green);
+    color: #fff; font-weight: 600; cursor: pointer;
+  }
+  .tsae-ie-media-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px; padding: 0 18px 18px;
+  }
+  .tsae-ie-media-grid button {
+    border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;
+    background: #f1f5f9; cursor: pointer; aspect-ratio: 1; padding: 0;
+  }
+  .tsae-ie-media-grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .tsae-ie-toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: #0f172a; color: #fff; padding: 10px 18px; border-radius: 10px;
+    z-index: 600; font-size: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.3);
+  }
+</style>
+
+<script>
+  type Block = Record<string, any>;
+
+  (function initInlineEditor() {
+    const rootEl = document.querySelector<HTMLElement>('[data-cms-page]');
+    if (!rootEl) return; // not a page-builder page
+    const root: HTMLElement = rootEl;
+
+    const pageId = root.dataset.cmsPage!;
+    const bar = document.getElementById('tsae-ie-bar')!;
+    const status = document.getElementById('tsae-ie-status')!;
+    const addBtn = document.getElementById('tsae-ie-add')!;
+    const saveBtn = document.getElementById('tsae-ie-save')!;
+    const cancelBtn = document.getElementById('tsae-ie-cancel')!;
+    const picker = document.getElementById('tsae-ie-picker')!;
+    const mediaModal = document.getElementById('tsae-ie-media')!;
+    const mediaGrid = document.getElementById('tsae-ie-media-grid')!;
+    const mediaUrl = document.getElementById('tsae-ie-media-url') as HTMLInputElement;
+    const mediaUse = document.getElementById('tsae-ie-media-use')!;
+
+    let model: Block[] = [];
+    let heroTitle = '';
+    let heroSubtitle = '';
+    let editing = false;
+    let mediaTarget: ((url: string) => void) | null = null;
+
+    const api = (path: string, opts?: RequestInit) =>
+      fetch('/api/admin/cms/api' + path, { credentials: 'same-origin', ...opts });
+
+    function toast(msg: string) {
+      const t = document.createElement('div');
+      t.className = 'tsae-ie-toast';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2200);
+    }
+
+    // ── Enter / leave edit mode ─────────────────────────────────────────
+    async function enterEdit() {
+      const res = await api('/pages/' + encodeURIComponent(pageId));
+      if (!res.ok) { toast('โหลดข้อมูลหน้าไม่สำเร็จ'); return; }
+      const page = await res.json();
+      model = Array.isArray(page.blocks) ? JSON.parse(JSON.stringify(page.blocks)) : [];
+      heroTitle = page.heroTitle || '';
+      heroSubtitle = page.heroSubtitle || '';
+
+      editing = true;
+      document.body.classList.add('tsae-ie-active');
+      bar.classList.remove('tsae-ie-hidden');
+      bar.setAttribute('aria-hidden', 'false');
+      status.textContent = pageId;
+      wireEditableFields();
+      mountBlockTools();
+    }
+
+    function exitEdit(reload = false) {
+      if (reload) { location.reload(); return; }
+      editing = false;
+      document.body.classList.remove('tsae-ie-active');
+      bar.classList.add('tsae-ie-hidden');
+      document.querySelectorAll('.tsae-ie-block-tools').forEach((n) => n.remove());
+      document.querySelectorAll('[data-edit-field],[data-cms-field]').forEach((el) => {
+        el.removeAttribute('contenteditable');
+      });
+    }
+
+    // ── Editable text/html fields (contenteditable) ─────────────────────
+    function wireEditableFields() {
+      root.querySelectorAll<HTMLElement>('[data-cms-field]').forEach((el) => {
+        el.setAttribute('contenteditable', 'true');
+        el.addEventListener('input', () => {
+          const f = el.dataset.cmsField!;
+          if (f === 'heroTitle') heroTitle = el.textContent || '';
+          if (f === 'heroSubtitle') heroSubtitle = el.textContent || '';
+        });
+      });
+
+      root.querySelectorAll<HTMLElement>('[data-edit-field]').forEach((el) => {
+        const field = el.dataset.editField!;
+        if (field === 'src') return; // images handled by click->media picker
+        el.setAttribute('contenteditable', 'true');
+        el.addEventListener('input', () => {
+          const blockEl = el.closest('[data-block]') as HTMLElement | null;
+          if (!blockEl) return;
+          const idx = Number(blockEl.dataset.blockIndex);
+          if (Number.isNaN(idx) || !model[idx]) return;
+          if (field === 'html') model[idx].html = el.innerHTML;
+          else model[idx][field] = el.textContent || '';
+        });
+      });
+    }
+
+    // ── Per-block toolbar ───────────────────────────────────────────────
+    function mountBlockTools() {
+      document.querySelectorAll('.tsae-ie-block-tools').forEach((n) => n.remove());
+      root.querySelectorAll<HTMLElement>('[data-block]').forEach((blockEl) => {
+        const idx = Number(blockEl.dataset.blockIndex);
+        const type = blockEl.dataset.blockType || '';
+        const tools = document.createElement('div');
+        tools.className = 'tsae-ie-block-tools';
+        tools.contentEditable = 'false';
+
+        const mk = (label: string, title: string, fn: () => void) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.innerHTML = label;
+          b.title = title;
+          b.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); fn(); });
+          tools.appendChild(b);
+        };
+
+        mk('&#9650;', 'ย้ายขึ้น', () => moveBlock(idx, -1));
+        mk('&#9660;', 'ย้ายลง', () => moveBlock(idx, +1));
+        if (type === 'image') mk('&#128247;', 'เปลี่ยนรูป', () => {
+          openMedia((url) => {
+            model[idx].src = url;
+            const img = blockEl.querySelector('img');
+            if (img) img.setAttribute('src', url);
+          });
+        });
+        if (type === 'cta' || type === 'file') mk('&#128279;', 'แก้ลิงก์', () => {
+          const href = prompt('URL ปลายทาง', model[idx].href || '');
+          if (href !== null) model[idx].href = href;
+        });
+        mk('&times;', 'ลบบล็อก', () => {
+          if (confirm('ลบบล็อกนี้?')) deleteBlock(idx);
+        });
+
+        blockEl.appendChild(tools);
+      });
+    }
+
+    function moveBlock(idx: number, dir: number) {
+      const j = idx + dir;
+      if (j < 0 || j >= model.length) return;
+      [model[idx], model[j]] = [model[j], model[idx]];
+      renderPreview();
+    }
+
+    function deleteBlock(idx: number) {
+      model.splice(idx, 1);
+      renderPreview();
+    }
+
+    function addBlock(type: string) {
+      const b: Block = { type };
+      if (type === 'heading') { b.text = 'หัวข้อใหม่'; b.level = 2; }
+      else if (type === 'richtext') b.html = '<p>ข้อความใหม่…</p>';
+      else if (type === 'image') b.src = '';
+      else if (type === 'cta') { b.label = 'ปุ่มใหม่'; b.href = '#'; b.style = 'primary'; }
+      else if (type === 'file') { b.label = 'ดาวน์โหลด'; b.href = '#'; }
+      else if (type === 'alert') { b.text = 'ข้อความแจ้งเตือน'; b.variant = 'info'; }
+      else if (type === 'spacer') b.size = 'md';
+      else if (type === 'html') b.html = '<div></div>';
+      model.push(b);
+      if (type === 'image') {
+        openMedia((url) => { b.src = url; renderPreview(); });
+      } else {
+        renderPreview();
+      }
+    }
+
+    // Re-render the blocks region from the model (used after structural edits)
+    function renderPreview() {
+      const wrap = root.querySelector('[data-cms-blocks]');
+      if (!wrap) return;
+      wrap.innerHTML = model.map((b, i) => renderBlock(b, i)).join('');
+      mountBlockTools();
+      wireEditableFields();
+    }
+
+    function esc(s: string) {
+      return String(s || '').replace(/[&<>"]/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] as string));
+    }
+
+    function renderBlock(b: Block, i: number): string {
+      const open = `<div data-block data-block-index="${i}" data-block-type="${esc(b.type)}">`;
+      const close = '</div>';
+      let inner = '';
+      if (b.type === 'heading') {
+        const lvl = b.level || 2;
+        const size = lvl === 2 ? '1.75rem' : lvl === 3 ? '1.35rem' : '1.15rem';
+        const color = lvl === 2 ? '#1a6b3a' : '#124d2a';
+        inner = `<h${lvl} class="font-bold text-gray-900" data-edit-field="text" style="color:${color};font-size:${size}">${esc(b.text || '')}</h${lvl}>`;
+      } else if (b.type === 'richtext') {
+        inner = `<div class="prose prose-lg max-w-none cms-prose" data-edit-field="html">${b.html || ''}</div>`;
+      } else if (b.type === 'image') {
+        inner = `<figure class="${b.width === 'medium' ? 'max-w-2xl mx-auto' : ''}"><img src="${esc(b.src || '')}" alt="${esc(b.alt || '')}" class="w-full rounded-xl shadow-md" data-edit-field="src"/>${b.caption ? `<figcaption class="text-center text-sm text-gray-500 mt-2" data-edit-field="caption">${esc(b.caption)}</figcaption>` : ''}</figure>`;
+      } else if (b.type === 'cta') {
+        const gold = b.style === 'secondary';
+        inner = `<div class="flex flex-wrap gap-3"><a href="${esc(b.href || '#')}" class="inline-flex items-center px-6 py-3 rounded-lg font-semibold text-white" data-edit-field="label" style="background-color:${gold ? '#c8a951' : '#1a6b3a'}">${esc(b.label || 'ดูรายละเอียด')}</a></div>`;
+      } else if (b.type === 'file') {
+        inner = `<a href="${esc(b.href || '#')}" class="inline-flex items-center gap-2 px-5 py-3 rounded-lg border-2 font-semibold" style="border-color:#1a6b3a;color:#1a6b3a"><span data-edit-field="label">${esc(b.label || 'ดาวน์โหลด')}</span></a>`;
+      } else if (b.type === 'alert') {
+        const warn = b.variant === 'warn';
+        inner = `<div class="p-4 rounded-xl border text-sm ${warn ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-green-50 border-green-200 text-green-900'}" data-edit-field="text">${esc(b.text || '')}</div>`;
+      } else if (b.type === 'html') {
+        inner = `<div class="cms-html prose max-w-none" data-edit-field="html">${b.html || ''}</div>`;
+      } else if (b.type === 'spacer') {
+        const h = b.size === 'sm' ? 'h-6' : b.size === 'lg' ? 'h-20' : 'h-12';
+        inner = `<div class="${h}" aria-hidden="true"></div>`;
+      }
+      return open + inner + close;
+    }
+
+    // ── Media picker ────────────────────────────────────────────────────
+    async function openMedia(onPick: (url: string) => void) {
+      mediaTarget = onPick;
+      mediaModal.classList.remove('tsae-ie-hidden');
+      mediaGrid.innerHTML = '<p style="padding:0 18px;color:#64748b">กำลังโหลด…</p>';
+      try {
+        const res = await api('/media?per_page=60');
+        const data = res.ok ? await res.json() : { items: [] };
+        const items = (data.items || []).filter((m: any) => m.type === 'image');
+        mediaGrid.innerHTML = items.map((m: any) =>
+          `<button type="button" data-url="${esc(m.url)}"><img src="${esc(m.url)}" alt=""/></button>`
+        ).join('') || '<p style="padding:0 18px;color:#64748b">ไม่มีรูปในคลัง</p>';
+        mediaGrid.querySelectorAll<HTMLButtonElement>('button[data-url]').forEach((b) => {
+          b.addEventListener('click', () => pickMedia(b.dataset.url!));
+        });
+      } catch {
+        mediaGrid.innerHTML = '<p style="padding:0 18px;color:#b91c1c">โหลดคลังสื่อไม่สำเร็จ</p>';
+      }
+    }
+    function pickMedia(url: string) {
+      mediaModal.classList.add('tsae-ie-hidden');
+      if (mediaTarget) mediaTarget(url);
+      mediaTarget = null;
+    }
+    mediaUse.addEventListener('click', () => {
+      const u = mediaUrl.value.trim();
+      if (u) pickMedia(u);
+    });
+
+    // ── Save ────────────────────────────────────────────────────────────
+    async function save() {
+      saveBtn.textContent = 'กำลังบันทึก…';
+      const body = JSON.stringify({ blocks: model, heroTitle, heroSubtitle });
+      const res = await api('/pages/' + encodeURIComponent(pageId), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+      });
+      saveBtn.textContent = 'บันทึก';
+      if (!res.ok) { toast('บันทึกไม่สำเร็จ'); return; }
+      toast('บันทึกลง CMS แล้ว · รัน ./deploy.sh web เพื่อเผยแพร่');
+      setTimeout(() => exitEdit(true), 1600);
+    }
+
+    // ── Wire controls ───────────────────────────────────────────────────
+    addBtn.addEventListener('click', () => picker.classList.remove('tsae-ie-hidden'));
+    picker.querySelectorAll<HTMLButtonElement>('[data-newtype]').forEach((b) => {
+      b.addEventListener('click', () => {
+        picker.classList.add('tsae-ie-hidden');
+        addBlock(b.dataset.newtype!);
+      });
+    });
+    saveBtn.addEventListener('click', save);
+    cancelBtn.addEventListener('click', () => {
+      if (confirm('ยกเลิกการแก้ไข? การเปลี่ยนแปลงที่ยังไม่บันทึกจะหายไป')) exitEdit(true);
+    });
+    document.querySelectorAll('[data-ie-close]').forEach((b) =>
+      b.addEventListener('click', () => {
+        picker.classList.add('tsae-ie-hidden');
+        mediaModal.classList.add('tsae-ie-hidden');
+      }));
+    [picker, mediaModal].forEach((m) =>
+      m.addEventListener('click', (e) => { if (e.target === m) m.classList.add('tsae-ie-hidden'); }));
+
+    // Expose entry point so the AdminBar button can trigger it
+    (window as any).tsaeInlineEdit = () => { if (!editing) enterEdit(); };
+    document.addEventListener('tsae:inline-edit', () => { if (!editing) enterEdit(); });
+  })();
+</script>

@@ -1,0 +1,148 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+import { getLangFromUrl, useTranslations, localize, formatDate } from '../../i18n/utils';
+
+export async function getStaticPaths() {
+  const journals = await getCollection('journal');
+  return journals.map((journal) => ({
+    params: { slug: journal.id },
+    props: { journal },
+  }));
+}
+
+const { journal } = Astro.props;
+const { Content } = await render(journal);
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+
+const displayTitle = localize(lang, journal.data.title, journal.data.titleTH);
+const volLabel = lang === 'th'
+  ? `ปีที่ ${journal.data.volume} ฉบับที่ ${journal.data.issue}`
+  : `Vol.${journal.data.volume} No.${journal.data.issue}`;
+const yearLabel = lang === 'th'
+  ? `ปี ${journal.data.year} (พ.ศ. ${journal.data.year + 543})`
+  : `Year ${journal.data.year}`;
+---
+
+<Layout title={displayTitle} description={`${t('journal.title')} ${volLabel}`} lang={lang}>
+  <div class="py-12" style="background: linear-gradient(135deg, #0d3b1e, #1a6b3a);">
+    <div class="max-w-7xl mx-auto px-4">
+      <nav class="flex items-center gap-2 text-sm text-green-300 mb-4">
+        <a href={`${base}/`} class="hover:text-white transition-colors">{t('ui.home')}</a>
+        <span>/</span>
+        <a href={`${base}/journal`} class="hover:text-white transition-colors">{t('nav.journal')}</a>
+        <span>/</span>
+        <span class="text-white">{volLabel}</span>
+      </nav>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <div class="lg:col-span-2">
+        <h1 class="text-3xl font-bold text-gray-900 mb-6">{displayTitle}</h1>
+
+        <div class="p-5 rounded-xl border-l-4 mb-8" style="background-color: #f0faf4; border-color: #1a6b3a;">
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div><span class="text-gray-500">{lang === 'th' ? 'ปีที่:' : 'Volume:'}</span> <strong>{journal.data.volume}</strong></div>
+            <div><span class="text-gray-500">{lang === 'th' ? 'ฉบับที่:' : 'Issue:'}</span> <strong>{journal.data.issue}</strong></div>
+            <div><span class="text-gray-500">{lang === 'th' ? 'ปี:' : 'Year:'}</span> <strong>{yearLabel}</strong></div>
+            <div><span class="text-gray-500">{t('journal.publishedDate')}</span> <strong>{formatDate(lang, journal.data.publishDate, { year: 'numeric', month: 'long' })}</strong></div>
+          </div>
+        </div>
+
+        {journal.data.articles && journal.data.articles.length > 0 && (
+          <div class="mb-8">
+            <h2 class="text-xl font-bold mb-6 pb-3 border-b-2" style="color: #1a6b3a; border-color: #c8a951;">
+              {t('journal.articlesIn')} ({journal.data.articles.length} {t('journal.articles')})
+            </h2>
+            <div class="space-y-4">
+              {journal.data.articles.map((article, i) => (
+                <div class="p-4 rounded-xl border border-gray-200 hover:border-green-200 transition-colors">
+                  <div class="flex gap-4">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0" style="background-color: #1a6b3a;">
+                      {i + 1}
+                    </div>
+                    <div>
+                      <h3 class="font-semibold text-gray-900 mb-1 leading-snug">{article.title}</h3>
+                      <p class="text-sm text-gray-600">{article.authors}</p>
+                      {article.pages && (
+                        <p class="text-xs text-gray-400 mt-1">{lang === 'th' ? 'หน้า' : 'Pages'} {article.pages}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div class="prose max-w-none">
+          <Content />
+        </div>
+      </div>
+
+      <aside class="lg:col-span-1">
+        <a href={`${base}/journal`} class="flex items-center gap-2 text-sm font-medium mb-6 transition-colors" style="color: #1a6b3a;" onmouseover="this.style.color='#c8a951'" onmouseout="this.style.color='#1a6b3a'">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          {lang === 'th' ? 'กลับหน้าวารสาร' : 'Back to Journal'}
+        </a>
+
+        <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+          <div class="p-1" style="background: linear-gradient(90deg, #1a6b3a, #c8a951);"></div>
+          <div class="flex items-center justify-center p-8" style="background: linear-gradient(135deg, #0d3b1e, #1a6b3a);">
+            <div class="w-28 h-40 rounded-lg flex flex-col items-center justify-center text-white shadow-xl" style="background: linear-gradient(160deg, #c8a951, #a8892f);">
+              <span class="text-xs font-bold mb-1">{lang === 'th' ? 'สวกท.' : 'TSAE'}</span>
+              <span class="text-2xl font-bold">Vol.{journal.data.volume}</span>
+              <span class="text-sm opacity-90">No.{journal.data.issue}</span>
+              <span class="text-xs opacity-70 mt-1">{journal.data.year}</span>
+            </div>
+          </div>
+          <div class="p-6 space-y-4">
+            <div class="text-center">
+              <p class="text-xs text-gray-500 mb-1">ISSN (Print)</p>
+              <p class="font-mono font-bold" style="color: #1a6b3a;">0858-2114</p>
+            </div>
+            {journal.data.pdfUrl && (
+              <a
+                href={journal.data.pdfUrl}
+                target="_blank"
+                rel="noopener"
+                class="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-white font-semibold text-sm transition-colors"
+                style="background-color: #c8a951;"
+                onmouseover="this.style.backgroundColor='#a8892f'"
+                onmouseout="this.style.backgroundColor='#c8a951'"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                {t('journal.pdf')}
+              </a>
+            )}
+            <a
+              href="mailto:journal@tsae.asia"
+              class="flex items-center justify-center gap-2 w-full py-3 rounded-lg font-semibold text-sm transition-colors border-2"
+              style="border-color: #1a6b3a; color: #1a6b3a;"
+              onmouseover="this.style.backgroundColor='#1a6b3a'; this.style.color='white';"
+              onmouseout="this.style.backgroundColor=''; this.style.color='#1a6b3a';"
+            >
+              {t('journal.submit')}
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .prose h2 { color: #1a6b3a; }
+  .prose h3 { color: #124d2a; }
+  .prose ul { list-style-type: disc; padding-left: 1.5rem; }
+  .prose li { margin-bottom: 0.5rem; }
+</style>

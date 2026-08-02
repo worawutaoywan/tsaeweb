@@ -1,0 +1,268 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AjaxFormScript from '../../components/AjaxFormScript.astro';
+import { getLangFromUrl, useTranslations } from '../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+
+const courses = [
+  {
+    id: 'irrigation-systems',
+    title: 'ระบบให้น้ำเพื่อการเกษตรสมัยใหม่',
+    titleEN: 'Modern Agricultural Irrigation Systems',
+    duration: '2 ' + (lang === 'th' ? 'วัน' : 'days'),
+    nextDate: lang === 'th' ? '18-19 กรกฎาคม 2569' : '18-19 July 2026',
+    status: 'open',
+    fee: { member: 2500, nonMember: 3500, student: 1800 },
+    seats: 30,
+    descTH: 'หลักสูตรอบรมเชิงปฏิบัติการครอบคลุมระบบน้ำหยด สปริงเกลอร์ และการจัดการน้ำอัจฉริยะด้วย IoT',
+    descEN: 'Practical training covering drip irrigation, sprinkler systems, and smart water management with IoT.',
+    topicsTH: ['หลักการออกแบบระบบให้น้ำ', 'ระบบน้ำหยด (Drip Irrigation)', 'ระบบสปริงเกลอร์', 'IoT Sensors & Smart Control', 'ฝึกปฏิบัติในแปลงทดลอง'],
+    topicsEN: ['Irrigation system design principles', 'Drip Irrigation systems', 'Sprinkler systems', 'IoT Sensors & Smart Control', 'Field practice'],
+    categoryTH: 'ชลประทาน',
+    categoryEN: 'Irrigation',
+    color: '#0891b2',
+  },
+  {
+    id: 'smart-farming',
+    title: 'เกษตรอัจฉริยะ: IoT และ AI สำหรับการเกษตร',
+    titleEN: 'Smart Farming: IoT and AI for Agriculture',
+    duration: '3 ' + (lang === 'th' ? 'วัน' : 'days'),
+    nextDate: lang === 'th' ? 'กันยายน 2569 (กำหนดเร็วๆ นี้)' : 'September 2026 (date TBA)',
+    status: 'upcoming',
+    fee: { member: 3500, nonMember: 5000, student: 2500 },
+    seats: 25,
+    descTH: 'เรียนรู้การประยุกต์ใช้ IoT และ AI ในการจัดการฟาร์มสมัยใหม่',
+    descEN: 'Learn to apply IoT and Artificial Intelligence for modern farm management.',
+    topicsTH: ['พื้นฐาน IoT สำหรับการเกษตร', 'Sensors ชนิดต่างๆ', 'การส่งข้อมูลผ่าน LoRa/NB-IoT', 'การวิเคราะห์ข้อมูลด้วย AI', 'กรณีศึกษา Smart Farm'],
+    topicsEN: ['IoT fundamentals for agriculture', 'Types of sensors', 'LoRa/NB-IoT data transmission', 'AI data analysis', 'Smart Farm case studies'],
+    categoryTH: 'เกษตรอัจฉริยะ',
+    categoryEN: 'Smart Farming',
+    color: '#1a6b3a',
+  },
+  {
+    id: 'farm-machinery',
+    title: 'การบำรุงรักษาเครื่องจักรกลการเกษตร',
+    titleEN: 'Agricultural Machinery Maintenance',
+    duration: '2 ' + (lang === 'th' ? 'วัน' : 'days'),
+    nextDate: lang === 'th' ? 'ตุลาคม 2569 (กำหนดเร็วๆ นี้)' : 'October 2026 (date TBA)',
+    status: 'upcoming',
+    fee: { member: 2000, nonMember: 3000, student: 1500 },
+    seats: 30,
+    descTH: 'หลักสูตรการดูแลและบำรุงรักษาเครื่องจักรกลการเกษตร เพื่อเพิ่มประสิทธิภาพและยืดอายุการใช้งาน',
+    descEN: 'Agricultural machinery care and maintenance to improve efficiency and extend service life.',
+    topicsTH: ['ระบบเครื่องยนต์ดีเซลสำหรับการเกษตร', 'ระบบส่งกำลัง', 'การตรวจสอบและวิเคราะห์ปัญหา', 'การบำรุงรักษาเชิงป้องกัน', 'การปรับแต่งและซ่อมแซม'],
+    topicsEN: ['Agricultural diesel engines', 'Power transmission systems', 'Inspection and fault analysis', 'Preventive maintenance', 'Adjustment and repair'],
+    categoryTH: 'เครื่องจักรกล',
+    categoryEN: 'Machinery',
+    color: '#7c3aed',
+  },
+  {
+    id: 'gis-agriculture',
+    title: 'GIS และ Remote Sensing เพื่อการเกษตร',
+    titleEN: 'GIS and Remote Sensing for Agriculture',
+    duration: '3 ' + (lang === 'th' ? 'วัน' : 'days'),
+    nextDate: lang === 'th' ? 'พฤศจิกายน 2569 (กำหนดเร็วๆ นี้)' : 'November 2026 (date TBA)',
+    status: 'upcoming',
+    fee: { member: 4000, nonMember: 5500, student: 3000 },
+    seats: 20,
+    descTH: 'เรียนรู้การใช้ GIS และ Remote Sensing สำหรับการวางแผนการเกษตรและการจัดการทรัพยากร',
+    descEN: 'Learn to use GIS and Remote Sensing for agricultural planning and resource management.',
+    topicsTH: ['พื้นฐาน GIS', 'การใช้ QGIS / ArcGIS', 'Drone Remote Sensing', 'การวิเคราะห์ภาพถ่ายดาวเทียม', 'การทำแผนที่แปลงเกษตร'],
+    topicsEN: ['GIS fundamentals', 'QGIS / ArcGIS', 'Drone Remote Sensing', 'Satellite image analysis', 'Farm plot mapping'],
+    categoryTH: 'เทคโนโลยีสำรวจ',
+    categoryEN: 'Survey Technology',
+    color: '#d97706',
+  },
+  {
+    id: 'postharvest',
+    title: 'เทคโนโลยีหลังการเก็บเกี่ยวและการแปรรูป',
+    titleEN: 'Post-Harvest Technology and Processing',
+    duration: '2 ' + (lang === 'th' ? 'วัน' : 'days'),
+    nextDate: lang === 'th' ? 'ธันวาคม 2569 (กำหนดเร็วๆ นี้)' : 'December 2026 (date TBA)',
+    status: 'upcoming',
+    fee: { member: 2500, nonMember: 3500, student: 1800 },
+    seats: 25,
+    descTH: 'ความรู้ด้านการจัดการผลผลิตหลังการเก็บเกี่ยว เพื่อลดการสูญเสียและเพิ่มมูลค่าสินค้าเกษตร',
+    descEN: 'Post-harvest produce management to reduce losses and add value to agricultural products.',
+    topicsTH: ['หลักการหลังการเก็บเกี่ยว', 'ห้องเย็นและระบบทำความเย็น', 'การบรรจุหีบห่อ', 'HACCP เบื้องต้น', 'การแปรรูปผลผลิตขั้นต้น'],
+    topicsEN: ['Post-harvest principles', 'Cold storage and refrigeration', 'Packaging', 'HACCP fundamentals', 'Primary produce processing'],
+    categoryTH: 'หลังการเก็บเกี่ยว',
+    categoryEN: 'Post-Harvest',
+    color: '#c8a951',
+  },
+];
+---
+
+<Layout title={t('training.title')} description={t('training.subtitle')} lang={lang}>
+  <div class="py-12" style="background: linear-gradient(135deg, #0d3b1e, #1a6b3a);">
+    <div class="max-w-7xl mx-auto px-4">
+      <nav class="flex items-center gap-2 text-sm text-green-300 mb-4">
+        <a href={`${base}/`} class="hover:text-white transition-colors">{t('ui.home')}</a>
+        <span>/</span>
+        <span class="text-white">{t('training.title')}</span>
+      </nav>
+      <h1 class="text-4xl font-bold text-white mb-2">{t('training.title')}</h1>
+      <p class="text-green-200">{t('training.subtitle')}</p>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 py-16">
+    <div class="flex items-center gap-3 mb-10">
+      <div class="w-1.5 h-8 rounded-full" style="background-color: #1a6b3a;"></div>
+      <h2 class="text-2xl font-bold" style="color: #1a6b3a;">{t('training.upcoming')}</h2>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+      {courses.map((course) => (
+        <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow flex flex-col">
+          <div class="p-1" style={`background: linear-gradient(90deg, ${course.color}, #1a6b3a);`}></div>
+          <div class="p-6 flex flex-col flex-1">
+            <div class="flex items-start justify-between gap-4 mb-4">
+              <div class="flex-1">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold text-white mb-2" style={`background-color: ${course.color};`}>
+                  {lang === 'th' ? course.categoryTH : course.categoryEN}
+                </span>
+                <h3 class="text-lg font-bold text-gray-900 leading-snug">
+                  {lang === 'th' ? course.title : course.titleEN}
+                </h3>
+              </div>
+              <div class={`px-3 py-1.5 rounded-lg text-xs font-semibold flex-shrink-0 ${course.status === 'open' ? 'text-green-700' : 'text-yellow-700'}`}
+                style={course.status === 'open' ? 'background-color: #dcfce7;' : 'background-color: #fef9c3;'}>
+                {course.status === 'open'
+                  ? (lang === 'th' ? 'เปิดรับสมัคร' : 'Open')
+                  : (lang === 'th' ? 'เร็วๆ นี้' : 'Coming Soon')}
+              </div>
+            </div>
+
+            <p class="text-gray-600 text-sm leading-relaxed mb-4">
+              {lang === 'th' ? course.descTH : course.descEN}
+            </p>
+
+            <ul class="space-y-1 mb-4">
+              {(lang === 'th' ? course.topicsTH : course.topicsEN).slice(0, 4).map((topic) => (
+                <li class="flex items-center gap-2 text-xs text-gray-600">
+                  <span style={`color: ${course.color};`}>•</span>
+                  {topic}
+                </li>
+              ))}
+            </ul>
+
+            <div class="mt-auto pt-4 border-t border-gray-100">
+              <div class="grid grid-cols-3 gap-3 text-center mb-4">
+                <div>
+                  <span class="text-gray-500 text-xs block">{lang === 'th' ? 'ระยะเวลา' : 'Duration'}</span>
+                  <p class="font-semibold text-gray-800 text-sm">{course.duration}</p>
+                </div>
+                <div>
+                  <span class="text-gray-500 text-xs block">{t('training.seats')}</span>
+                  <p class="font-semibold text-gray-800 text-sm">{course.seats}</p>
+                </div>
+                <div>
+                  <span class="text-gray-500 text-xs block">{lang === 'th' ? 'วันที่' : 'Date'}</span>
+                  <p class="font-semibold text-gray-800 text-sm">{course.nextDate}</p>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-2 text-xs text-gray-500 mb-4">
+                <span class="px-2 py-1 rounded bg-gray-100">{t('training.member.fee')}: ฿{course.fee.member.toLocaleString()}</span>
+                <span class="px-2 py-1 rounded bg-gray-100">{t('training.nonmember.fee')}: ฿{course.fee.nonMember.toLocaleString()}</span>
+                <span class="px-2 py-1 rounded bg-gray-100">{t('training.student.fee')}: ฿{course.fee.student.toLocaleString()}</span>
+              </div>
+
+              {course.status === 'open' ? (
+                <a
+                  href={`${base}/contact`}
+                  class="block w-full text-center py-3 rounded-xl text-white font-semibold text-sm transition-colors"
+                  style="background-color: #1a6b3a;"
+                  onmouseover="this.style.backgroundColor='#124d2a'"
+                  onmouseout="this.style.backgroundColor='#1a6b3a'"
+                >
+                  {t('training.register')}
+                </a>
+              ) : (
+                <button
+                  class="block w-full text-center py-3 rounded-xl font-semibold text-sm border-2 transition-colors cursor-pointer"
+                  style="border-color: #c8a951; color: #c8a951;"
+                  onclick="document.getElementById('notify-form').scrollIntoView({behavior: 'smooth'})"
+                >
+                  {t('training.notify')}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Notify Form -->
+    <div id="notify-form" class="max-w-2xl mx-auto">
+      <div class="bg-white rounded-2xl shadow-md p-8 border border-gray-100">
+        <h3 class="text-xl font-bold mb-2" style="color: #1a6b3a;">{t('training.notify.form')}</h3>
+        <p class="text-gray-600 text-sm mb-6">{t('training.notify.desc')}</p>
+
+        <form
+          action="/api/submit/training"
+          method="POST"
+          class="tsae-ajax-form space-y-4"
+          data-sending={lang === 'th' ? 'กำลังส่ง…' : 'Sending…'}
+          data-err={lang === 'th' ? 'เกิดข้อผิดพลาด กรุณาตรวจสอบข้อมูลแล้วลองใหม่' : 'Something went wrong. Please check your input and try again.'}
+          data-net={lang === 'th' ? 'เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่' : 'Connection failed. Please try again.'}
+          novalidate
+        >
+          <div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;">
+            <label>Company URL <input type="text" name="company_url" tabindex="-1" autocomplete="off" /></label>
+            <input type="hidden" name="form_token" />
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">{t('contact.form.name')}</label>
+              <input type="text" name="name" required placeholder={lang === 'th' ? 'ชื่อ-นามสกุล' : 'Full Name'} class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">{t('contact.form.email')}</label>
+              <input type="email" name="email" required placeholder="email@example.com" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">{t('training.course.interest')}</label>
+            <select name="course" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none">
+              <option value="">{t('training.select.course')}</option>
+              {courses.map((c) => (
+                <option value={c.id}>{lang === 'th' ? c.title : c.titleEN}</option>
+              ))}
+              <option value="other">{t('training.other')}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">{t('training.message.label')}</label>
+            <textarea name="message" rows="3" placeholder={t('training.message.placeholder')} class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none resize-y"></textarea>
+          </div>
+          <p class="ajax-error hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5"></p>
+          <button type="submit" class="ajax-submit w-full py-3 text-white font-bold rounded-xl text-sm transition-colors disabled:opacity-60" style="background-color: #c8a951;" onmouseover="this.style.backgroundColor='#a8892f'" onmouseout="this.style.backgroundColor='#c8a951'">
+            {t('training.submit')}
+          </button>
+        </form>
+        <div class="tsae-ajax-success hidden rounded-xl border p-8 text-center" style="background-color:#f0fdf4; border-color:#bbf7d0;">
+          <div class="mx-auto w-14 h-14 rounded-full flex items-center justify-center mb-4" style="background-color:#1a6b3a;">
+            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
+          </div>
+          <h3 class="text-xl font-bold mb-1" style="color:#1a6b3a;">{lang === 'th' ? 'ส่งข้อมูลเรียบร้อย' : 'Submitted successfully'}</h3>
+          <p class="text-gray-600">{lang === 'th' ? 'ขอบคุณ เราได้รับข้อมูลของคุณแล้ว และจะแจ้งเมื่อมีหลักสูตรอบรมใหม่' : 'Thank you. We have received your details and will notify you of new training courses.'}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <AjaxFormScript />
+  <script>
+    function initFormTokens() {
+      document.querySelectorAll<HTMLInputElement>('input[name="form_token"]').forEach((el) => {
+        el.value = String(Math.floor(Date.now() / 1000));
+      });
+    }
+    initFormTokens();
+    document.addEventListener('astro:page-load', initFormTokens);
+  </script>
+</Layout>

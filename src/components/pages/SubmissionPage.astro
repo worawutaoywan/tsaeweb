@@ -1,0 +1,124 @@
+---
+import PageHero from '../PageHero.astro';
+import type { Lang } from '../../i18n/ui';
+import { useTranslations } from '../../i18n/utils';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const th = lang === 'th';
+const THAIJO = 'https://li01.tci-thaijo.org/index.php/TSAEJ';
+
+const scopes = th
+  ? [
+      { n: 1, title: 'ต้นกำลังและเครื่องจักรกลเกษตร', items: ['เครื่องยนต์และกำลัง', 'การออกแบบและทดสอบเครื่องจักรกลเกษตร', 'กระบวนการผลิตเครื่องจักรกลเกษตร', 'เทคนิคปฏิบัติและการใช้เครื่องจักรกลเกษตร'] },
+      { n: 2, title: 'วิศวกรรมดินและน้ำ', items: ['การอัดแน่น การชะล้าง และการปรับปรุงดิน', 'พื้นที่แห้งแล้ง และการเก็บกักน้ำ', 'อุทกวิทยาและการจัดการน้ำ', 'ชลศาสตร์และระบบชลประทาน', 'การให้น้ำพืชระดับไร่นา'] },
+      { n: 3, title: 'กระบวนการหลังเก็บเกี่ยวและวิศวกรรมอาหาร', items: ['กระบวนการหลังเก็บเกี่ยวและการเก็บรักษา', 'การบรรจุ', 'เทคนิคแบบไม่ทำลาย', 'กระบวนการและเครื่องจักรกลอาหาร', 'วิศวกรรมชีวภาพ'] },
+      { n: 4, title: 'โครงสร้างอาคารเกษตร', items: ['การออกแบบอาคารเกษตร', 'ไซโล โรงเรือน และโรงงานผลิตพืช', 'การวางผังฟาร์ม', 'การออกแบบโรงงานอุตสาหกรรมเกษตร'] },
+      { n: 5, title: 'ระบบเกษตร', items: ['โลจิสติกส์และโซ่อุปทานผลิตผลและสินค้าเกษตร', 'ระบบตรวจสอบย้อนกลับและความปลอดภัยอาหาร', 'การจัดการระบบเกษตร และการจำลองสถานการณ์', 'อุตสาหกรรมเกษตร'] },
+      { n: 6, title: 'คอมพิวเตอร์ อิเล็กทรอนิกส์ และเทคโนโลยีสารสนเทศ', items: ['การเกษตรแม่นยำ การตรวจวัดระยะไกล ระบบภูมิสารสนเทศ ระบบผู้เชี่ยวชาญ', 'เซ็นเซอร์ หุ่นยนต์ และระบบอัตโนมัติ', 'ชีวสารสนเทศ', 'การประยุกต์คอมพิวเตอร์ การพัฒนาซอฟต์แวร์ และเทคโนโลยีสารสนเทศ'] },
+      { n: 7, title: 'พลังงานและสิ่งแวดล้อม', items: ['พลังงานทดแทน ชีวมวลและพลังงานชีวมวล', 'การจัดการพลังงาน', 'การจัดการของเสียการเกษตร รีไซเคิล และเทคโนโลยีไร้ของเสีย', 'วิศวกรรมระบบนิเวศน์เกษตร'] },
+    ]
+  : [
+      { n: 1, title: 'Power units and agricultural machinery', items: ['Engines and power', 'Design and testing of agricultural machinery', 'Manufacturing of agricultural machinery', 'Machinery operation and field practice'] },
+      { n: 2, title: 'Soil and water engineering', items: ['Soil compaction, erosion and improvement', 'Dryland and water storage', 'Hydrology and water management', 'Hydraulics and irrigation systems', 'On-farm irrigation'] },
+      { n: 3, title: 'Postharvest process and food engineering', items: ['Postharvest processing and storage', 'Packaging', 'Non-destructive techniques', 'Food processing and machinery', 'Bioengineering'] },
+      { n: 4, title: 'Agricultural structures', items: ['Agricultural building design', 'Silos, greenhouses and plant factories', 'Farm layout planning', 'Agro-industrial plant design'] },
+      { n: 5, title: 'Agricultural systems', items: ['Logistics and supply chain of agricultural produce', 'Traceability and food safety systems', 'Farm systems management and simulation', 'Agro-industry'] },
+      { n: 6, title: 'Computer, electronics and IT', items: ['Precision agriculture, remote sensing, GIS, expert systems', 'Sensors, robotics and automation', 'Bioinformatics', 'Computer applications, software development and IT'] },
+      { n: 7, title: 'Energy and environment', items: ['Renewable energy, biomass and bioenergy', 'Energy management', 'Agricultural waste management, recycling and zero-waste technology', 'Agro-ecosystem engineering'] },
+    ];
+
+const articleTypes = th
+  ? [
+      { title: 'บทความวิจัย (Research paper)', desc: 'รายงานผลการศึกษาทดลองที่ทำให้ได้มาซึ่งองค์ความรู้ใหม่ หรือนวัตกรรมใหม่ที่ดำเนินการจนสำเร็จและเรียบเรียงครบถ้วนสมบูรณ์ตามระเบียบวิธีวิจัย', len: 'ไม่เกิน 10 หน้าเรียงพิมพ์' },
+      { title: 'บทวิจัยย่อ (Research note)', desc: 'รายงานผลการศึกษาทดลองเฉพาะในบางประเด็นที่ผู้วิจัยค้นพบ แต่ยังไม่เสร็จสมบูรณ์', len: 'ไม่เกิน 5 หน้าเรียงพิมพ์' },
+      { title: 'บทความปริทัศน์ (Review paper)', desc: 'รายงานจากการรวบรวม ทบทวน และสังเคราะห์งานวิจัยในเรื่องใดเรื่องหนึ่ง โดยสอดแทรกทัศนคติและความคิดเห็นของผู้เขียน', len: 'ไม่เกิน 10 หน้าเรียงพิมพ์' },
+    ]
+  : [
+      { title: 'Research paper', desc: 'A complete experimental study producing new knowledge or innovation, prepared fully according to research methodology.', len: 'Up to 10 typeset pages' },
+      { title: 'Research note', desc: 'A report on specific findings from an experimental study that is not yet complete.', len: 'Up to 5 typeset pages' },
+      { title: 'Review paper', desc: 'A synthesis and review of prior research on a topic, incorporating the author\u2019s perspective and opinions.', len: 'Up to 10 typeset pages' },
+    ];
+---
+
+<PageHero lang={lang} title={t('submit.title')} subtitle={t('submit.subtitle')} />
+
+<div class="max-w-7xl mx-auto px-4 py-12">
+  <div class="rounded-2xl p-6 sm:p-8 mb-10 text-white shadow-md" style="background: linear-gradient(135deg, #4c1d95, #7c3aed);">
+    <p class="text-sm sm:text-base leading-relaxed">
+      {th
+        ? 'ขอเชิญคณาจารย์ นักวิจัย วิศวกร นิสิต และผู้สนใจ ส่งบทความเพื่อพิจารณาตีพิมพ์ในวารสารสมาคมวิศวกรรมเกษตรแห่งประเทศไทย ซึ่งเผยแพร่ผลงานวิจัย นวัตกรรม และเทคโนโลยีด้านวิศวกรรมเกษตรและระบบชีวภาพ ในรูปของบทความวิจัย บทวิจัยย่อ และบทความปริทัศน์'
+        : 'Faculty, researchers, engineers, students and interested authors are invited to submit papers to the TSAE Journal, which publishes research, innovation and technology in agricultural engineering and biological systems as research papers, research notes and review papers.'}
+    </p>
+    <a href={THAIJO} target="_blank" rel="noopener" class="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold bg-white" style="color:#7c3aed;">
+      {t('submit.cta')}
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+    </a>
+  </div>
+
+  <h2 class="text-xl font-bold mb-5" style="color:#7c3aed;">{t('submit.scope')}</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-12">
+    {scopes.map((s) => (
+      <div class="bg-white rounded-xl p-5 shadow-sm ring-1 ring-gray-100">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-sm font-bold text-white" style="background-color:#7c3aed;">{s.n}</span>
+          <h3 class="font-bold text-gray-900 text-sm leading-snug">{s.title}</h3>
+        </div>
+        <ul class="space-y-1.5 pl-1">
+          {s.items.map((it) => (
+            <li class="flex items-start gap-2 text-[13px] text-gray-600">
+              <span class="mt-1.5 w-1.5 h-1.5 shrink-0 rounded-full" style="background-color:#c4b5fd;"></span>
+              <span>{it}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+
+  <h2 class="text-xl font-bold mb-5" style="color:#7c3aed;">{t('submit.types')}</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-12">
+    {articleTypes.map((a) => (
+      <div class="bg-white rounded-xl p-5 shadow-sm ring-1 ring-gray-100 flex flex-col">
+        <h3 class="font-bold text-gray-900 text-sm mb-2">{a.title}</h3>
+        <p class="text-[13px] text-gray-600 leading-relaxed flex-1">{a.desc}</p>
+        <div class="mt-3 pt-3 border-t border-gray-100 text-xs font-semibold" style="color:#7c3aed;">{a.len}</div>
+      </div>
+    ))}
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-12">
+    <div class="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-100">
+      <h3 class="font-bold text-gray-900 mb-2 flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="#7c3aed" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 7h6m-6 4h6m-6 4h4m5 5H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2z"/></svg>
+        {t('submit.fee')}
+      </h3>
+      <p class="text-sm text-gray-600 leading-relaxed">
+        {th
+          ? 'บทความที่ผ่านการพิจารณาให้ตีพิมพ์ ผู้เขียนต้องชำระค่าธรรมเนียมในอัตราหน้าละ 300 บาท โดยกองบรรณาธิการจะแจ้งรายละเอียดวิธีชำระเมื่อบทความได้รับการยอมรับให้ตีพิมพ์'
+          : 'For accepted papers, authors pay a publication fee of 300 THB per page. The editorial board will provide payment details once the paper is accepted.'}
+      </p>
+    </div>
+    <div class="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-100">
+      <h3 class="font-bold text-gray-900 mb-2 flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="#7c3aed" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        {t('submit.review')}
+      </h3>
+      <p class="text-sm text-gray-600 leading-relaxed">
+        {th
+          ? 'ต้นฉบับทุกประเภทจะถูกประเมินโดยผู้ทรงคุณวุฒิไม่ต่ำกว่า 2 ท่าน ผู้เขียนต้องปรับปรุงแก้ไขตามคำแนะนำและส่งกลับภายในเวลาที่กำหนด คำตัดสินของกองบรรณาธิการถือเป็นอันสิ้นสุด'
+          : 'Every manuscript is peer-reviewed by at least two experts. Authors must revise per the reviewers\u2019 comments and return within the set deadline. The editorial board\u2019s decision is final.'}
+      </p>
+    </div>
+  </div>
+
+  <div class="rounded-2xl p-8 text-center border-2" style="border-color:#7c3aed; background: linear-gradient(135deg, #f5f3ff, #ffffff);">
+    <h3 class="text-lg font-bold mb-2" style="color:#7c3aed;">{t('submit.submitQ')}</h3>
+    <p class="text-sm text-gray-600 mb-5">{th ? 'ส่งต้นฉบับผ่านระบบ TCI ThaiJO ได้ที่ลิงก์ด้านล่าง' : 'Submit your manuscript through the TCI ThaiJO system below.'}</p>
+    <a href={THAIJO} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-transform hover:scale-105" style="background-color:#7c3aed;">
+      {t('submit.cta')}
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+    </a>
+  </div>
+</div>

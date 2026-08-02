@@ -1,17 +1,171 @@
 ---
+import Layout from '../layouts/Layout.astro';
+import HeroSection from '../components/HeroSection.astro';
+import ConferencesFeature from '../components/ConferencesFeature.astro';
+import VideoFeature from '../components/VideoFeature.astro';
+import NewsCard from '../components/NewsCard.astro';
+import { getCollection } from 'astro:content';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+import { currentIssue } from '../data/journalIssues';
+import type { Lang } from '../i18n/ui';
 
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+const th = lang === 'th';
+
+const allNews = await getCollection('news');
+const latestNews = allNews
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
+
+const latestJournal = currentIssue;
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title={t('ui.home')} description={t('site.tagline')} lang={lang}>
+  <HeroSection lang={lang} />
+
+  <ConferencesFeature lang={lang} />
+
+  <VideoFeature lang={lang} />
+
+  <!-- Latest News -->
+  <section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex items-end justify-between mb-10">
+        <div>
+          <h2 class="text-3xl font-bold mb-1" style="color: #1a6b3a;">{t('home.latestNews')}</h2>
+          <p class="text-gray-500">{t('home.latestNewsDesc')}</p>
+        </div>
+        <a href={`${base}/news`} class="text-sm font-semibold flex items-center gap-1 transition-colors" style="color: #1a6b3a;" onmouseover="this.style.color='#c8a951'" onmouseout="this.style.color='#1a6b3a'">
+          {t('ui.viewAll')}
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {latestNews.map((news) => (
+          <NewsCard
+            title={news.data.title}
+            titleTH={news.data.titleTH}
+            date={news.data.date}
+            category={news.data.category}
+            excerpt={news.data.excerpt}
+            excerptTH={news.data.excerptTH}
+            image={news.data.image}
+            slug={news.id}
+            featured={news.data.featured}
+            lang={lang}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section Brief -->
+  <section class="py-16" style="background: linear-gradient(135deg, #0d3b1e 0%, #1a6b3a 100%);">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium mb-6" style="background-color: rgba(200, 169, 81, 0.2); color: #fde68a;">
+            {t('home.aboutBadge')}
+          </div>
+          <h2 class="text-3xl lg:text-4xl font-bold text-white mb-6">
+            {t('home.aboutTitle')}
+          </h2>
+          <p class="text-green-200 leading-relaxed mb-4">{t('home.aboutDesc1')}</p>
+          <p class="text-green-200 leading-relaxed mb-8">{t('home.aboutDesc2')}</p>
+          <div class="flex flex-wrap gap-4">
+            <a href={`${base}/about`} class="inline-flex items-center gap-2 px-6 py-3 text-white font-semibold rounded-xl border-2 border-white/50 hover:bg-white/10 transition-colors">
+              {t('ui.learnMore')}
+            </a>
+            <a href={`${base}/membership`} class="inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-xl text-white transition-colors" style="background-color: #c8a951;" onmouseover="this.style.backgroundColor='#a8892f'" onmouseout="this.style.backgroundColor='#c8a951'">
+              {t('nav.join')}
+            </a>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          {[
+            { icon: '🔬', titleKey: 'Research & Development', descKey: 'Promoting agricultural engineering research and publishing through the TSAE Journal.' },
+            { icon: '🌾', titleKey: 'Agri-Technology', descKey: 'Developing and transferring modern agricultural technology to farmers and professionals.' },
+            { icon: '🎓', titleKey: 'Human Capital', descKey: 'Organizing training, seminars, and skill development programs for agricultural engineers.' },
+            { icon: '🌐', titleKey: 'Global Network', descKey: 'Building partnerships with AAAE and agricultural engineering organizations worldwide.' },
+          ].map((item) => (
+            <div class="p-5 rounded-xl border border-white/10 hover:border-white/30 transition-colors" style="background-color: rgba(255,255,255,0.07);">
+              <div class="text-3xl mb-3">{item.icon}</div>
+              <h3 class="text-white font-semibold mb-2 text-sm">{item.titleKey}</h3>
+              <p class="text-green-300 text-xs leading-relaxed">{item.descKey}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Latest Journal -->
+  {latestJournal && (
+    <section class="py-16 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-end justify-between mb-10">
+          <div>
+            <h2 class="text-3xl font-bold mb-1" style="color: #1a6b3a;">{t('home.latestJournal')}</h2>
+            <p class="text-gray-500">{t('journal.subtitle')}</p>
+          </div>
+          <a href={`${base}/journal`} class="text-sm font-semibold flex items-center gap-1 transition-colors" style="color: #1a6b3a;" onmouseover="this.style.color='#c8a951'" onmouseout="this.style.color='#1a6b3a'">
+            {t('ui.allIssues')}
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-0">
+            <div class="p-8 flex items-center justify-center" style="background: linear-gradient(135deg, #1a6b3a, #0d3b1e);">
+              <div class="text-center">
+                <div class="w-32 h-44 mx-auto rounded-lg shadow-xl flex flex-col items-center justify-center mb-4" style="background: linear-gradient(160deg, #c8a951 0%, #a8892f 100%);">
+                  <div class="text-white font-bold text-xs mb-1">TSAE</div>
+                  <div class="text-white text-2xl font-bold">Vol.{latestJournal.volume}</div>
+                  <div class="text-white/80 text-sm">No.{latestJournal.issue}</div>
+                  <div class="text-white/70 text-xs mt-1">{latestJournal.year}</div>
+                </div>
+                <p class="text-green-200 text-sm font-medium">TSAE Journal</p>
+                <p class="text-green-300 text-xs">ISSN 0858-2114</p>
+              </div>
+            </div>
+            <div class="lg:col-span-2 p-8 flex flex-col justify-center">
+              <div class="inline-block self-start text-[11px] font-bold px-3 py-1 rounded-full mb-3" style="background:#e6cf8a; color:#0d3b1e;">{th ? 'ฉบับปัจจุบัน' : 'Current issue'}</div>
+              <h3 class="text-2xl font-bold text-gray-900 mb-2">{th ? `วารสาร สวกท. ปีที่ ${latestJournal.volume} ฉบับที่ ${latestJournal.issue}` : `TSAE Journal Vol. ${latestJournal.volume} No. ${latestJournal.issue}`}</h3>
+              <p class="text-gray-500 text-sm mb-6">{th ? `พ.ศ. ${latestJournal.year + 543} (${latestJournal.year})` : latestJournal.year}</p>
+              <div class="flex gap-3 flex-wrap">
+                <a href={latestJournal.url} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-5 py-2.5 text-white text-sm font-semibold rounded-lg transition-colors" style="background-color: #1a6b3a;" onmouseover="this.style.backgroundColor='#124d2a'" onmouseout="this.style.backgroundColor='#1a6b3a'">
+                  {th ? 'อ่านฉบับปัจจุบัน' : 'Read current issue'}
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                </a>
+                <a href={`${base}/journal`} class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg border-2 transition-colors" style="border-color: #c8a951; color: #c8a951;" onmouseover="this.style.backgroundColor='#c8a951'; this.style.color='white';" onmouseout="this.style.backgroundColor=''; this.style.color='#c8a951';">
+                  {t('ui.allIssues')}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Call to Action -->
+  <section class="py-16" style="background: linear-gradient(90deg, #c8a951, #a8892f);">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h2 class="text-3xl font-bold text-white mb-4">{t('home.ctaTitle')}</h2>
+      <p class="text-yellow-100 mb-8 text-lg">{t('home.ctaDesc')}</p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href={`${base}/membership`} class="inline-flex items-center gap-2 px-8 py-4 bg-white font-bold rounded-xl transition-all hover:bg-gray-50 hover:scale-105 shadow-lg" style="color: #1a6b3a;">
+          {t('home.ctaJoin')}
+        </a>
+        <a href={`${base}/about`} class="inline-flex items-center gap-2 px-8 py-4 text-white font-bold rounded-xl border-2 border-white/50 hover:bg-white/10 transition-all">
+          {t('ui.learnMore')}
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

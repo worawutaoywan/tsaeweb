@@ -1,0 +1,149 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import EventCard from '../../../components/EventCard.astro';
+import { getCollection } from 'astro:content';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+
+const allEvents = await getCollection('events');
+const upcoming = allEvents
+  .filter((e) => e.data.status === 'upcoming' || e.data.status === 'ongoing')
+  .sort((a, b) => a.data.startDate.getTime() - b.data.startDate.getTime());
+
+const past = allEvents
+  .filter((e) => e.data.status === 'past')
+  .sort((a, b) => b.data.startDate.getTime() - a.data.startDate.getTime());
+
+const typeFilters = [
+  { id: 'all', labelKey: 'ui.all' as const },
+  { id: 'national', labelKey: 'type.national' as const },
+  { id: 'international', labelKey: 'type.international' as const },
+  { id: 'training', labelKey: 'type.training' as const },
+  { id: 'webinar', labelKey: 'type.webinar' as const },
+];
+---
+
+<Layout title={t('events.title')} description={t('events.subtitle')} lang={lang}>
+  <div class="py-12" style="background: linear-gradient(135deg, #0d3b1e, #1a6b3a);">
+    <div class="max-w-7xl mx-auto px-4">
+      <nav class="flex items-center gap-2 text-sm text-green-300 mb-4">
+        <a href={`${base}/`} class="hover:text-white transition-colors">{t('ui.home')}</a>
+        <span>/</span>
+        <span class="text-white">{t('nav.events')}</span>
+      </nav>
+      <h1 class="text-4xl font-bold text-white mb-2">{t('events.title')}</h1>
+      <p class="text-green-200">{t('events.subtitle')}</p>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 py-12">
+    <div class="flex flex-wrap gap-3 mb-10">
+      {typeFilters.map((tab) => (
+        <button
+          data-type={tab.id}
+          class="type-filter px-5 py-2.5 rounded-full text-sm font-semibold transition-all border-2"
+          style={tab.id === 'all' ? 'background-color: #1a6b3a; color: white; border-color: #1a6b3a;' : 'border-color: #e5e7eb; color: #6b7280; background: white;'}
+        >
+          {t(tab.labelKey)}
+        </button>
+      ))}
+    </div>
+
+    {upcoming.length > 0 && (
+      <div class="mb-16">
+        <div class="flex items-center gap-3 mb-8">
+          <div class="w-1.5 h-8 rounded-full" style="background-color: #1a6b3a;"></div>
+          <h2 class="text-2xl font-bold" style="color: #1a6b3a;">{t('events.upcoming')}</h2>
+          <span class="px-3 py-0.5 rounded-full text-sm font-semibold text-white" style="background-color: #1a6b3a;">{upcoming.length}</span>
+        </div>
+        <div id="upcoming-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {upcoming.map((event) => (
+            <div class="event-item" data-type={event.data.type}>
+              <EventCard
+                title={event.data.title}
+                titleTH={event.data.titleTH}
+                startDate={event.data.startDate}
+                endDate={event.data.endDate}
+                location={event.data.location}
+                locationTH={event.data.locationTH}
+                type={event.data.type}
+                status={event.data.status}
+                registrationUrl={event.data.registrationUrl}
+                image={event.data.image}
+                excerpt={event.data.excerpt}
+                excerptTH={event.data.excerptTH}
+                slug={event.id}
+                lang={lang}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {past.length > 0 && (
+      <div>
+        <div class="flex items-center gap-3 mb-8">
+          <div class="w-1.5 h-8 rounded-full bg-gray-400"></div>
+          <h2 class="text-2xl font-bold text-gray-600">{t('events.past')}</h2>
+          <span class="px-3 py-0.5 rounded-full text-sm font-semibold text-white bg-gray-400">{past.length}</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {past.map((event) => (
+            <div class="event-item" data-type={event.data.type}>
+              <EventCard
+                title={event.data.title}
+                titleTH={event.data.titleTH}
+                startDate={event.data.startDate}
+                endDate={event.data.endDate}
+                location={event.data.location}
+                locationTH={event.data.locationTH}
+                type={event.data.type}
+                status={event.data.status}
+                registrationUrl={event.data.registrationUrl}
+                image={event.data.image}
+                excerpt={event.data.excerpt}
+                excerptTH={event.data.excerptTH}
+                slug={event.id}
+                lang={lang}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {upcoming.length === 0 && past.length === 0 && (
+      <div class="text-center py-20">
+        <p class="text-gray-500">{t('ui.noResults')}</p>
+      </div>
+    )}
+  </div>
+</Layout>
+
+<script>
+  const typeFilters = document.querySelectorAll('.type-filter');
+  const eventItems = document.querySelectorAll('.event-item');
+
+  typeFilters.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const type = btn.getAttribute('data-type');
+      typeFilters.forEach((b) => {
+        (b as HTMLElement).style.backgroundColor = 'white';
+        (b as HTMLElement).style.color = '#6b7280';
+        (b as HTMLElement).style.borderColor = '#e5e7eb';
+      });
+      (btn as HTMLElement).style.backgroundColor = '#1a6b3a';
+      (btn as HTMLElement).style.color = 'white';
+      (btn as HTMLElement).style.borderColor = '#1a6b3a';
+
+      eventItems.forEach((item) => {
+        const itemType = item.getAttribute('data-type');
+        (item as HTMLElement).style.display = (type === 'all' || itemType === type) ? '' : 'none';
+      });
+    });
+  });
+</script>

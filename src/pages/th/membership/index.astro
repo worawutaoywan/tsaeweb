@@ -1,0 +1,350 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import AjaxFormScript from '../../../components/AjaxFormScript.astro';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+
+const membershipTypes = [
+  {
+    type: 'สมาชิกสามัญ',
+    typeEN: 'Regular Member',
+    fee: '200',
+    feePeriodTH: 'ปี',
+    feePeriodEN: 'year',
+    icon: '👤',
+    color: '#1a6b3a',
+    eligibilityTH: 'ผู้ที่กำลังปฏิบัติงานด้านวิศวกรรม สาขาวิศวกรรมเกษตร หรือผู้สนใจกิจการของสมาคม',
+    eligibilityEN: 'Those working in agricultural engineering, or anyone interested in the Society\'s activities',
+    benefitsTH: ['เข้าร่วมประชุมวิชาการในราคาพิเศษ', 'รับวารสาร สวกท. ฟรีทุกฉบับ', 'เข้าถึงฐานข้อมูลบทความย้อนหลังทั้งหมด', 'ส่วนลดค่าลงทะเบียนอบรม 10-20%', 'สิทธิออกเสียงในที่ประชุมใหญ่', 'ใบรับรองเป็นสมาชิก สามัญ'],
+    benefitsEN: ['Discounted registration at national conferences', 'Free TSAE Journal (all issues)', 'Full access to article database', '10-20% discount on training programs', 'Voting rights at general meetings', 'Regular membership certificate'],
+    featured: false,
+  },
+  {
+    type: 'สมาชิกภาคี',
+    typeEN: 'Associate Member',
+    fee: '100',
+    feePeriodTH: 'ปี',
+    feePeriodEN: 'year',
+    icon: '🎓',
+    color: '#0891b2',
+    eligibilityTH: 'นิสิต นักศึกษา',
+    eligibilityEN: 'Students (undergraduate and graduate)',
+    benefitsTH: ['เข้าร่วมกิจกรรมสมาคมในราคาพิเศษ', 'รับข่าวสารและประกาศจากสมาคม', 'ส่วนลดค่าลงทะเบียนอบรม 10-15%', 'เข้าถึงสรุปบทความ Abstract ฟรี', 'ใบรับรองเป็นสมาชิกภาคี'],
+    benefitsEN: ['Discounted access to association activities', 'TSAE news and announcements', '10-15% discount on training programs', 'Free access to article abstracts', 'Associate membership certificate'],
+    featured: false,
+  },
+  {
+    type: 'สมาชิกสามัญตลอดชีพ',
+    typeEN: 'Life Member',
+    fee: '2,000',
+    feePeriodTH: 'ตลอดชีพ',
+    feePeriodEN: 'lifetime',
+    icon: '⭐',
+    color: '#c8a951',
+    eligibilityTH: 'สมาชิกสามัญที่ชำระค่าบำรุงแบบตลอดชีพ (คุณสมบัติเช่นเดียวกับสมาชิกสามัญ)',
+    eligibilityEN: 'Ordinary members paying the one-time lifetime fee (same eligibility as regular members)',
+    benefitsTH: ['สิทธิ์ครบเช่นเดียวกับสมาชิกสามัญ', 'ไม่ต้องต่ออายุสมาชิกรายปี', 'รับวารสาร สวกท. ฟรีตลอดชีพ', 'ส่วนลดพิเศษค่าลงทะเบียนทุกกิจกรรม', 'ชื่อปรากฏใน Directory สมาชิกตลอดชีพ'],
+    benefitsEN: ['Full privileges of a regular member', 'No annual renewal required', 'Free TSAE Journal for life', 'Special discounts on all events', 'Listed in lifetime member directory'],
+    featured: true,
+  },
+  {
+    type: 'สมาชิกนิติบุคคล',
+    typeEN: 'Corporate Member',
+    fee: '1,000',
+    feePeriodTH: 'ปี',
+    feePeriodEN: 'year',
+    icon: '🏢',
+    color: '#7c3aed',
+    eligibilityTH: 'บริษัท ห้างหุ้นส่วนจำกัด สมาคม กลุ่มสหกรณ์ กลุ่มเกษตรกร ฯลฯ',
+    eligibilityEN: 'Companies, limited partnerships, associations, cooperatives, farmer groups, etc.',
+    benefitsTH: ['โลโก้ปรากฏบนเว็บไซต์สมาคม', 'ประชาสัมพันธ์กิจกรรมองค์กรผ่านช่องทางสมาคม', 'ส่วนลดพิเศษสำหรับบุคลากร 5 คน', 'โอกาสร่วมจัดกิจกรรมกับสมาคม', 'Certificate of Corporate Membership'],
+    benefitsEN: ['Logo on TSAE website', 'Promote organizational events through TSAE channels', 'Special discount for up to 5 staff members', 'Co-hosting opportunities with TSAE', 'Certificate of Corporate Membership'],
+    featured: false,
+  },
+];
+---
+
+<Layout title={t('membership.title')} description={t('membership.subtitle')} lang={lang}>
+  <div class="py-12" style="background: linear-gradient(135deg, #0d3b1e, #1a6b3a);">
+    <div class="max-w-7xl mx-auto px-4">
+      <nav class="flex items-center gap-2 text-sm text-green-300 mb-4">
+        <a href={`${base}/`} class="hover:text-white transition-colors">{t('ui.home')}</a>
+        <span>/</span>
+        <span class="text-white">{t('membership.title')}</span>
+      </nav>
+      <h1 class="text-4xl font-bold text-white mb-2">{t('membership.title')}</h1>
+      <p class="text-green-200">{t('membership.subtitle')}</p>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 py-16">
+    <div class="text-center mb-14">
+      <h2 class="text-2xl font-bold mb-3" style="color: #1a6b3a;">{t('membership.types')}</h2>
+      <p class="text-gray-600 max-w-2xl mx-auto">{t('membership.typesDesc')}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-16">
+      {membershipTypes.map((type) => (
+        <div class={`relative bg-white rounded-2xl overflow-hidden border-2 transition-all hover:shadow-xl flex flex-col ${type.featured ? 'shadow-xl' : 'shadow-md border-gray-100'}`}
+          style={type.featured ? `border-color: ${type.color};` : ''}>
+          {type.featured && (
+            <div class="text-center py-2 text-white text-xs font-bold" style={`background-color: ${type.color};`}>
+              {t('membership.featured')} ⭐
+            </div>
+          )}
+          <div class="p-6 flex flex-col flex-1">
+            <div class="text-3xl mb-3">{type.icon}</div>
+            <h3 class="text-lg font-bold text-gray-900 mb-1">
+              {lang === 'th' ? type.type : type.typeEN}
+            </h3>
+            <p class="text-gray-500 text-xs mb-4">
+              {lang === 'th' ? type.typeEN : type.type}
+            </p>
+
+            <div class="mb-4 pb-4 border-b border-gray-100">
+              <span class="text-3xl font-bold" style={`color: ${type.color};`}>฿{type.fee}</span>
+              <span class="text-gray-500 text-sm">/{lang === 'th' ? type.feePeriodTH : type.feePeriodEN}</span>
+            </div>
+
+            <p class="text-xs text-gray-600 mb-4 leading-relaxed">
+              <strong>{t('membership.eligibility')}:</strong> {lang === 'th' ? type.eligibilityTH : type.eligibilityEN}
+            </p>
+
+            <ul class="space-y-2 mb-6 flex-1">
+              {(lang === 'th' ? type.benefitsTH : type.benefitsEN).map((benefit) => (
+                <li class="flex items-start gap-2 text-sm text-gray-700">
+                  <svg class="w-4 h-4 flex-shrink-0 mt-0.5" style={`color: ${type.color};`} fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                  {benefit}
+                </li>
+              ))}
+            </ul>
+
+            <a
+              href="#apply"
+              class="block w-full text-center py-3 rounded-xl font-semibold text-sm transition-colors"
+              style={type.featured
+                ? `background-color: ${type.color}; color: white;`
+                : `border: 2px solid ${type.color}; color: ${type.color};`}
+              onmouseover={`this.style.backgroundColor='${type.color}'; this.style.color='white';`}
+              onmouseout={type.featured
+                ? `this.style.backgroundColor='${type.color}'; this.style.color='white';`
+                : `this.style.backgroundColor=''; this.style.color='${type.color}';`}
+            >
+              {t('membership.apply')}
+            </a>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- How to Apply -->
+    <div class="max-w-3xl mx-auto mb-16">
+      <h2 class="text-2xl font-bold text-center mb-8" style="color: #1a6b3a;">{t('membership.howto')}</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {[
+          { text: t('membership.step1') },
+          { text: t('membership.step2') },
+          { text: t('membership.step3') },
+          { text: t('membership.step4') },
+        ].map((step, i) => (
+          <div class="flex gap-4 p-4 rounded-xl bg-white shadow-sm border border-gray-100">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0" style="background-color: #1a6b3a;">{i + 1}</div>
+            <div class="min-w-0">
+              <p class="text-sm text-gray-700 leading-relaxed">{step.text}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div class="mt-4 p-4 rounded-xl text-sm text-gray-600 text-center" style="background-color: #f0faf4;">
+        {t('membership.bank')}
+      </div>
+    </div>
+
+    <!-- Application Form -->
+    <div id="apply" class="max-w-3xl mx-auto">
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="p-1" style="background: linear-gradient(90deg, #1a6b3a, #c8a951);"></div>
+        <div class="p-8">
+          <h2 class="text-2xl font-bold mb-2" style="color: #1a6b3a;">
+            {lang === 'th' ? 'แบบฟอร์มสมัครสมาชิก' : 'Membership Application Form'}
+          </h2>
+          <p class="text-gray-600 text-sm mb-8">
+            {lang === 'th'
+              ? 'กรอกข้อมูลด้านล่างเพื่อสมัครสมาชิก TSAE ทีมงานจะติดต่อกลับภายใน 3-5 วันทำการ'
+              : 'Fill in the form below to apply for TSAE membership. Our team will contact you within 3-5 business days.'}
+          </p>
+
+          <form
+            action="/api/submit/membership"
+            method="POST"
+            class="tsae-ajax-form space-y-6"
+            data-sending={lang === 'th' ? 'กำลังส่ง…' : 'Sending…'}
+            data-err={lang === 'th' ? 'เกิดข้อผิดพลาด กรุณาตรวจสอบข้อมูลแล้วลองใหม่' : 'Something went wrong. Please check your input and try again.'}
+            data-net={lang === 'th' ? 'เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่' : 'Connection failed. Please try again.'}
+            enctype="multipart/form-data"
+          >
+            <div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;">
+              <label>Company URL <input type="text" name="company_url" tabindex="-1" autocomplete="off" /></label>
+              <input type="hidden" name="form_token" />
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                  {lang === 'th' ? 'คำนำหน้า' : 'Title'} <span class="text-red-500">*</span>
+                </label>
+                <select name="prefix" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2">
+                  <option value="">{lang === 'th' ? 'เลือกคำนำหน้า' : 'Select title'}</option>
+                  {lang === 'th' ? (
+                    <>
+                      <option>นาย</option>
+                      <option>นาง</option>
+                      <option>นางสาว</option>
+                      <option>ดร.</option>
+                      <option>ผศ.ดร.</option>
+                      <option>รศ.ดร.</option>
+                      <option>ศ.ดร.</option>
+                    </>
+                  ) : (
+                    <>
+                      <option>Mr.</option>
+                      <option>Mrs.</option>
+                      <option>Ms.</option>
+                      <option>Dr.</option>
+                      <option>Asst. Prof. Dr.</option>
+                      <option>Assoc. Prof. Dr.</option>
+                      <option>Prof. Dr.</option>
+                    </>
+                  )}
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                  {lang === 'th' ? 'ประเภทสมาชิก' : 'Membership Type'} <span class="text-red-500">*</span>
+                </label>
+                <select name="membershipType" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2">
+                  <option value="">{lang === 'th' ? 'เลือกประเภทสมาชิก' : 'Select type'}</option>
+                  {membershipTypes.map((m) => (
+                    <option value={m.typeEN.toLowerCase().replace(' ', '-')}>
+                      {lang === 'th' ? m.type : m.typeEN} (฿{m.fee}/{lang === 'th' ? m.feePeriodTH : m.feePeriodEN})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                  {lang === 'th' ? 'ชื่อ' : 'First Name'} <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="firstName" required placeholder={lang === 'th' ? 'ชื่อ' : 'First name'} class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2" />
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                  {lang === 'th' ? 'นามสกุล' : 'Last Name'} <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="lastName" required placeholder={lang === 'th' ? 'นามสกุล' : 'Last name'} class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                  {t('contact.form.email')} <span class="text-red-500">*</span>
+                </label>
+                <input type="email" name="email" required placeholder="email@example.com" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2" />
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                  {lang === 'th' ? 'โทรศัพท์' : 'Phone'} <span class="text-red-500">*</span>
+                </label>
+                <input type="tel" name="phone" required placeholder="08x-xxx-xxxx" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                {lang === 'th' ? 'หน่วยงาน/สถาบัน' : 'Organization/Institution'} <span class="text-red-500">*</span>
+              </label>
+              <input type="text" name="organization" required placeholder={lang === 'th' ? 'ชื่อหน่วยงานหรือสถาบันการศึกษา' : 'Name of organization or university'} class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                {lang === 'th' ? 'ข้อมูลเพิ่มเติม' : 'Additional Information'}
+              </label>
+              <textarea name="message" rows="3" placeholder={lang === 'th' ? 'ข้อมูลเพิ่มเติม หรือคำถามที่ต้องการสอบถาม (ถ้ามี)' : 'Additional information or questions (optional)'} class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 resize-y"></textarea>
+            </div>
+
+            <div class="rounded-xl border border-dashed p-4" style="border-color:#1a6b3a; background:#f0fdf4;">
+              <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                {lang === 'th' ? 'แนบสลิปโอนเงิน' : 'Attach Payment Slip'} <span class="text-red-500">*</span>
+              </label>
+              <input type="file" name="payment_file" required accept=".pdf,.jpg,.jpeg,.png,.webp,.heic" class="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-[#1a6b3a] file:px-3 file:py-2 file:font-semibold file:text-white" />
+              <p class="text-xs text-gray-500 mt-2">
+                {lang === 'th'
+                  ? 'จำเป็น · ไม่ต้องแนบใบสมัครกระดาษ กรอกฟอร์มออนไลน์ครบแล้วส่งสลิปอย่างเดียว'
+                  : 'Required · No paper form needed — complete the online form and attach the payment slip only'}
+              </p>
+            </div>
+
+            <p class="ajax-error hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5"></p>
+            <button type="submit" class="ajax-submit w-full py-4 text-white font-bold rounded-xl text-base transition-colors disabled:opacity-60" style="background-color: #1a6b3a;" onmouseover="this.style.backgroundColor='#124d2a'" onmouseout="this.style.backgroundColor='#1a6b3a'">
+              {lang === 'th' ? 'ส่งใบสมัครสมาชิก' : 'Submit Application'}
+            </button>
+          </form>
+          <div class="tsae-ajax-success hidden rounded-xl border p-8 text-center" style="background-color:#f0fdf4; border-color:#bbf7d0;">
+            <div class="mx-auto w-14 h-14 rounded-full flex items-center justify-center mb-4" style="background-color:#1a6b3a;">
+              <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <h3 class="text-xl font-bold mb-1" style="color:#1a6b3a;">{lang === 'th' ? 'ส่งใบสมัครเรียบร้อย' : 'Application received'}</h3>
+            <p class="text-gray-600">{lang === 'th' ? 'ขอบคุณ เราได้รับใบสมัครของคุณแล้ว ทีมงานจะติดต่อกลับภายใน 3-5 วันทำการ' : 'Thank you. We have received your application and will contact you within 3-5 business days.'}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Renew -->
+    <div class="mt-16 max-w-3xl mx-auto">
+      <div class="p-8 rounded-2xl border-2 text-center" style="border-color: #c8a951; background: linear-gradient(135deg, #fffbf0, #ffffff);">
+        <h3 class="text-xl font-bold mb-3" style="color: #c8a951;">
+          {lang === 'th' ? 'ต่ออายุสมาชิก' : 'Renew Membership'}
+        </h3>
+        <p class="text-gray-600 mb-6 text-sm">
+          {lang === 'th'
+            ? 'สมาชิกปัจจุบันที่ต้องการต่ออายุ กรุณาส่งอีเมลแจ้งความประสงค์พร้อมแจ้งชื่อ และ/หรือหมายเลขสมาชิก พร้อมแนบหลักฐานการชำระเงิน'
+            : 'Current members who wish to renew, please email your renewal request with your name and/or membership number, attaching proof of payment.'}
+        </p>
+        <div class="flex justify-center">
+          <a href={`mailto:center@tsae.asia?subject=${encodeURIComponent(lang === 'th' ? 'ต่ออายุสมาชิก TSAE' : 'TSAE Membership Renewal')}`} class="px-6 py-3 font-semibold rounded-xl text-white transition-colors" style="background-color: #c8a951;" onmouseover="this.style.backgroundColor='#a8892f'" onmouseout="this.style.backgroundColor='#c8a951'">
+            {lang === 'th' ? 'ส่งอีเมลต่ออายุ' : 'Email Renewal'}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <AjaxFormScript />
+  <script>
+    function initFormTokens() {
+      document.querySelectorAll<HTMLInputElement>('input[name="form_token"]').forEach((el) => {
+        el.value = String(Math.floor(Date.now() / 1000));
+      });
+    }
+    initFormTokens();
+    document.addEventListener('astro:page-load', initFormTokens);
+  </script>
+</Layout>
+
+<style>
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #1a6b3a;
+    box-shadow: 0 0 0 2px rgba(26, 107, 58, 0.2);
+  }
+</style>

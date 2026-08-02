@@ -1,0 +1,10 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import AcademicCommitteePage from '../../../components/pages/AcademicCommitteePage.astro';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+<Layout title={t('nav.about.academicCommittee')} lang={lang}>
+  <AcademicCommitteePage lang={lang} />
+</Layout>

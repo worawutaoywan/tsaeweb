@@ -1,0 +1,251 @@
+---
+interface Props {
+  /** 'national' | 'intl' — stored with the submission */
+  conf: 'national' | 'intl';
+  /** 'th' | 'en' — field labels language */
+  lang?: 'th' | 'en';
+}
+
+const { conf, lang = 'en' } = Astro.props;
+const isTH = lang === 'th';
+
+const t = {
+  name: isTH ? 'ชื่อ' : 'Name',
+  surname: isTH ? 'นามสกุล' : 'Surname',
+  street: isTH ? 'ที่อยู่' : 'Street Address',
+  apt: isTH ? 'อาคาร/ห้อง ฯลฯ' : 'Apartment, suite, etc.',
+  city: isTH ? 'เมือง/อำเภอ' : 'City',
+  state: isTH ? 'จังหวัด/รัฐ' : 'State / Province',
+  zip: isTH ? 'รหัสไปรษณีย์' : 'ZIP / Postal Code',
+  country: isTH ? 'ประเทศ' : 'Country',
+  email: isTH ? 'อีเมล' : 'Email Address',
+  phone: isTH ? 'เบอร์โทรศัพท์' : 'Phone',
+  org: isTH ? 'หน่วยงาน/บริษัท' : 'Organization / Company',
+  job: isTH ? 'ตำแหน่ง' : 'Job Title',
+  file: isTH ? 'แนบหลักฐานการโอนค่าลงทะเบียน' : 'Proof of registration fee transfer',
+  fileHint: isTH ? 'รองรับ PDF, JPG, PNG (สูงสุด 45MB)' : 'PDF, JPG, PNG accepted (max 45MB)',
+  consent: isTH
+    ? 'ข้าพเจ้ายอมรับเงื่อนไขของการประชุม และยินยอมให้ประมวลผลข้อมูลส่วนบุคคล'
+    : "I agree to the conference's terms and the processing of my personal data.",
+  selectCountry: isTH ? '— เลือกประเทศ —' : '— Select country —',
+  submit: isTH ? 'ลงทะเบียน' : 'Register',
+  sending: isTH ? 'กำลังส่ง…' : 'Submitting…',
+  required: isTH ? 'จำเป็น' : 'required',
+  okTitle: isTH ? 'ลงทะเบียนสำเร็จ' : 'Registration received',
+  okMsg: isTH
+    ? 'ขอบคุณสำหรับการลงทะเบียน เราได้รับข้อมูลของคุณเรียบร้อยแล้ว'
+    : 'Thank you. Your registration has been received successfully.',
+  errMsg: isTH
+    ? 'เกิดข้อผิดพลาดในการส่ง กรุณาตรวจสอบข้อมูลแล้วลองใหม่อีกครั้ง'
+    : 'Something went wrong. Please check your input and try again.',
+  errTooBig: isTH
+    ? 'ไฟล์มีขนาดใหญ่เกินไป (สูงสุด 45MB) กรุณาบีบอัดหรือเลือกไฟล์ที่เล็กลง'
+    : 'File is too large (max 45MB). Please compress it or choose a smaller file.',
+  errType: isTH
+    ? 'ชนิดไฟล์ไม่รองรับ กรุณาใช้ PDF, JPG หรือ PNG'
+    : 'File type not allowed. Please use PDF, JPG or PNG.',
+  errNet: isTH
+    ? 'เชื่อมต่อไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'
+    : 'Connection failed. Please check your internet and try again.',
+};
+
+const MAX_FILE_MB = 45;
+
+const countries = [
+  'Thailand', 'Taiwan', 'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola',
+  'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaijan', 'Bahrain',
+  'Bangladesh', 'Belarus', 'Belgium', 'Bhutan', 'Bolivia', 'Bosnia and Herzegovina',
+  'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Cambodia', 'Cameroon', 'Canada',
+  'Chile', 'China', 'Colombia', 'Costa Rica', 'Croatia', 'Cuba', 'Cyprus', 'Czechia',
+  'Denmark', 'Ecuador', 'Egypt', 'Estonia', 'Ethiopia', 'Fiji', 'Finland', 'France',
+  'Georgia', 'Germany', 'Ghana', 'Greece', 'Guatemala', 'Hong Kong SAR China',
+  'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel',
+  'Italy', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kuwait', 'Kyrgyzstan',
+  'Lao People\u2019s Democratic Republic', 'Latvia', 'Lebanon', 'Lithuania',
+  'Luxembourg', 'Macao SAR China', 'Madagascar', 'Malaysia', 'Maldives', 'Malta',
+  'Mexico', 'Moldova', 'Mongolia', 'Montenegro', 'Morocco', 'Myanmar', 'Nepal',
+  'Netherlands', 'New Zealand', 'Nigeria', 'North Macedonia', 'Norway', 'Oman',
+  'Pakistan', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines',
+  'Poland', 'Portugal', 'Qatar', 'Romania', 'Russia', 'Rwanda', 'Saudi Arabia',
+  'Senegal', 'Serbia', 'Singapore', 'Slovakia', 'Slovenia', 'South Africa',
+  'South Korea', 'Spain', 'Sri Lanka', 'Sweden', 'Switzerland', 'Syria', 'Tajikistan',
+  'Tanzania', 'Timor-Leste', 'Tunisia', 'Turkey', 'Turkmenistan', 'Uganda', 'Ukraine',
+  'United Arab Emirates', 'United Kingdom', 'United States of America (USA)', 'Uruguay',
+  'Uzbekistan', 'Vatican City', 'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe',
+];
+
+const reqMark = '<span style="color:#dc2626;">*</span>';
+---
+
+<form class="tsae-reg-form bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8" data-conf={conf} data-sending={t.sending} data-err={t.errMsg} data-toobig={t.errTooBig} data-type={t.errType} data-net={t.errNet} data-maxmb={String(MAX_FILE_MB)} novalidate>
+  <input type="hidden" name="conf" value={conf} />
+  {/* honeypot: hidden from humans, bots tend to fill it */}
+  <div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;">
+    <label>Company URL <input type="text" name="company_url" tabindex="-1" autocomplete="off" /></label>
+    <input type="hidden" name="form_token" />
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{t.name} <Fragment set:html={reqMark} /></label>
+      <input name="name" required type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600/40 focus:border-green-600" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{t.surname} <Fragment set:html={reqMark} /></label>
+      <input name="surname" required type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600/40 focus:border-green-600" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{t.email} <Fragment set:html={reqMark} /></label>
+      <input name="email" required type="email" class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600/40 focus:border-green-600" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{t.phone} <Fragment set:html={reqMark} /></label>
+      <input name="phone" required type="tel" class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600/40 focus:border-green-600" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{t.org}</label>
+      <input name="organization" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600/40 focus:border-green-600" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{t.job}</label>
+      <input name="job_title" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600/40 focus:border-green-600" />
+    </div>
+    <div class="sm:col-span-2">
+      <label class="block text-sm font-medium text-gray-700 mb-1">{t.street}</label>
+      <input name="street" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600/40 focus:border-green-600" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{t.apt}</label>
+      <input name="apartment" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600/40 focus:border-green-600" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{t.city}</label>
+      <input name="city" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600/40 focus:border-green-600" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{t.state}</label>
+      <input name="state" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600/40 focus:border-green-600" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{t.zip}</label>
+      <input name="zip" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600/40 focus:border-green-600" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{t.country}</label>
+      <select name="country" class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-600/40 focus:border-green-600">
+        <option value="">{t.selectCountry}</option>
+        {countries.map((c) => <option value={c}>{c}</option>)}
+      </select>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <label class="block text-sm font-medium text-gray-700 mb-1">{t.file}</label>
+    <input name="file" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic" class="block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:text-white file:cursor-pointer" style="--tw:0;" />
+    <p class="text-xs text-gray-400 mt-1">{t.fileHint}</p>
+  </div>
+
+  <label class="mt-5 flex items-start gap-3 text-sm text-gray-600 cursor-pointer">
+    <input name="consent" type="checkbox" value="1" required class="mt-0.5 w-4 h-4 shrink-0 accent-green-700" />
+    <span>{t.consent} <Fragment set:html={reqMark} /></span>
+  </label>
+
+  <p class="reg-error hidden mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5"></p>
+
+  <button type="submit" class="reg-submit mt-6 inline-flex items-center justify-center gap-2 px-7 py-3 font-bold rounded-xl text-white shadow transition-transform hover:scale-105 disabled:opacity-60 disabled:hover:scale-100" style="background-color:#1a6b3a;">
+    {t.submit}
+  </button>
+</form>
+
+<div class="tsae-reg-success hidden rounded-2xl border p-8 text-center" style="background-color:#f0fdf4; border-color:#bbf7d0;">
+  <div class="mx-auto w-14 h-14 rounded-full flex items-center justify-center mb-4" style="background-color:#1a6b3a;">
+    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+  </div>
+  <h3 class="text-xl font-bold mb-1" style="color:#1a6b3a;">{t.okTitle}</h3>
+  <p class="text-gray-600">{t.okMsg}</p>
+</div>
+
+<style>
+  .tsae-reg-form input[type="file"]::file-selector-button { background-color:#1a6b3a; }
+</style>
+
+<script>
+  function initRegForms() {
+    document.querySelectorAll<HTMLFormElement>('.tsae-reg-form').forEach((form) => {
+      if (form.dataset.bound) return;
+      form.dataset.bound = '1';
+
+      const btn = form.querySelector<HTMLButtonElement>('.reg-submit');
+      const errBox = form.querySelector<HTMLElement>('.reg-error');
+      const success = form.parentElement?.querySelector<HTMLElement>('.tsae-reg-success');
+      const sendingText = btn?.dataset.sending || form.getAttribute('data-sending') || 'Submitting…';
+      const defaultText = btn?.textContent?.trim() || 'Register';
+      const msgErr = form.getAttribute('data-err') || 'Something went wrong. Please try again.';
+      const msgTooBig = form.getAttribute('data-toobig') || msgErr;
+      const msgType = form.getAttribute('data-type') || msgErr;
+      const msgNet = form.getAttribute('data-net') || msgErr;
+      const maxMb = parseInt(form.getAttribute('data-maxmb') || '45', 10);
+      const allowedExt = ['pdf', 'jpg', 'jpeg', 'png', 'webp', 'heic'];
+
+      const showError = (text: string) => {
+        if (errBox) {
+          errBox.textContent = text;
+          errBox.classList.remove('hidden');
+          errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      };
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (errBox) errBox.classList.add('hidden');
+
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+
+        // client-side file checks (size + extension) for instant feedback
+        const fileInput = form.querySelector<HTMLInputElement>('input[type="file"]');
+        const file = fileInput?.files?.[0];
+        if (file) {
+          const ext = (file.name.split('.').pop() || '').toLowerCase();
+          if (!allowedExt.includes(ext)) { showError(msgType); return; }
+          if (file.size > maxMb * 1024 * 1024) { showError(msgTooBig); return; }
+        }
+
+        if (btn) { btn.disabled = true; btn.textContent = sendingText; }
+
+        try {
+          const res = await fetch('/api/register', {
+            method: 'POST',
+            body: new FormData(form),
+          });
+          if (res.ok) {
+            form.classList.add('hidden');
+            success?.classList.remove('hidden');
+            success?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+          }
+          // map server status to a helpful message
+          let detail = '';
+          try { detail = (await res.json())?.detail || ''; } catch (_e) { /* noop */ }
+          if (res.status === 413 || /too large/i.test(detail)) showError(msgTooBig);
+          else if (/file type/i.test(detail)) showError(msgType);
+          else showError(msgErr);
+          if (btn) { btn.disabled = false; btn.textContent = defaultText; }
+        } catch (_err) {
+          showError(msgNet);
+          if (btn) { btn.disabled = false; btn.textContent = defaultText; }
+        }
+      });
+    });
+  }
+  function initFormTokens() {
+    document.querySelectorAll<HTMLInputElement>('input[name="form_token"]').forEach((el) => {
+      el.value = String(Math.floor(Date.now() / 1000));
+    });
+  }
+  initRegForms();
+  initFormTokens();
+  document.addEventListener('astro:page-load', () => { initRegForms(); initFormTokens(); });
+</script>

@@ -1,0 +1,53 @@
+[
+  {
+    "id": "tsae-2026-national",
+    "title": "27th TSAE National Conference",
+    "titleTH": "การประชุมวิชาการระดับชาติ ครั้งที่ 27",
+    "startDate": "2026-07-20T08:30:00+07:00",
+    "endDate": "2026-07-21T18:00:00+07:00",
+    "location": "Department of Agricultural Extension, Bangkok",
+    "locationTH": "ห้องประชุม 7 ชั้น 5 อาคาร 1 กรมส่งเสริมการเกษตร กรุงเทพฯ",
+    "type": "national",
+    "status": "upcoming",
+    "registrationUrl": "/2026conf-national/#register",
+    "image": "/images/conf/tsae2026-national-poster.png",
+    "excerpt": "The 27th national academic conference of the Thai Society of Agricultural Engineering.",
+    "excerptTH": "การประชุมวิชาการสมาคมวิศวกรรมเกษตรแห่งประเทศไทย ระดับชาติ ครั้งที่ 27 วันที่ 20–21 กรกฎาคม 2569",
+    "featured": true,
+    "html": "<p>รายละเอียดและลงทะเบียนได้ที่ <a href=\"/2026conf-national/\">หน้างานประชุมระดับชาติ 2026</a></p>"
+  },
+  {
+    "id": "tsae-2026-international",
+    "title": "19th TSAE International Conference",
+    "titleTH": "การประชุมวิชาการระดับนานาชาติ ครั้งที่ 19",
+    "startDate": "2026-11-18T08:30:00+07:00",
+    "endDate": "2026-11-20T18:00:00+07:00",
+    "location": "Kasetsart University, Bangkok",
+    "locationTH": "มหาวิทยาลัยเกษตรศาสตร์ กรุงเทพฯ",
+    "type": "international",
+    "status": "upcoming",
+    "registrationUrl": "/2026conf-intl/#register",
+    "image": "/images/conf/tsae2026-intl-poster.jpg",
+    "excerpt": "The 19th international academic conference of TSAE.",
+    "excerptTH": "การประชุมวิชาการสมาคมวิศวกรรมเกษตรแห่งประเทศไทย ระดับนานาชาติ ครั้งที่ 19",
+    "featured": true,
+    "html": "<p>รายละเอียดและลงทะเบียนได้ที่ <a href=\"/2026conf-intl/\">หน้างานประชุมนานาชาติ 2026</a></p>"
+  },
+  {
+    "id": "iaec-2026",
+    "title": "IAEC 2026 — Appropriate Technologies for Climate Resilient Farming",
+    "titleTH": "IAEC 2026 — Appropriate Technologies for Climate Resilient Farming",
+    "startDate": "2026-11-26T09:00:00+08:00",
+    "endDate": "2026-11-28T18:00:00+08:00",
+    "location": "Prime Plaza Hotel, Bali, Indonesia",
+    "locationTH": "Prime Plaza Hotel, บาหลี ประเทศอินโดนีเซีย",
+    "type": "international",
+    "status": "upcoming",
+    "registrationUrl": "https://aaaesociety.org/register-iaec2026/",
+    "image": "/images/conf/iaec2026-poster.jpg",
+    "excerpt": "Hosted by AAAE with PERTETA. Abstracts due 30 July 2026. TSAE members register at the member-society rate (USD 100).",
+    "excerptTH": "จัดโดย AAAE ร่วมกับ PERTETA ที่บาหลี 26–28 พ.ย. 2569 ส่งบทคัดย่อภายใน 30 ก.ค. 2569 สมาชิก TSAE ลงทะเบียนในอัตราสมาชิกสมาคม (USD 100)",
+    "featured": true,
+    "html": "<p>งานประชุมนานาชาติของ AAAE (IAEC 2026) หัวข้อ <strong>Appropriate Technologies for Climate Resilient Farming</strong> ร่วมกับ PERTETA ณ บาหลี</p><ul><li><a href=\"/iaec2026/\">หน้ารายละเอียดบนเว็บ TSAE</a></li><li><a href=\"/iaec2026/poster/\">โปสเตอร์แบบ interactive (HTML)</a></li><li><a href=\"/downloads/IAEC2026-poster.pdf\" target=\"_blank\" rel=\"noopener\">ดาวน์โหลดโปสเตอร์ PDF</a></li><li><a href=\"https://aaaesociety.org/register-iaec2026/\" target=\"_blank\" rel=\"noopener\">ลงทะเบียน / ส่งบทคัดย่อ</a></li></ul>"
+  }
+]

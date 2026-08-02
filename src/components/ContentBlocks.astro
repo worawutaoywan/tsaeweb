@@ -1,0 +1,131 @@
+---
+import type { PageBlock } from '../loaders/pages';
+
+interface Props {
+  blocks: PageBlock[];
+  /** When true, wrap each block with edit metadata for the inline editor */
+  editable?: boolean;
+}
+
+const { blocks, editable = false } = Astro.props;
+
+const spacerClass: Record<string, string> = {
+  sm: 'h-6',
+  md: 'h-12',
+  lg: 'h-20',
+};
+---
+
+<div class="cms-blocks space-y-8" data-cms-blocks>
+  {blocks.map((block, i) => {
+    const attrs = editable
+      ? { 'data-block': '', 'data-block-index': String(i), 'data-block-type': block.type }
+      : {};
+
+    if (block.type === 'heading') {
+      const Tag = (`h${block.level || 2}` as 'h2' | 'h3' | 'h4');
+      return (
+        <div {...attrs}>
+          <Tag
+            class="font-bold text-gray-900"
+            data-edit-field={editable ? 'text' : undefined}
+            style={`color: ${block.level === 2 ? '#1a6b3a' : '#124d2a'}; font-size: ${block.level === 2 ? '1.75rem' : block.level === 3 ? '1.35rem' : '1.15rem'};`}
+          >
+            {block.text}
+          </Tag>
+        </div>
+      );
+    }
+    if (block.type === 'richtext' && block.html) {
+      return (
+        <div {...attrs}>
+          <div class="prose prose-lg max-w-none cms-prose" data-edit-field={editable ? 'html' : undefined} set:html={block.html} />
+        </div>
+      );
+    }
+    if (block.type === 'image' && block.src) {
+      const wrapClass = block.width === 'medium' ? 'max-w-2xl mx-auto' : '';
+      return (
+        <div {...attrs}>
+          <figure class={wrapClass}>
+            <img src={block.src} alt={block.alt || ''} class="w-full rounded-xl shadow-md" data-edit-field={editable ? 'src' : undefined} loading="lazy" />
+            {block.caption && <figcaption class="text-center text-sm text-gray-500 mt-2" data-edit-field={editable ? 'caption' : undefined}>{block.caption}</figcaption>}
+          </figure>
+        </div>
+      );
+    }
+    if (block.type === 'gallery' && block.images?.length) {
+      return (
+        <div {...attrs}>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {block.images.filter((im) => im.src).map((im) => (
+              <img src={im.src} alt={im.alt || ''} class="w-full aspect-square object-cover rounded-lg shadow" loading="lazy" />
+            ))}
+          </div>
+        </div>
+      );
+    }
+    if (block.type === 'cta' && block.href) {
+      const isGold = block.style === 'secondary';
+      return (
+        <div {...attrs}>
+          <div class="flex flex-wrap gap-3">
+            <a
+              href={block.href}
+              class="inline-flex items-center px-6 py-3 rounded-lg font-semibold text-white transition-colors"
+              data-edit-field={editable ? 'label' : undefined}
+              style={isGold ? 'background-color:#c8a951' : 'background-color:#1a6b3a'}
+            >
+              {block.label || 'ดูรายละเอียด'}
+            </a>
+          </div>
+        </div>
+      );
+    }
+    if (block.type === 'file' && block.href) {
+      return (
+        <div {...attrs}>
+          <a href={block.href} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-5 py-3 rounded-lg border-2 font-semibold transition-colors" style="border-color:#1a6b3a;color:#1a6b3a">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span data-edit-field={editable ? 'label' : undefined}>{block.label || 'ดาวน์โหลด'}</span>
+          </a>
+        </div>
+      );
+    }
+    if (block.type === 'alert' && block.text) {
+      const warn = block.variant === 'warn';
+      return (
+        <div {...attrs}>
+          <div class={`p-4 rounded-xl border text-sm ${warn ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-green-50 border-green-200 text-green-900'}`} data-edit-field={editable ? 'text' : undefined}>
+            {block.text}
+          </div>
+        </div>
+      );
+    }
+    if (block.type === 'html' && block.html) {
+      return (
+        <div {...attrs}>
+          <div class="cms-html prose max-w-none" data-edit-field={editable ? 'html' : undefined} set:html={block.html} />
+        </div>
+      );
+    }
+    if (block.type === 'spacer') {
+      return (
+        <div {...attrs}>
+          <div class={spacerClass[block.size || 'md'] || 'h-12'} aria-hidden="true" />
+        </div>
+      );
+    }
+    return null;
+  })}
+</div>
+
+<style>
+  .cms-prose :global(h2) { color: #1a6b3a; margin-top: 1.5rem; }
+  .cms-prose :global(h3) { color: #124d2a; }
+  .cms-prose :global(a) { color: #1a6b3a; text-decoration: underline; }
+  .cms-prose :global(img) { border-radius: 0.75rem; margin: 1rem 0; }
+  .cms-prose :global(table) { width: 100%; border-collapse: collapse; }
+  .cms-prose :global(th) { background: #1a6b3a; color: #fff; padding: 0.5rem 0.75rem; }
+  .cms-prose :global(td) { padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; }
+</style>

@@ -1,0 +1,93 @@
+---
+import PageHero from '../PageHero.astro';
+import type { Lang } from '../../i18n/ui';
+import { useTranslations } from '../../i18n/utils';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const th = lang === 'th';
+
+// Source of truth: official appointment order คำสั่งสมาคมฯ ที่ 1/2568 (14 พ.ย. 2568)
+// https://old.tsae.asia/home/executive_committee_of_the_association/
+const committee: { name: string; role: string; roleEN: string }[] = [
+  { name: 'นางดาเรศร์ กิตติโยภาส', role: 'นายกสมาคม', roleEN: 'President' },
+  { name: 'นายปราโมทย์ คล้ายเนตร', role: 'ที่ปรึกษา', roleEN: 'Advisor' },
+  { name: 'นายวิบูลย์ เทเพนทร์', role: 'อุปนายก', roleEN: 'Vice President' },
+  { name: 'นายชีรวรรธก์ มั่นกิจ', role: 'เลขาธิการ', roleEN: 'Secretary General' },
+  { name: 'ดร.วุฒิพล จันทร์สระคู', role: 'ผู้ช่วยเลขาธิการ', roleEN: 'Assistant Secretary General' },
+  { name: 'นางสาวชัญญานุช ปานเอี่ยม', role: 'เหรัญญิก', roleEN: 'Treasurer' },
+  { name: 'ผศ.ดร.จิตติมนต์ วงศ์ษา', role: 'นายทะเบียน', roleEN: 'Registrar' },
+  { name: 'ผศ.ดร.ระวิน สืบค้า', role: 'ผู้ช่วยนายทะเบียน', roleEN: 'Assistant Registrar' },
+  { name: 'ดร.อนุชิต ฉ่ำสิงห์', role: 'ปฏิคม', roleEN: 'Reception Officer' },
+  { name: 'นายวชิรศิริ ทวีเดช', role: 'ผู้ช่วยปฏิคม', roleEN: 'Assistant Reception Officer' },
+  { name: 'รศ.ดร.วัชรพล ชยประเสริฐ', role: 'สาราณียกร', roleEN: 'Editor' },
+  { name: 'ผศ.ดร.เจษฎา โพธิ์สม', role: 'ผู้ช่วยสาราณียกร', roleEN: 'Assistant Editor' },
+  { name: 'ศ.ดร.สักกมน เทพหัสดิน ณ อยุธยา', role: 'ประธานฝ่ายวิชาการ', roleEN: 'Head of Academic Affairs' },
+  { name: 'ผศ.ดร.เทวรัตน์ ตรีอำนรรค', role: 'รองประธานฝ่ายวิชาการ', roleEN: 'Deputy Head of Academic Affairs' },
+  { name: 'รศ.ดร.สิรินาฏ น้อยพิทักษ์', role: 'ผู้ช่วยประธานฝ่ายวิชาการ', roleEN: 'Assistant Head of Academic Affairs' },
+  { name: 'ผศ.ดร.ศิระษา ทางดี', role: 'ประธานฝ่ายประชาสัมพันธ์', roleEN: 'Head of Public Relations' },
+  { name: 'ผศ.ดร.สวนิต อิชยาวณิชย์', role: 'ผู้ช่วยประธานฝ่ายประชาสัมพันธ์', roleEN: 'Assistant Head of Public Relations' },
+  { name: 'ผศ.ดร.วสุ อุดมเพทายกุล', role: 'ประธานฝ่ายพัฒนาวิชาชีพ', roleEN: 'Head of Professional Development' },
+  { name: 'ผศ.ดร.ดนุวัศ ทางดี', role: 'รองประธานฝ่ายพัฒนาวิชาชีพ', roleEN: 'Deputy Head of Professional Development' },
+];
+
+const initial = (name: string) => name.match(/[\u0E00-\u0E7F]/)?.[0] ?? name.match(/[A-Za-z]/)?.[0] ?? '?';
+---
+
+<PageHero
+  lang={lang}
+  title={t('about.committee')}
+  subtitle={th ? 'คณะกรรมการบริหาร วาระปี 2568–2570' : 'Executive Committee 2025–2027'}
+  crumbs={[{ label: t('nav.about'), href: lang === 'th' ? '/th/about' : '/about' }]}
+/>
+
+<div class="max-w-7xl mx-auto px-4 py-14">
+  <div class="text-center mb-10">
+    <h2 class="text-2xl font-bold mb-3" style="color: #1a6b3a;">{th ? 'คณะกรรมการบริหาร วาระปี 2568–2570' : 'Executive Committee 2025–2027'}</h2>
+    <p class="text-gray-600 max-w-2xl mx-auto">
+      {th
+        ? 'แต่งตั้งตามคำสั่งสมาคมวิศวกรรมเกษตรแห่งประเทศไทย ที่ 1/2568 ลงวันที่ 14 พฤศจิกายน พ.ศ. 2568'
+        : 'Appointed by TSAE order No. 1/2568, dated 14 November 2025 (B.E. 2568).'}
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {committee.map((m, i) => (
+      <div class={`bg-white rounded-xl p-5 shadow-md border ${i === 0 ? 'border-amber-300 ring-1 ring-amber-200' : 'border-gray-100'} hover:shadow-lg transition-shadow flex items-center gap-4`}>
+        <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-white font-bold" style="background: linear-gradient(135deg, #c8a951, #1a6b3a);">
+          {initial(m.name)}
+        </div>
+        <div class="min-w-0">
+          <div class="text-xs font-semibold mb-0.5 px-2 py-0.5 rounded-full inline-block" style="background-color: #e8f5e9; color: #1a6b3a;">
+            {th ? m.role : m.roleEN}
+          </div>
+          <h3 class="font-semibold text-gray-900 leading-snug">{m.name}</h3>
+          <p class="text-xs text-gray-400 mt-0.5">{th ? m.roleEN : m.role}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <!-- Official appointment order (source of truth) -->
+  <div class="mt-14">
+    <h2 class="text-lg font-bold mb-4 text-center" style="color: #1a6b3a;">
+      {th ? 'เอกสารคำสั่งแต่งตั้งฉบับจริง' : 'Official Appointment Order'}
+    </h2>
+    <div class="flex justify-center">
+      <a href="/images/committee/exec-committee-2568.jpg" target="_blank" rel="noopener" class="block max-w-md w-full">
+        <img src="/images/committee/exec-committee-2568.jpg" alt={th ? 'คำสั่งแต่งตั้งคณะกรรมการบริหารสมาคม ที่ 1/2568' : 'TSAE Executive Committee appointment order No. 1/2568'} class="w-full rounded-2xl shadow-lg border border-gray-100" loading="lazy" />
+      </a>
+    </div>
+  </div>
+
+  <div class="mt-10 p-6 rounded-xl border border-gray-200 bg-gray-50 text-center">
+    <p class="text-gray-600 text-sm">
+      {th
+        ? 'หมายเหตุ: ถอดความจากคำสั่งสมาคมฯ ที่ 1/2568 สำหรับข้อมูลล่าสุด กรุณาติดต่อสำนักงานสมาคม'
+        : 'Note: Transcribed from TSAE order No. 1/2568. For the latest information, please contact the TSAE office.'}
+      <br />
+      <a href={lang === 'th' ? '/th/contact' : '/contact'} class="mt-2 inline-block font-medium" style="color: #1a6b3a;">{t('nav.contact')} →</a>
+    </p>
+  </div>
+</div>

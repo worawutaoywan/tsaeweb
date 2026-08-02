@@ -1,0 +1,30 @@
+[
+  {
+    "id": "sample-th",
+    "slug": "sample",
+    "lang": "th",
+    "title": "ตัวอย่างหน้า Page Builder",
+    "description": "หน้าตัวอย่างจาก CMS page builder",
+    "heroTitle": "ตัวอย่าง Page Builder",
+    "heroSubtitle": "แก้เนื้อหา static ผ่าน CMS → deploy web",
+    "enabled": true,
+    "blocks": [
+      {
+        "type": "richtext",
+        "html": "<p>นี่คือหน้าตัวอย่างจาก <strong>Page Builder</strong> ใน CMS — ใช้บล็อกข้อความ รูป และปุ่มลิงก์ โดยเลือกรูปจากคลังสื่อแบบ inline</p>"
+      },
+      {
+        "type": "alert",
+        "text": "หลังแก้เนื้อหาใน CMS ให้รัน ./deploy.sh web เพื่อ build เว็บใหม่",
+        "variant": "info"
+      },
+      {
+        "type": "cta",
+        "label": "กลับหน้าแรก",
+        "href": "/th/",
+        "style": "primary"
+      }
+    ],
+    "updatedAt": "2026-07-04T12:00:00+07:00"
+  }
+]

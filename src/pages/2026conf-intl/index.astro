@@ -1,0 +1,711 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import RegisterForm from '../../components/RegisterForm.astro';
+
+const U = '/wp-uploads/2026';
+
+const topics = [
+  { img: `${U}/01/b-01.png`, title: 'Plant, Animal & Aquacultural Production Engineering' },
+  { img: `${U}/01/b-02.png`, title: 'Land and Water Engineering' },
+  { img: `${U}/01/b-03.png`, title: 'Agro-Processing & Food Engineering' },
+  { img: `${U}/01/b-04.png`, title: 'Non-Food Biological Materials Engineering' },
+  { img: `${U}/01/b-05.png`, title: 'Information Technology for Agricultural Engineering' },
+  { img: `${U}/01/b-06.png`, title: 'Energy and Biomass Engineering' },
+];
+
+const speakers = [
+  {
+    photo: `${U}/02/sakamol1-300x300.jpg`,
+    name: 'Prof. Dr. Sakamon Devahastin',
+    affil: 'Department of Food Engineering, Faculty of Engineering, King Mongkut’s University of Technology Thonburi, Thailand',
+    talk: 'Novel Approaches to the Production of Highly Stable Natural Food Colorants: From Molecular to Practical Viewpoints',
+    email: 'sakamon.dev@kmutt.ac.th',
+  },
+  {
+    photo: `${U}/01/Ping-Lang-Yen.jpg`,
+    name: 'Prof. Dr. Ping-Lang Yen',
+    affil: 'Dept. of Biomechatronics Engineering, National Taiwan University, Taipei, Taiwan ROC',
+    talk: 'AI Robotics for Future Agriculture',
+    email: 'plyen@ntu.edu.tw',
+  },
+  {
+    photo: `${U}/02/S__46915589-300x300.jpg`,
+    name: 'Assoc. Prof. Dr. Yao-Chuan Tsai',
+    affil: 'Department of Bio-Industrial Mechatronics Engineering, National Chung Hsing University, Taichung, Taiwan ROC',
+    talk: 'Development and Application of Artificial Intelligence in Taiwan Poultry Farms',
+    email: 'yctsaii@nchu.edu.tw',
+  },
+  {
+    photo: `${U}/02/Mark-Chou1-300x300.jpg`,
+    name: 'Dr. Chou, Ching-An',
+    affil: 'Sunlit Hydroponic Farm and Moss Creek Co., Ltd.',
+    talk: 'Towards Negative Carbon Hydroponic Vegetable Production: Integration of AIoT Automation, CCU, Microbubble Technology, and Climate-Resilient Greenhouse Systems',
+    email: '',
+  },
+];
+
+const importantDates = [
+  { label: 'Article submission due', date: 'June 30, 2026' },
+  { label: 'Notification of acceptance', date: 'July 20, 2026' },
+  { label: 'Final (camera-ready) submission', date: 'July 31, 2026' },
+  { label: 'Last date of early-bird registration', date: 'July 31, 2026' },
+  { label: 'Conference dates', date: 'September 7 – 10, 2026', highlight: true },
+];
+
+const feesOnline = [
+  { who: 'Student / Observer', early: 'US$ 250 (8,750 THB)', regular: 'US$ 300 (10,500 THB)' },
+  { who: 'TSAE Member', early: 'US$ 300 (10,500 THB)', regular: 'US$ 350 (12,250 THB)' },
+  { who: 'Non-Member', early: 'US$ 375 (13,125 THB)', regular: 'US$ 425 (14,875 THB)' },
+];
+const feesOnsite = [
+  { who: 'Student / Observer', early: 'US$ 600 (21,000 THB)', regular: 'US$ 650 (22,750 THB)' },
+  { who: 'TSAE Member', early: 'US$ 650 (22,750 THB)', regular: 'US$ 700 (24,500 THB)' },
+  { who: 'Non-Member', early: 'US$ 725 (25,375 THB)', regular: 'US$ 775 (27,125 THB)' },
+];
+
+const submitUrl = 'https://easychair.org/conferences/?conf=tsae2026';
+const posterUrl = '/images/conf/intl-poster-1.jpg';
+const posterUrl2 = '/images/conf/intl-poster-2.jpg';
+const scheduleUrl = `${U}/04/Poster-TSAE-2026_Schedule_-V3_17-April_0.jpg`;
+
+const subNav = [
+  { href: '#speakers', label: 'Speakers' },
+  { href: '#dates', label: 'Important Dates' },
+  { href: '#fees', label: 'Fees' },
+  { href: '#payment', label: 'Payment' },
+  { href: '#guidelines', label: 'Submission' },
+  { href: '#template', label: 'Template' },
+  { href: '#presentation', label: 'Presentation' },
+  { href: '#venue', label: 'Venue' },
+  { href: '#register', label: 'Register' },
+  { href: '#committees', label: 'Committee' },
+];
+
+const hybridNote = 'TSAE 2026 is held in a hybrid format. On-site participation accepts both oral and poster presentations, while virtual participation accepts oral presentations only. The presentation mode does not affect the review, publication, or indexing of accepted articles. All proceedings, certificates, and communications are distributed electronically.';
+
+const manuscriptPrep = [
+  'Template: use the official TSAE 2026 Paper Template with no modifications (download below).',
+  'Length: 5–10 pages (double-column), including figures, tables, and references.',
+  'Abstract: maximum 200 words. Keywords: maximum 6 (not repeating terms already in the title).',
+  'References: 10–15 recommended; at most 3 conference proceedings; avoid self-citation above 10%.',
+  'Language: English only — grammatically sound and clearly written.',
+  'Figures: high quality (≥300 dpi for print, ≥150 dpi for online).',
+];
+const submissionSteps = [
+  'Submit full papers (Word and PDF) online via the EasyChair system.',
+  'First-time users must create an EasyChair account before submission.',
+  'Select the single topic that best matches your manuscript.',
+  'Enter the complete author list, affiliations, title, and all required information correctly.',
+];
+const reviewCriteria = [
+  'Relevance to TSAE 2026 themes and topics',
+  'Scientific quality, originality, and significance',
+  'Soundness and rigour of the methodology',
+  'Clarity of presentation, quality of English, and format compliance',
+];
+const ethicsNote = 'TSAE 2026 enforces a zero-tolerance policy on plagiarism. All submissions are screened with Turnitin; a similarity index above 25% results in a desktop reject without review. TSAE adheres to COPE and EDP Sciences publication ethics.';
+const publicationNote = 'Accepted and presented full papers are published in E3S Web of Conferences (EDP Sciences), subject to final publisher checks, and indexed by Scopus. Copyright is retained by the author(s) under a Creative Commons Attribution (CC-BY) license.';
+
+const scopeOriginality = [
+  'Each manuscript must present original, unpublished scientific or technical work aligned with one or more TSAE 2026 themes, and must clearly state the research problem, methodology, application domain, and key contributions.',
+  'Submissions must not be under review or published elsewhere; dual or near-duplicate submission is strictly prohibited.',
+  'Each author may be listed as an author on a maximum of two submitted papers.',
+  'The Program Committee reserves the right to reject any manuscript that exhibits excessive overlap in content or text.',
+];
+const reviewDecisions = 'Based on the reviewers’ recommendations, the Program Committee issues one of four decisions: accept, accept with minor revision, accept with major revision, or reject. Authors whose manuscripts require revision must address all reviewers’ comments and resubmit within the stated timeline using the Review Response Form below.';
+
+// Author forms (originals provided by the organizing committee)
+const reviewResponseUrl = '/downloads/TSAE2026-Review-Response-Form.docx';
+const publicationRightUrl = '/downloads/TSAE2026-Publication-Right-Form.pdf';
+const instructionsUrl = '/downloads/TSAE2026-Instructions-for-Authors.docx';
+
+const bank = {
+  name: 'KASIKORNBANK — Bang Khen Branch',
+  swift: 'KASITHBK',
+  branchAddr: '1456 Phaholyothin Rd., Lat Yao, Chatuchak, Bangkok 10900 · Tel. 02 093 1234',
+  accName: 'THAI SOCIETY OF AGRICULTURAL ENGINEERING',
+  accNo: '694-2-01262-2',
+  societyAddr: 'Building 5, Floor 5, Department of Agricultural Extension, 2143/1 Phahonyothin Rd., Lat Yao, Chatuchak, Bangkok 10900, Thailand',
+};
+const paymentNotes = [
+  'All transaction fees must be borne by the participant.',
+  'The registration fee is non-refundable under any circumstances once paid, even if the registrant is unable to attend the conference.',
+  'Please submit your proof of payment via EasyChair.',
+];
+
+// Paper template (E3S Web of Conferences style) — TSAE2026-Paper-Template.docx
+const templateUrl = '/downloads/TSAE2026-Paper-Template.docx';
+const templateSpecs = [
+  { k: 'Page layout', v: 'A4 (210×297 mm); final printable area 172×252 mm. Margins — top 25, bottom 20, left 20, right 20 mm. Two-column layout with 8 mm column spacing. No page numbers.' },
+  { k: 'Title', v: 'Arial 16 pt, bold, justified. Capitalise the first letter of each word (except prepositions). Leave 22 mm above and 6 mm below.' },
+  { k: 'Authors & affiliations', v: 'First name(s) in italic 10 pt Times New Roman, last name in 10 pt; no academic titles. Affiliations 9 pt Times New Roman with numeric superscripts, including the country.' },
+  { k: 'Abstract', v: 'Heading in bold 9 pt Arial; body in 9 pt Times New Roman, single paragraph, justified — maximum 200 words.' },
+  { k: 'Body text', v: '10 pt Times New Roman, single line spacing, justified. The first paragraph of a section is not indented; following paragraphs indent 5 mm.' },
+  { k: 'Headings', v: 'Section 12 pt Arial bold (1, 2, 3); subsection 10 pt Arial bold (1.1); sub-subsection 10 pt Arial italic (1.1.1).' },
+  { k: 'Figures & tables', v: 'Captions 9 pt Times New Roman — table captions centred above, figure captions flush-left below. Black & white strongly encouraged; figure text ≈ 10 pt; lines ≥ 0.25 pt.' },
+  { k: 'Equations', v: 'Centred and numbered on the right-hand side. Use italics for variables and bold for vectors; bracket order {[()]}.' },
+  { k: 'References', v: 'Cited by sequential numbers in brackets, e.g. [1], [2, 5, 7], [8–10]; 10–15 references required, with at most 3 conference proceedings.' },
+];
+
+const presentOral = [
+  'Oral presentation: 15 minutes total (10 minutes presentation + 5 minutes Q&A).',
+  'A first warning is given near the time limit; a second warning signals the presenter to conclude and begin the Q&A.',
+];
+const presentOnline = [
+  'Online presenters must submit a pre-recorded video (max 10 minutes).',
+  'The video must reach the organizer no later than September 3, 2026.',
+  'The Zoom ID and exact presentation time will be announced later.',
+];
+const presentPoster = [
+  'Poster size: 60 cm (width) × 160 cm (height), one topic per sheet.',
+  'Must include the title, all authors and affiliations, introduction, methodology, results, conclusions, references, plus the conference and TSAE logos.',
+  'Each poster session lasts 10 minutes (5 minutes presentation + 5 minutes Q&A).',
+  'Display period: September 8, 2026 (1:00 PM) – September 9, 2026 (4:00 PM).',
+];
+
+const nonPresentingIncludes = [
+  'Accommodation: 3 nights of stay',
+  'Catering: 2 meals and 3 coffee breaks',
+  'Full access to all conference sessions, including keynote lectures',
+  'Complimentary entry to the Taiwan Smart Agri-Week exhibition',
+];
+
+const venue = {
+  name: 'Nangang International Exhibition Center (TaiNex 1), Hall 1',
+  address: 'No.1, Jingmao 2nd Rd., Nangang District, Taipei City 11568, Taiwan ROC',
+  tel: '+886-2-2725-5200',
+};
+
+// Scientific Committee
+const committeeAcademic = [
+  { name: 'Prof. Dr. Abdul Rashid Bin Mohamed Shariff', inst: 'Universiti Putra Malaysia, Malaysia' },
+  { name: 'Prof. Dr. Bim Prasad Shrestha', inst: 'Kathmandu University, Nepal' },
+  { name: 'Prof. Dr. Chang, Yaw-Nan (Nelson)', inst: 'National Formosa University, Taiwan' },
+  { name: 'Dr. Martin Boruvka', inst: 'Technical University of Liberec, Czech Republic' },
+  { name: 'Dr. Muhammad Hazwan Hamzah', inst: 'Universiti Putra Malaysia, Malaysia' },
+  { name: 'Prof. Dr. Munehiro Tanaka', inst: 'Saga University, Japan' },
+  { name: 'Assoc. Prof. Dr. Norhashila Binti Hashim', inst: 'Universiti Putra Malaysia, Malaysia' },
+  { name: 'Prof. Dr. Rosnah Shamsudin', inst: 'Universiti Putra Malaysia, Malaysia' },
+  { name: 'Prof. Dr. Shyam Sablani', inst: 'Washington State University, USA' },
+  { name: 'Prof. Dr. Tri Ratna Bajracharya', inst: 'RIFS Research Institute Sustainability at GFZ, Potsdam, Germany' },
+  { name: 'Prof. Dr. Vijaya G.S. Raghavan', inst: 'McGill University, Canada' },
+  { name: 'Prof. Dr. Wouter Saeys', inst: 'KU Leuven, Belgium' },
+  { name: 'Prof. Dr. Xiao Dong Chen', inst: 'Tsinghua Shenzhen International Graduate School, China' },
+  { name: 'Prof. Dr. Anupun Terdwongworakul', inst: 'Kasetsart University, Thailand' },
+  { name: 'Assoc. Prof. Dr. Areeya Rittima', inst: 'Mahidol University, Thailand' },
+  { name: 'Prof. Dr. Panmanas Sirisomboon', inst: "King Mongkut's Institute of Technology Ladkrabang, Thailand" },
+  { name: 'Assoc. Prof. Dr. Prathuang Usaborisut', inst: 'Kasetsart University, Thailand' },
+  { name: 'Prof. Dr. Sakamon Devahastin', inst: "King Mongkut's University of Technology Thonburi, Thailand" },
+  { name: 'Assoc. Prof. Dr. Tiraporn Junyusen', inst: 'Suranaree University of Technology, Thailand' },
+];
+
+// Organizing Committee — Thai Society of Agricultural Engineering
+const committeeOrganizing = [
+  'Dr. Dares Kittiyopas',
+  'Mr. Pramote Klainetr',
+  'Mr. Viboon Thepent',
+  'Mr. Cherawat Munkit',
+  'Dr. Wuttiphol Chansrakoo',
+  'Ms. Chanyanuch Pan-iam',
+  'Asst. Prof. Dr. Jittimon Wongsa',
+  'Asst. Prof. Dr. Rawin Surbkar',
+  'Dr. Anuchit Chamsing',
+  'Mr. Wachirasiri Tavidech',
+  'Assoc. Prof. Dr. Watcharapol Chayaprasert',
+  'Assoc. Prof. Dr. Jetsada Posom',
+  'Prof. Dr. Sakamon Devahastin',
+  'Assoc. Prof. Dr. Tawarat Treeamnuk',
+  'Assoc. Prof. Sirinad Noypitak',
+  'Asst. Prof. Dr. Sirasa Thangdee',
+  'Asst. Prof. Sawanit Aichayanich',
+  'Asst. Prof. Dr. Vasu Udompetaikul',
+  'Asst. Prof. Dr. Danuwat Thangdee',
+];
+---
+
+<Layout title="19th TSAE International Conference 2026" description="19th Thai Society of Agricultural Engineering International Conference (TSAE 2026), September 7–10, 2026, Taipei, Taiwan ROC." lang="en" hideLangSwitch={true}>
+  <!-- HERO -->
+  <section class="relative overflow-hidden" style="background: linear-gradient(125deg, #1a9650 0%, #1a6b3a 48%, #0f7d5c 100%);">
+    <!-- bright decorative glows -->
+    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+      <div class="absolute -top-28 -right-24 w-[26rem] h-[26rem] rounded-full" style="background: radial-gradient(circle, rgba(200,169,81,0.55), transparent 70%);"></div>
+      <div class="absolute -bottom-32 -left-24 w-[30rem] h-[30rem] rounded-full" style="background: radial-gradient(circle, rgba(74,222,128,0.45), transparent 70%);"></div>
+      <div class="absolute top-1/4 left-1/3 w-80 h-80 rounded-full" style="background: radial-gradient(circle, rgba(255,255,255,0.16), transparent 70%);"></div>
+    </div>
+    <div class="relative max-w-6xl mx-auto px-4 py-20 lg:py-24 text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium mb-5 border border-yellow-300/40" style="background-color: rgba(200,169,81,0.2); color:#fde68a;">
+        19th TSAE International Conference
+      </div>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-4">TSAE 2026</h1>
+      <p class="text-lg sm:text-2xl font-light text-green-100 max-w-3xl mx-auto mb-6">
+        “Empowering Engineering Solutions for Future Agriculture in the New World Order”
+      </p>
+      <div class="flex flex-wrap justify-center gap-x-8 gap-y-2 text-green-50 mb-8">
+        <span class="inline-flex items-center gap-2"><svg class="w-5 h-5" style="color:#c8a951" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>September 7 – 10, 2026</span>
+        <span class="inline-flex items-center gap-2"><svg class="w-5 h-5" style="color:#c8a951" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Nangang Exhibition Center (TaiNex 1), Taipei, Taiwan ROC</span>
+      </div>
+
+      <!-- Countdown -->
+      <div id="countdown" data-target="2026-09-07T09:00:00+08:00" class="flex justify-center gap-3 sm:gap-4 mb-8">
+        {['days','hours','minutes','seconds'].map((u) => (
+          <div class="w-20 sm:w-24 rounded-xl py-3 px-2" style="background-color: rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15);">
+            <div class="text-3xl sm:text-4xl font-extrabold text-white" data-cd={u}>--</div>
+            <div class="text-[11px] uppercase tracking-wide text-green-200">{u}</div>
+          </div>
+        ))}
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href={submitUrl} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-7 py-3.5 font-bold rounded-xl text-white shadow-lg transition-transform hover:scale-105" style="background-color:#c8a951;">
+          Submit Your Paper
+        </a>
+        <a href={posterUrl} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-7 py-3.5 font-bold rounded-xl border-2 border-white/60 text-white hover:bg-white/10 transition-colors">
+          Conference Poster
+        </a>
+        <a href="#register" class="inline-flex items-center gap-2 px-7 py-3.5 font-bold rounded-xl text-white shadow-lg transition-transform hover:scale-105" style="background-color:#1a6b3a; border:2px solid rgba(255,255,255,0.5);">
+          Register to Attend
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUB NAV -->
+  <nav class="bg-white border-b border-gray-200 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-4">
+      <p class="text-center text-xs font-bold uppercase tracking-widest mb-3" style="color:#1a6b3a;">Jump to section</p>
+      <ul class="flex flex-wrap justify-center gap-2.5 sm:gap-3 text-sm font-semibold">
+        {subNav.map((n) => (
+          <li>
+            <a href={n.href} class="inline-block px-5 py-2.5 rounded-full text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md" style="background-color:#1a6b3a;" onmouseover="this.style.backgroundColor='#13502b';" onmouseout="this.style.backgroundColor='#1a6b3a';">{n.label}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </nav>
+
+  <!-- BACKGROUND -->
+  <section class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-6 text-center" style="color:#1a6b3a;">Background</h2>
+      <p class="text-gray-600 leading-relaxed text-lg">
+        The Thai Society of Agricultural Engineering (TSAE), in collaboration with the Taiwan Institute of
+        Biological Mechatronics (TIBM), the Chinese Institute of Agricultural Machinery (CIAM) and the Smart
+        Agriweek Taiwan exhibition, will hold the 19th TSAE International Conference (TSAE 2026) during
+        September 7–10, 2026 in Taipei, Taiwan ROC. Under the theme “Empowering Engineering Solutions for
+        Future Agriculture in the New World Order,” the conference serves as a forum for dissemination and
+        exchange of ideas and recent advances in agricultural engineering and related areas among students,
+        academic researchers, industry personnel and interested participants — with the aim of bringing
+        research results into practice.
+      </p>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm">
+        <span class="px-3 py-1.5 rounded-full bg-green-50 text-green-800 font-medium">Organized by TSAE · TIBM · CIAM · Smart Agriweek Taiwan</span>
+        <span class="px-3 py-1.5 rounded-full font-medium" style="background-color:#fdf6e3; color:#a8892f;">Papers published in E3S Web of Conferences · Indexed by Scopus</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOPICS -->
+  <section class="py-16" style="background-color:#f6faf7;">
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-10 text-center" style="color:#1a6b3a;">Conference Topics</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {topics.map((tp) => (
+          <div class="rounded-2xl overflow-hidden shadow-md bg-white hover:shadow-xl transition-shadow">
+            <img src={tp.img} alt={tp.title} class="w-full h-32 object-cover" loading="lazy" />
+            <div class="p-4">
+              <p class="font-semibold text-gray-800">{tp.title}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- KEYNOTE SPEAKERS -->
+  <section id="speakers" class="py-16 bg-white scroll-mt-28">
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-10 text-center" style="color:#1a6b3a;">Keynote Speakers</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {speakers.map((sp) => (
+          <div class="flex gap-5 p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <img src={sp.photo} alt={sp.name} class="w-24 h-24 rounded-xl object-cover shrink-0" loading="lazy" />
+            <div>
+              <h3 class="text-lg font-bold text-gray-900">{sp.name}</h3>
+              <p class="text-sm text-gray-500 mb-2">{sp.affil}</p>
+              <p class="text-sm font-medium" style="color:#1a6b3a;">{sp.talk}</p>
+              {sp.email && <a href={`mailto:${sp.email}`} class="text-xs text-gray-400 hover:text-green-700">{sp.email}</a>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- IMPORTANT DATES -->
+  <section id="dates" class="py-16 scroll-mt-28" style="background:linear-gradient(135deg,#0d3b1e,#1a6b3a);">
+    <div class="max-w-3xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-10 text-center text-white">Important Dates</h2>
+      <div class="space-y-3">
+        {importantDates.map((d) => (
+          <div class="flex items-center justify-between gap-4 rounded-xl px-5 py-4" style={`background-color: ${d.highlight ? 'rgba(200,169,81,0.25)' : 'rgba(255,255,255,0.08)'}; border:1px solid rgba(255,255,255,0.12);`}>
+            <span class="text-green-50">{d.label}</span>
+            <span class="font-bold whitespace-nowrap" style={d.highlight ? 'color:#fde68a;' : 'color:#ffffff;'}>{d.date}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- REGISTRATION FEES -->
+  <section id="fees" class="py-16 bg-white scroll-mt-28">
+    <div class="max-w-5xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-3 text-center" style="color:#1a6b3a;">Registration Fees</h2>
+      <p class="text-center text-gray-500 mb-10">Early-bird rate valid until July 31, 2026</p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {[{title:'Online Participation', rows:feesOnline}, {title:'Onsite Participation (incl. 3-night accommodation)', rows:feesOnsite}].map((tb) => (
+          <div class="rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+            <div class="px-5 py-3 text-white font-semibold" style="background-color:#1a6b3a;">{tb.title}</div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm min-w-[440px]">
+                <thead>
+                  <tr class="text-gray-500 text-left" style="background-color:#f6faf7;">
+                    <th class="px-4 py-2 font-medium">Participant</th>
+                    <th class="px-4 py-2 font-medium">Early Bird</th>
+                    <th class="px-4 py-2 font-medium">Regular</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tb.rows.map((r) => (
+                    <tr class="border-t border-gray-100">
+                      <td class="px-4 py-3 font-medium text-gray-800 whitespace-nowrap">{r.who}</td>
+                      <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{r.early}</td>
+                      <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{r.regular}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))}
+      </div>
+      <p class="text-sm text-gray-500 mt-6 text-center max-w-3xl mx-auto">
+        Academic conference participants can enter the Taiwan Smart Agriweek exhibition for free. As part of a special
+        promotional arrangement, participants who register under the non-member rate are eligible to apply for TSAE
+        membership without any additional fee.
+      </p>
+    </div>
+  </section>
+
+  <!-- PAYMENT -->
+  <section id="payment" class="py-16 scroll-mt-28" style="background-color:#f6faf7;">
+    <div class="max-w-4xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-3 text-center" style="color:#1a6b3a;">Payment</h2>
+      <p class="text-center text-gray-600 max-w-2xl mx-auto mb-10">
+        Payment can be made by cash, telegraphic transfer, direct transfer, or any suitable method to the following bank account:
+      </p>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="grid grid-cols-1 sm:grid-cols-3">
+          <div class="flex items-center justify-center p-8" style="background-color:#138f2d;">
+            <div class="text-center text-white">
+              <div class="text-4xl font-black leading-none">K</div>
+              <div class="text-xs font-semibold tracking-widest mt-1">KASIKORNBANK</div>
+            </div>
+          </div>
+          <div class="sm:col-span-2 p-6 sm:p-8">
+            <dl class="space-y-3 text-sm">
+              <div><dt class="text-gray-500">Bank</dt><dd class="font-semibold text-gray-900">{bank.name}</dd></div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div><dt class="text-gray-500">Account name</dt><dd class="font-semibold text-gray-900">{bank.accName}</dd></div>
+                <div><dt class="text-gray-500">Account number</dt><dd class="font-bold text-lg" style="color:#1a6b3a;">{bank.accNo}</dd></div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div><dt class="text-gray-500">SWIFT code</dt><dd class="font-semibold text-gray-900">{bank.swift}</dd></div>
+                <div><dt class="text-gray-500">Branch</dt><dd class="text-gray-700">{bank.branchAddr}</dd></div>
+              </div>
+              <div><dt class="text-gray-500">Account holder address</dt><dd class="text-gray-700">{bank.societyAddr}</dd></div>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <ul class="mt-6 space-y-2 text-sm text-gray-600 max-w-2xl mx-auto">
+        {paymentNotes.map((n) => (
+          <li class="flex gap-2"><span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span><span>{n}</span></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- SUBMISSION GUIDELINES -->
+  <section id="guidelines" class="py-16 scroll-mt-28" style="background-color:#f6faf7;">
+    <div class="max-w-5xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-4 text-center" style="color:#1a6b3a;">Submission Guidelines</h2>
+      <p class="text-gray-600 leading-relaxed max-w-3xl mx-auto text-center mb-10">{hybridNote}</p>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+        <h3 class="font-bold text-gray-800 mb-4">Scope &amp; Originality</h3>
+        <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2.5 text-sm text-gray-600">
+          {scopeOriginality.map((g) => (
+            <li class="flex gap-2"><span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span><span>{g}</span></li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h3 class="font-bold text-gray-800 mb-4">Manuscript Preparation</h3>
+          <ul class="space-y-2.5 text-sm text-gray-600">
+            {manuscriptPrep.map((g) => (
+              <li class="flex gap-2"><span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span><span>{g}</span></li>
+            ))}
+          </ul>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h3 class="font-bold text-gray-800 mb-4">Paper Submission</h3>
+          <ul class="space-y-2.5 text-sm text-gray-600">
+            {submissionSteps.map((g) => (
+              <li class="flex gap-2"><span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span><span>{g}</span></li>
+            ))}
+          </ul>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h3 class="font-bold text-gray-800 mb-4">Peer-Review &amp; Decisions</h3>
+          <ul class="space-y-2.5 text-sm text-gray-600">
+            {reviewCriteria.map((g) => (
+              <li class="flex gap-2"><span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span><span>{g}</span></li>
+            ))}
+          </ul>
+          <p class="text-sm text-gray-600 mt-4">{reviewDecisions}</p>
+          <a href={reviewResponseUrl} download class="inline-flex items-center gap-2 mt-4 text-sm font-semibold" style="color:#1a6b3a;">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Download Review Response Form (.docx)
+          </a>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h3 class="font-bold text-gray-800 mb-4">Ethics, Copyright &amp; Publication</h3>
+          <p class="text-sm text-gray-600 mb-3">{ethicsNote}</p>
+          <p class="text-sm text-gray-600 mb-3">{publicationNote}</p>
+          <p class="text-sm text-gray-600">Authors must grant EDP Sciences a licence to publish and complete the Publication Right Form before publication.</p>
+          <a href={publicationRightUrl} download class="inline-flex items-center gap-2 mt-4 text-sm font-semibold" style="color:#1a6b3a;">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Download Publication Right Form (.pdf)
+          </a>
+        </div>
+      </div>
+      <div class="flex flex-wrap justify-center gap-3 mt-8">
+        <a href={submitUrl} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-7 py-3.5 font-bold rounded-xl text-white shadow transition-transform hover:scale-105" style="background-color:#c8a951;">Submit via EasyChair</a>
+        <a href={instructionsUrl} download class="inline-flex items-center gap-2 px-7 py-3.5 font-bold rounded-xl border-2 transition-colors" style="border-color:#1a6b3a; color:#1a6b3a;">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Download Instructions for Authors (.docx)
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAPER TEMPLATE -->
+  <section id="template" class="py-16 bg-white scroll-mt-28">
+    <div class="max-w-5xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-4 text-center" style="color:#1a6b3a;">Paper Template &amp; Formatting</h2>
+      <p class="text-gray-600 leading-relaxed max-w-3xl mx-auto text-center mb-10">
+        All manuscripts must follow the official TSAE 2026 paper template (E3S Web of Conferences style). Download the
+        Word template below and prepare your paper exactly to the specifications — papers that do not comply may be returned for reformatting.
+      </p>
+
+      <!-- Download card -->
+      <div class="rounded-2xl p-6 sm:p-8 mb-8 flex flex-col sm:flex-row items-center gap-6 text-white shadow-lg" style="background: linear-gradient(135deg, #0d3b1e, #1a6b3a);">
+        <div class="w-16 h-16 rounded-2xl bg-white/15 flex items-center justify-center shrink-0">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        </div>
+        <div class="flex-1 text-center sm:text-left">
+          <h3 class="font-bold text-lg">TSAE 2026 Paper Template</h3>
+          <p class="text-green-100 text-sm mt-1">Microsoft Word (.docx) · double-column format · ready to use</p>
+        </div>
+        <a href={templateUrl} download class="inline-flex items-center gap-2 px-6 py-3 font-bold rounded-xl shadow transition-transform hover:scale-105 shrink-0" style="background-color:#c8a951; color:#143a22;">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Download Template
+        </a>
+      </div>
+
+      <!-- Spec grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {templateSpecs.map((s) => (
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <h4 class="font-bold text-sm mb-1.5" style="color:#1a6b3a;">{s.k}</h4>
+            <p class="text-sm text-gray-600 leading-relaxed">{s.v}</p>
+          </div>
+        ))}
+      </div>
+
+      <p class="text-xs text-gray-400 text-center mt-6">Tip: submit both the Word (.docx) and PDF versions, and keep a backup PDF of your slides/figures to avoid compatibility issues.</p>
+    </div>
+  </section>
+
+  <!-- PRESENTATION SPECIFICATIONS -->
+  <section id="presentation" class="py-16 bg-white scroll-mt-28">
+    <div class="max-w-5xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-10 text-center" style="color:#1a6b3a;">Presentation Specifications</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div class="px-5 py-3 text-white font-semibold" style="background:linear-gradient(135deg,#1a6b3a,#0d3b1e);">Oral</div>
+          <ul class="p-5 space-y-3 text-sm text-gray-600">
+            {presentOral.map((p) => (
+              <li class="flex gap-2.5"><span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span><span>{p}</span></li>
+            ))}
+          </ul>
+        </div>
+        <div class="rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div class="px-5 py-3 text-white font-semibold" style="background:linear-gradient(135deg,#1a6b3a,#0d3b1e);">Online</div>
+          <ul class="p-5 space-y-3 text-sm text-gray-600">
+            {presentOnline.map((p) => (
+              <li class="flex gap-2.5"><span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span><span>{p}</span></li>
+            ))}
+          </ul>
+        </div>
+        <div class="rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div class="px-5 py-3 text-white font-semibold" style="background:linear-gradient(135deg,#a8892f,#7a6320);">Poster</div>
+          <ul class="p-5 space-y-3 text-sm text-gray-600">
+            {presentPoster.map((p) => (
+              <li class="flex gap-2.5"><span class="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style="background-color:#c8a951;"></span><span>{p}</span></li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VENUE -->
+  <section id="venue" class="py-16 scroll-mt-28" style="background-color:#f6faf7;">
+    <div class="max-w-5xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-10 text-center" style="color:#1a6b3a;">Conference Venue</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col justify-center">
+          <h3 class="text-xl font-bold text-gray-900 mb-2">{venue.name}</h3>
+          <p class="text-gray-600 mb-4">Taipei, Taiwan ROC</p>
+          <ul class="space-y-3 text-sm text-gray-600">
+            <li class="flex gap-3"><svg class="w-5 h-5 shrink-0" style="color:#1a6b3a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span>{venue.address}</span></li>
+            <li class="flex gap-3"><svg class="w-5 h-5 shrink-0" style="color:#1a6b3a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg><span>Tel: {venue.tel}</span></li>
+          </ul>
+        </div>
+        <iframe
+          title="TSAE 2026 Venue — Nangang Exhibition Center"
+          src="https://www.google.com/maps?q=Nangang%20Exhibition%20Center%20Hall%201%20Taipei&output=embed"
+          class="w-full h-72 lg:h-full rounded-2xl border border-gray-100 shadow-sm"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- NON-PRESENTING REGISTRATION -->
+  <section id="register" class="py-16 bg-white scroll-mt-28">
+    <div class="max-w-5xl mx-auto px-4">
+      <div class="rounded-2xl p-6 sm:p-8 mb-6" style="background-color:#f6faf7; border:1px solid #d9ece0;">
+        <h3 class="text-xl font-bold mb-3" style="color:#1a6b3a;">Non-Presenting Participant Registration</h3>
+        <p class="text-gray-600 text-sm mb-4">Attend the conference without presenting a paper. The registration package includes:</p>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-sm text-gray-700">
+          {nonPresentingIncludes.map((it) => (
+            <li class="flex gap-2.5"><svg class="w-4 h-4 shrink-0 mt-0.5" style="color:#1a6b3a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>{it}</span></li>
+          ))}
+        </ul>
+        <p class="text-gray-600 text-sm mt-4">Please complete the form below and attach your proof of payment.</p>
+      </div>
+      <RegisterForm conf="intl" lang="en" />
+    </div>
+  </section>
+
+  <!-- COMMITTEES -->
+  <section id="committees" class="py-16 scroll-mt-28" style="background-color:#f6faf7;">
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-10 text-center" style="color:#1a6b3a;">Committee</h2>
+
+      <h3 class="text-xl font-bold mb-5" style="color:#1a6b3a;">Scientific Committee</h3>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto mb-12">
+        <table class="w-full text-sm min-w-[560px]">
+          <thead>
+            <tr class="text-left text-gray-500" style="background-color:#f1f5f2;">
+              <th class="px-4 py-3 font-medium w-[40%]">Name</th>
+              <th class="px-4 py-3 font-medium">Institution</th>
+            </tr>
+          </thead>
+          <tbody>
+            {committeeAcademic.map((c) => (
+              <tr class="border-t border-gray-100 align-top">
+                <td class="px-4 py-3 font-medium text-gray-800 whitespace-nowrap">{c.name}</td>
+                <td class="px-4 py-3 text-gray-600">{c.inst}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="text-xl font-bold mb-2" style="color:#1a6b3a;">Organizing Committee</h3>
+      <p class="text-sm text-gray-500 mb-5">Thai Society of Agricultural Engineering (TSAE)</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {committeeOrganizing.map((name) => (
+          <div class="bg-white rounded-xl border border-gray-100 px-4 py-3 text-sm text-gray-800 flex items-center gap-2.5">
+            <span class="shrink-0 w-2 h-2 rounded-full" style="background-color:#c8a951;"></span>
+            {name}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- POSTER + CTA -->
+  <section class="py-16 bg-white">
+    <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+      <div class="grid grid-cols-2 gap-4">
+        <a href={posterUrl} target="_blank" rel="noopener" class="block rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow">
+          <img src={posterUrl} alt="TSAE 2026 International Conference poster (page 1)" class="w-full" loading="lazy" />
+        </a>
+        <a href={posterUrl2} target="_blank" rel="noopener" class="block rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow">
+          <img src={posterUrl2} alt="TSAE 2026 International Conference poster (page 2)" class="w-full" loading="lazy" />
+        </a>
+      </div>
+      <div>
+        <h2 class="text-3xl font-bold mb-4" style="color:#1a6b3a;">Join us in Taipei</h2>
+        <p class="text-gray-600 mb-6 leading-relaxed">
+          Submit your paper through EasyChair and be part of the 19th TSAE International Conference. For more
+          details, see the conference posters and schedule.
+        </p>
+        <div class="flex flex-wrap gap-3 mb-8">
+          <a href={submitUrl} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-6 py-3 font-bold rounded-xl text-white shadow transition-transform hover:scale-105" style="background-color:#c8a951;">Submit Your Paper</a>
+          <a href={scheduleUrl} target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-6 py-3 font-bold rounded-xl border-2 transition-colors" style="border-color:#1a6b3a; color:#1a6b3a;">View Schedule</a>
+        </div>
+        <div class="text-sm text-gray-500 space-y-1">
+          <p><span class="font-semibold text-gray-700">Contact:</span> <a href="mailto:center@tsae.asia" class="hover:text-green-700">center@tsae.asia</a></p>
+          <p><span class="font-semibold text-gray-700">Tel:</span> +66 (0)81 807 2458</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  function initCountdown() {
+    const el = document.getElementById('countdown');
+    if (!el) return;
+    const target = new Date(el.dataset.target || '').getTime();
+    if (!target) return;
+    const set = (u: string, v: number) => {
+      const node = el.querySelector(`[data-cd="${u}"]`);
+      if (node) node.textContent = String(v).padStart(2, '0');
+    };
+    const tick = () => {
+      const diff = target - Date.now();
+      if (diff <= 0) { set('days',0); set('hours',0); set('minutes',0); set('seconds',0); return; }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      set('days', d); set('hours', h); set('minutes', m); set('seconds', s);
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
+  initCountdown();
+  document.addEventListener('astro:page-load', initCountdown);
+</script>

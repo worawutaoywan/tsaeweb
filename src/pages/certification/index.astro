@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CertificationPage from '../../components/pages/CertificationPage.astro';
+import { getLangFromUrl, useTranslations } from '../../i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+<Layout title={t('nav.certification')} lang={lang}>
+  <CertificationPage lang={lang} />
+</Layout>

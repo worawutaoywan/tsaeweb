@@ -1,0 +1,42 @@
+---
+import PageHero from '../PageHero.astro';
+import type { Lang } from '../../i18n/ui';
+import { useTranslations } from '../../i18n/utils';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+const th = lang === 'th';
+
+// Source of truth: https://old.tsae.asia/home/central_and_academic_committee/
+const docs = [
+  { label: 'คำสั่งแต่งตั้งกรรมการวิชาการ 2569 (ลว. 7 ม.ค. 2569)', href: '/wp-uploads/2026/02/คำสั่งแต่งตั้งกรรมการวิชาการ69_ลว-7-มค-2569.pdf' },
+];
+---
+
+<PageHero
+  lang={lang}
+  title={t('nav.about.academicCommittee')}
+  subtitle={th ? 'คณะกรรมการวิชาการของสมาคม' : 'Academic Committee of the association'}
+  crumbs={[{ label: t('nav.about'), href: `${base}/about` }]}
+/>
+
+<div class="max-w-3xl mx-auto px-4 py-14">
+  <p class="text-gray-600 mb-6 leading-relaxed">
+    {th
+      ? 'คณะกรรมการวิชาการของสมาคมวิศวกรรมเกษตรแห่งประเทศไทย ทำหน้าที่กำกับและส่งเสริมงานด้านวิชาการ การประชุมวิชาการ และวารสารของสมาคม สามารถดูรายละเอียดการแต่งตั้งได้จากเอกสารด้านล่าง'
+      : 'The Academic Committee of the Thai Society of Agricultural Engineering oversees and promotes the association\u2019s academic work, conferences, and journal. See the appointment order below.'}
+  </p>
+  <div class="space-y-3">
+    {docs.map((d) => (
+      <a href={d.href} target="_blank" rel="noopener" class="flex items-center gap-3 bg-white rounded-xl p-4 shadow-md border border-gray-100 hover:shadow-lg hover:border-green-200 transition-all">
+        <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 text-white" style="background-color: #c0392b;">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+        </div>
+        <span class="font-medium text-gray-800 flex-1">{d.label}</span>
+        <span class="text-xs text-gray-400">PDF</span>
+      </a>
+    ))}
+  </div>
+</div>

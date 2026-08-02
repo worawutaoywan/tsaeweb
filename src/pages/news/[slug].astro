@@ -1,0 +1,171 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+import { getLangFromUrl, useTranslations, localize, formatDate } from '../../i18n/utils';
+
+export async function getStaticPaths() {
+  const news = await getCollection('news');
+  return news.map((item) => ({
+    params: { slug: item.id },
+    props: { news: item },
+  }));
+}
+
+const { news } = Astro.props;
+const { Content } = await render(news);
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+
+const catColors: Record<string, string> = {
+  conference: '#1a6b3a',
+  journal: '#7c3aed',
+  training: '#c8a951',
+  announcement: '#dc2626',
+  activity: '#0891b2',
+};
+const catColor = catColors[news.data.category] || '#6b7280';
+const catLabel = t(`cat.${news.data.category}` as any) || news.data.category;
+
+const formattedDate = formatDate(lang, news.data.date, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+
+const displayTitle = localize(lang, news.data.title, news.data.titleTH);
+const displayExcerpt = localize(lang, news.data.excerpt, news.data.excerptTH);
+const altTitle = lang === 'th' ? news.data.title : news.data.titleTH;
+
+const allNews = await getCollection('news');
+const relatedNews = allNews
+  .filter((n) => n.id !== news.id && n.data.category === news.data.category)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
+---
+
+<Layout title={displayTitle} description={displayExcerpt} image={news.data.image} lang={lang}>
+  <div class="py-12" style="background: linear-gradient(135deg, #0d3b1e, #1a6b3a);">
+    <div class="max-w-7xl mx-auto px-4">
+      <nav class="flex items-center gap-2 text-sm text-green-300 mb-4 flex-wrap">
+        <a href={`${base}/`} class="hover:text-white transition-colors">{t('ui.home')}</a>
+        <span>/</span>
+        <a href={`${base}/news`} class="hover:text-white transition-colors">{t('nav.news')}</a>
+        <span>/</span>
+        <span class="text-white line-clamp-1">{displayTitle}</span>
+      </nav>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <article class="lg:col-span-2">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="px-3 py-1 rounded-full text-sm font-semibold text-white" style={`background-color: ${catColor};`}>
+            {catLabel}
+          </span>
+          <time class="text-gray-500 text-sm">{formattedDate}</time>
+          {news.data.featured && (
+            <span class="px-3 py-1 rounded-full text-sm font-semibold text-white" style="background-color: #c8a951;">
+              {t('ui.featured')}
+            </span>
+          )}
+        </div>
+
+        <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-4">{displayTitle}</h1>
+        {altTitle && <p class="text-xl text-gray-500 mb-6">{altTitle}</p>}
+
+        {news.data.author && (
+          <div class="flex items-center gap-2 mb-6 pb-6 border-b border-gray-200">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs" style="background-color: #1a6b3a;">
+              {news.data.author.charAt(0)}
+            </div>
+            <span class="text-sm text-gray-600">{t('news.by')} <strong>{news.data.author}</strong></span>
+          </div>
+        )}
+
+        {news.data.image && (
+          <div class="mb-8 rounded-xl overflow-hidden">
+            <img src={news.data.image} alt={displayTitle} class="w-full h-72 object-cover" onerror="this.parentElement.style.display='none'" />
+          </div>
+        )}
+
+        <div class="p-5 rounded-xl border-l-4 mb-8 text-gray-700" style="background-color: #f0faf4; border-color: #1a6b3a;">
+          <p class="text-base leading-relaxed font-medium">{displayExcerpt}</p>
+        </div>
+
+        <div class="prose prose-lg max-w-none prose-headings:text-green-800 prose-a:text-green-700 prose-strong:text-gray-900">
+          <Content />
+        </div>
+
+        <div class="mt-10 pt-6 border-t border-gray-200">
+          <p class="text-sm font-semibold text-gray-600 mb-3">{t('news.share')}</p>
+          <div class="flex gap-3">
+            <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(Astro.url.href)}`} target="_blank" rel="noopener" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-opacity hover:opacity-80" style="background-color: #1877f2;">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              Facebook
+            </a>
+            <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(displayTitle)}&url=${encodeURIComponent(Astro.url.href)}`} target="_blank" rel="noopener" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-opacity hover:opacity-80" style="background-color: #1da1f2;">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+              X (Twitter)
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <aside class="lg:col-span-1">
+        <a href={`${base}/news`} class="flex items-center gap-2 text-sm font-medium mb-6 transition-colors" style="color: #1a6b3a;" onmouseover="this.style.color='#c8a951'" onmouseout="this.style.color='#1a6b3a'">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+          {t('news.back')}
+        </a>
+
+        {relatedNews.length > 0 && (
+          <div>
+            <h3 class="text-lg font-bold mb-4 pb-2 border-b-2" style="color: #1a6b3a; border-color: #c8a951;">
+              {t('news.related')}
+            </h3>
+            <div class="space-y-4">
+              {relatedNews.map((related) => (
+                <a href={`${base}/news/${related.id}`} class="flex gap-3 group">
+                  <div class="w-16 h-16 rounded-lg flex-shrink-0 overflow-hidden" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
+                    {related.data.image && <img src={related.data.image} alt="" class="w-full h-full object-cover" onerror="this.style.display='none'" />}
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-900 group-hover:text-green-700 transition-colors line-clamp-2">
+                      {localize(lang, related.data.title, related.data.titleTH)}
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">
+                      {formatDate(lang, related.data.date, { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div class="mt-8 p-5 rounded-xl border border-gray-200 bg-gray-50">
+          <h3 class="font-bold text-gray-900 mb-3 text-sm">{t('news.quicklinks')}</h3>
+          <ul class="space-y-2">
+            <li><a href={`${base}/events`} class="text-sm text-gray-600 hover:text-green-700 transition-colors flex items-center gap-1"><span style="color: #c8a951;">›</span> {t('nav.events')}</a></li>
+            <li><a href={`${base}/journal`} class="text-sm text-gray-600 hover:text-green-700 transition-colors flex items-center gap-1"><span style="color: #c8a951;">›</span> {t('nav.journal')}</a></li>
+            <li><a href={`${base}/training`} class="text-sm text-gray-600 hover:text-green-700 transition-colors flex items-center gap-1"><span style="color: #c8a951;">›</span> {t('training.title')}</a></li>
+            <li><a href={`${base}/membership`} class="text-sm text-gray-600 hover:text-green-700 transition-colors flex items-center gap-1"><span style="color: #c8a951;">›</span> {t('membership.title')}</a></li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .prose h2 { color: #1a6b3a; margin-top: 2rem; margin-bottom: 1rem; }
+  .prose h3 { color: #124d2a; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+  .prose ul { list-style-type: disc; padding-left: 1.5rem; }
+  .prose ol { list-style-type: decimal; padding-left: 1.5rem; }
+  .prose li { margin-bottom: 0.5rem; }
+  .prose table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+  .prose th { background-color: #1a6b3a; color: white; padding: 0.75rem 1rem; text-align: left; }
+  .prose td { padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb; }
+  .prose tr:nth-child(even) td { background-color: #f9fafb; }
+  .prose a { color: #1a6b3a; text-decoration: underline; }
+  .prose blockquote { border-left: 4px solid #c8a951; padding-left: 1rem; color: #6b7280; }
+  .prose strong { font-weight: 700; }
+</style>

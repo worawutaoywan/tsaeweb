@@ -1,0 +1,80 @@
+---
+import NavBar from '../components/NavBar.astro';
+import Footer from '../components/Footer.astro';
+import Analytics from '../components/Analytics.astro';
+import AdminBar from '../components/AdminBar.astro';
+import InlineEditor from '../components/InlineEditor.astro';
+import '../styles/global.css';
+import { useTranslations, getLangFromUrl } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  lang?: Lang;
+  hideLangSwitch?: boolean;
+}
+
+const lang: Lang = (Astro.props.lang ?? getLangFromUrl(Astro.url)) as Lang;
+const t = useTranslations(lang);
+
+const {
+  title,
+  description = t('site.tagline'),
+  image = '/images/og-default.jpg',
+  hideLangSwitch = false,
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title} | TSAE – {t('site.fullname')}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={`${title} | TSAE`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
+    <meta property="og:locale" content={lang === 'th' ? 'th_TH' : 'en_US'} />
+
+    <!-- Alternate language links -->
+    <link rel="alternate" hreflang="en" href={new URL(Astro.url.pathname.replace(/^\/th/, '') || '/', Astro.site)} />
+    <link rel="alternate" hreflang="th" href={new URL('/th' + (Astro.url.pathname.replace(/^\/th/, '') || ''), Astro.site)} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${title} | TSAE`} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="min-h-screen flex flex-col" style="font-family: 'Inter', 'Noto Sans Thai', sans-serif;">
+    <AdminBar />
+    <InlineEditor />
+    <NavBar lang={lang} url={Astro.url} hideLangSwitch={hideLangSwitch} />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+    <Analytics lang={lang} />
+  </body>
+</html>

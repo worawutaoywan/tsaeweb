@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ProjectConferencePage from '../../components/pages/ProjectConferencePage.astro';
+import { getLangFromUrl, useTranslations } from '../../i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+<Layout title={t('projconf.title')} description={t('projconf.subtitle')} lang={lang}>
+  <ProjectConferencePage lang={lang} />
+</Layout>

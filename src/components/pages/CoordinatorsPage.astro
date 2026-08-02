@@ -1,0 +1,106 @@
+---
+import PageHero from '../PageHero.astro';
+import type { Lang } from '../../i18n/ui';
+import { useTranslations } from '../../i18n/utils';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+const th = lang === 'th';
+
+// Source of truth: https://old.tsae.asia/home/ผู้ประสานงานสมาคมฯ/
+const coordinators: [string, string, string][] = [
+  ['มหาวิทยาลัยขอนแก่น', 'ผศ.ดร.สมโภชน์ สุดาจันทร์', 'ผศ.ดร.สมชาย ชวนอุดม'],
+  ['มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ', 'อ.จักรพันธ์ เงาทอง', 'อ.ศิระษา เจ็งสุขสวัสดิ์'],
+  ['มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วข.ขอนแก่น', 'อ.สุกัญญา ทองโยธี', 'ผศ.เชิดศักดิ์ ศิริหล้า'],
+  ['มหาวิทยาลัยมหาสารคาม คณะวิศวกรรมศาสตร์', 'ผศ.ดร.ณัฐพล ภูมิสะอาด', 'อ.ดร.จักรมาส เลาหวณิช'],
+  ['มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วข.กาฬสินธุ์', 'ผศ.สุรสิทธิ์ พ่อค้า', 'อ.พัฒนา พงษ์พันธ์'],
+  ['มหาวิทยาลัยเทคโนโลยีสุรนารี', 'รศ.ดร.ธิราพร จุลยุเสน', 'อ.ดร.สามารถ บุญอาจ'],
+  ['มหาวิทยาลัยเชียงใหม่', 'รศ.ดร.อิทธิชัย ปรีชาวุฒิพงศ์', 'อ.ดามร บัณฑุรัตน์'],
+  ['มหาวิทยาลัยเทคโนโลยีราชมงคลธัญบุรี', 'อ.ธีระพงษ์ ควรคำนวณ (รักษาการ)', 'ดร.เกียรติศักดิ์ แสงประดิษฐ์'],
+  ['มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน (นครราชสีมา)', 'อ.ทยาวีร์ หนูบุญ', 'อ.วิรัตน์ หวังเขื่อนกลาง'],
+  ['มหาวิทยาลัยแม่โจ้', 'ผศ.อุมาพร อุประ', 'ผศ.ดร.สุเนตร สืบค้า'],
+  ['มหาวิทยาลัยราชภัฎอุดรธานี', 'อ.กวีพงษ์ หงษ์ทอง', 'อ.อภิชาต ศรีชาติ'],
+  ['มหาวิทยาลัยเกษตรศาสตร์', 'รศ.ดร.อนุพันธ์ เทอดวงศ์วรกุล', 'ผศ.ดร.ศิวลักษณ์ ปฐวีรัตน์'],
+  ['มหาวิทยาลัยเกษตรศาสตร์ (วิทยาเขตสกลนคร)', 'รศ.ดร.พงษ์ศักดิ์ สุริยวนากุล', 'อ.ดร.ประภากร แสงวิจิตร'],
+  ['สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง', 'ดร.ประสันต์ ชุ่มใจหาญ', 'ดร.ภัทรชัย วิชัยยะ'],
+  ['มหาวิทยาลัยราชภัฏวไลยอลงกรณ์ คณะเทคโนโลยีอุตสาหกรรม', 'ผศ.ประจบ ดีบุตร', 'รศ.ดร.วัชระ เพิ่มชาติ'],
+  ['สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง (ชุมพร)', 'ดร.เกษมสุข เสพศิริสุข', 'อ.ณัฐพงศ์ รัตนเดช'],
+  ['มหาวิทยาลัยธรรมศาสตร์ (ศูนย์รังสิต)', 'รศ.พินัย ทองสวัสดิ์วงศ์', 'อ.นเรนทร บุญส่ง'],
+  ['จุฬาลงกรณ์มหาวิทยาลัย', 'ผศ.สุวิทย์ บุณยวานิชกุล', '—'],
+  ['สำนักงานคณะกรรมการอาชีวศึกษา', 'อ.พิเชษฐ์ โรจนวงศ์', 'อ.ศุภวัฒน์ ปากเมย'],
+  ['กรมวิชาการเกษตร', 'นายอรรคพล เสนาณรงค์', 'นายอรรคพล เสนาณรงค์'],
+  ['มหาวิทยาลัยเทคโนโลยีราชมงคลล้านนา (ภาคพายัพ)', 'อ.กริชเพชร กลัดเนียม', 'อ.นิวัฒน์ มูลปา'],
+];
+
+// หน่วยงานที่มีความพร้อมในการทดสอบเครื่องจักรกลการเกษตร
+const testing: [string, string, string][] = [
+  ['มหาวิทยาลัยขอนแก่น', 'เครื่องเกี่ยวนวดข้าว, เครื่องนวดธัญพืช', 'อ.ดร.สมชาย ชวนอุดม'],
+  ['มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน วข.ขอนแก่น', 'การทดสอบโดยไม่ทำลายผลิตผลเกษตร (NIR)', 'ดร.ภานุวัฒน์ ทรัพย์ปรุง'],
+  ['สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง', 'อุปกรณ์ไฟฟ้าและอิเล็กทรอนิกส์, วิศวกรรมประยุกต์', 'ดร.ไกรสอน'],
+];
+---
+
+<PageHero
+  lang={lang}
+  title={t('nav.about.coordinators')}
+  subtitle={th ? 'เครือข่ายผู้ประสานงานสมาคมตามสถาบัน' : 'Association coordinators by institution'}
+  crumbs={[{ label: t('nav.about'), href: `${base}/about` }]}
+/>
+
+<div class="max-w-7xl mx-auto px-4 py-14">
+  <h2 class="text-xl font-bold mb-1" style="color: #1a6b3a;">
+    {th ? 'รายชื่อผู้ประสานงานสมาคมวิศวกรรมเกษตรแห่งประเทศไทย' : 'Association Coordinators'}
+  </h2>
+  <p class="text-sm text-gray-400 mb-6">{th ? 'ข้อมูล ปี 2555' : 'Data as of 2012'}</p>
+
+  <div class="overflow-x-auto rounded-2xl border border-gray-100 shadow-md mb-14">
+    <table class="w-full text-sm">
+      <thead>
+        <tr style="background-color: #1a6b3a;" class="text-white text-left">
+          <th class="px-4 py-3 font-semibold w-12">#</th>
+          <th class="px-4 py-3 font-semibold">{th ? 'หน่วยงาน' : 'Institution'}</th>
+          <th class="px-4 py-3 font-semibold">{th ? 'หัวหน้าหน่วยงาน' : 'Head'}</th>
+          <th class="px-4 py-3 font-semibold">{th ? 'ผู้ประสานงาน' : 'Coordinator'}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {coordinators.map(([org, head, coord], i) => (
+          <tr class={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+            <td class="px-4 py-3 text-gray-400">{i + 1}</td>
+            <td class="px-4 py-3 font-medium text-gray-800">{org}</td>
+            <td class="px-4 py-3 text-gray-600">{head}</td>
+            <td class="px-4 py-3 text-gray-600">{coord}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="text-xl font-bold mb-6" style="color: #1a6b3a;">
+    {th ? 'หน่วยงานที่มีความพร้อมในการทดสอบเครื่องจักรกลการเกษตร' : 'Institutions ready for agricultural machinery testing'}
+  </h2>
+  <div class="overflow-x-auto rounded-2xl border border-gray-100 shadow-md">
+    <table class="w-full text-sm">
+      <thead>
+        <tr style="background-color: #c8a951;" class="text-white text-left">
+          <th class="px-4 py-3 font-semibold w-12">#</th>
+          <th class="px-4 py-3 font-semibold">{th ? 'หน่วยงาน' : 'Institution'}</th>
+          <th class="px-4 py-3 font-semibold">{th ? 'ด้านที่มีความพร้อม' : 'Testing capability'}</th>
+          <th class="px-4 py-3 font-semibold">{th ? 'ผู้ประสานงาน' : 'Coordinator'}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {testing.map(([org, cap, coord], i) => (
+          <tr class={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+            <td class="px-4 py-3 text-gray-400">{i + 1}</td>
+            <td class="px-4 py-3 font-medium text-gray-800">{org}</td>
+            <td class="px-4 py-3 text-gray-600">{cap}</td>
+            <td class="px-4 py-3 text-gray-600">{coord}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>

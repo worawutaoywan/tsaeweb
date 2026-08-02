@@ -1,0 +1,10 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import PrivacyPage from '../../../components/pages/PrivacyPage.astro';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+<Layout title={t('nav.privacy')} lang={lang}>
+  <PrivacyPage lang={lang} />
+</Layout>

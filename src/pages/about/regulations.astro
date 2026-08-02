@@ -1,0 +1,86 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getLangFromUrl, useTranslations } from '../../i18n/utils';
+import { regulations } from '../../data/regulations';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+const th = lang === 'th';
+
+let counter = 0;
+const numberedChapters = regulations.map((ch) => ({
+  num: ch.num,
+  th: ch.th,
+  en: ch.en,
+  items: ch.items.map((it) => ({ ...it, no: ++counter })),
+}));
+---
+
+<Layout title={t('regulations.title')} description={t('regulations.subtitle')} lang={lang}>
+  <div class="py-12" style="background: linear-gradient(135deg, #0d3b1e, #1a6b3a);">
+    <div class="max-w-7xl mx-auto px-4">
+      <nav class="flex items-center gap-2 text-sm text-green-300 mb-4">
+        <a href={`${base}/`} class="hover:text-white transition-colors">{t('ui.home')}</a>
+        <span>/</span>
+        <a href={`${base}/about`} class="hover:text-white transition-colors">{t('nav.about')}</a>
+        <span>/</span>
+        <span class="text-white">{t('about.regulations')}</span>
+      </nav>
+      <h1 class="text-4xl font-bold text-white mb-2">{t('regulations.title')}</h1>
+      <p class="text-green-200">{t('regulations.subtitle')}</p>
+    </div>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-4 py-16">
+    <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-10">
+      <div class="text-center mb-10 pb-8 border-b border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">
+          {th ? 'ข้อบังคับสมาคมวิศวกรรมเกษตรแห่งประเทศไทย' : 'Regulations of the Thai Society of Agricultural Engineering'}
+        </h2>
+        <p class="text-gray-500">{th ? 'ฉบับแก้ไข พ.ศ. 2555' : 'Amended B.E. 2555 (2012)'}</p>
+      </div>
+
+      <div class="space-y-10 text-gray-700">
+        {numberedChapters.map((ch) => (
+          <section>
+            <h3 class="text-lg font-bold mb-4 flex items-baseline gap-2" style="color: #1a6b3a;">
+              <span>{th ? `หมวด ${ch.num}` : `Chapter ${ch.num}`}</span>
+              <span class="text-gray-400">—</span>
+              <span>{th ? ch.th : ch.en}</span>
+            </h3>
+            <ol class="space-y-3 text-sm leading-relaxed">
+              {ch.items.map((item) => (
+                <li class="flex gap-3">
+                  <span class="shrink-0 font-bold text-xs mt-0.5 tabular-nums" style="color:#1a6b3a; min-width:2.75rem;">{th ? `ข้อ ${item.no}` : `Art. ${item.no}`}</span>
+                  <div class="flex-1">
+                    <p>{th ? item.th : item.en}</p>
+                    {item.sub && (
+                      <ul class="mt-2 space-y-1.5 pl-4 border-l-2" style="border-color: #e5e7eb;">
+                        {item.sub.map((s) => (
+                          <li class="flex gap-2 text-gray-600">
+                            <span class="mt-1.5 w-1 h-1 rounded-full shrink-0 bg-gray-400"></span>
+                            <span>{th ? s.th : s.en}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ))}
+
+        <div class="mt-8 p-4 rounded-lg" style="background-color: #f0faf4;">
+          <p class="text-sm text-gray-600">
+            <strong>{th ? 'หมายเหตุ' : 'Note'}:</strong> {t('regulations.note')}
+          </p>
+          <a href={`${base}/contact`} class="inline-flex items-center gap-1 mt-2 text-sm font-medium" style="color: #1a6b3a;">
+            {t('regulations.contact')} →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

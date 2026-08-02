@@ -1,0 +1,43 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ContentBlocks from '../../components/ContentBlocks.astro';
+import { getPageBySlug, getStaticPagePaths } from '../../loaders/pages';
+import { getLangFromUrl, useTranslations } from '../../i18n/utils';
+
+export async function getStaticPaths() {
+  return getStaticPagePaths()
+    .filter((p) => p.lang === 'en')
+    .map((p) => ({ params: { slug: p.slug } }));
+}
+
+const { slug } = Astro.params;
+const lang = getLangFromUrl(Astro.url);
+const page = getPageBySlug(slug!, 'en');
+
+if (!page) {
+  return Astro.redirect('/404');
+}
+
+const t = useTranslations(lang);
+const base = '';
+---
+
+<Layout title={page.title} description={page.description || page.title} lang={lang}>
+  <div data-cms-page={page.id} data-cms-page-lang={page.lang}>
+    <div class="py-12" style="background: linear-gradient(135deg, #0d3b1e, #1a6b3a);">
+      <div class="max-w-7xl mx-auto px-4">
+        <nav class="flex items-center gap-2 text-sm text-green-300 mb-4">
+          <a href={`${base}/`} class="hover:text-white transition-colors">{t('ui.home')}</a>
+          <span>/</span>
+          <span class="text-white">{page.heroTitle || page.title}</span>
+        </nav>
+        <h1 class="text-4xl font-bold text-white mb-2" data-cms-field="heroTitle">{page.heroTitle || page.title}</h1>
+        <p class="text-green-200" data-cms-field="heroSubtitle">{page.heroSubtitle}</p>
+      </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 py-14">
+      <ContentBlocks blocks={page.blocks} editable={true} />
+    </div>
+  </div>
+</Layout>

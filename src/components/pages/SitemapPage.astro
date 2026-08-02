@@ -1,0 +1,101 @@
+---
+import PageHero from '../PageHero.astro';
+import type { Lang } from '../../i18n/ui';
+import { useTranslations } from '../../i18n/utils';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+const th = lang === 'th';
+
+type Item = { label: string; href: string };
+type Group = { title: string; color: string; items: Item[] };
+
+const groups: Group[] = [
+  {
+    title: t('nav.about'),
+    color: '#1a6b3a',
+    items: [
+      { label: t('nav.about.history'), href: `${base}/about` },
+      { label: t('nav.about.regulations'), href: `${base}/about/regulations` },
+      { label: t('nav.about.committee'), href: `${base}/about/committee` },
+      { label: t('nav.about.academicCommittee'), href: `${base}/about/academic-committee` },
+      { label: t('nav.about.coordinators'), href: `${base}/about/coordinators` },
+      { label: t('nav.about.members'), href: `${base}/about/members` },
+      { label: t('nav.network'), href: `${base}/network` },
+    ],
+  },
+  {
+    title: t('nav.news'),
+    color: '#c0392b',
+    items: [
+      { label: t('nav.newsAll'), href: `${base}/news` },
+      { label: t('nav.events'), href: `${base}/events` },
+      { label: t('nav.events.national'), href: '/2026conf-national/' },
+      { label: t('nav.events.international'), href: '/2026conf-intl/' },
+      { label: t('nav.events.iaec'), href: '/iaec2026/' },
+      { label: t('nav.events.training'), href: `${base}/training` },
+    ],
+  },
+  {
+    title: t('nav.academic'),
+    color: '#2563eb',
+    items: [
+      { label: t('nav.academic.research'), href: `${base}/about/research` },
+      { label: t('nav.academic.proceeding'), href: `${base}/proceeding` },
+      { label: t('nav.academic.journal'), href: `${base}/journal` },
+      { label: t('journal.archive'), href: `${base}/journal/archive` },
+      { label: t('nav.academic.projects'), href: `${base}/project-conference` },
+      { label: t('nav.academic.submission'), href: `${base}/submission` },
+      { label: t('nav.academic'), href: `${base}/academic` },
+    ],
+  },
+  {
+    title: th ? 'บริการและอื่น ๆ' : 'Services & more',
+    color: '#7c3aed',
+    items: [
+      { label: t('nav.certification'), href: `${base}/certification` },
+      { label: t('membership.title'), href: `${base}/membership` },
+      { label: t('nav.contact'), href: `${base}/contact` },
+      { label: t('nav.privacy'), href: `${base}/privacy` },
+    ],
+  },
+];
+---
+
+<PageHero
+  lang={lang}
+  title={th ? 'แผนผังเว็บไซต์' : 'Sitemap'}
+  subtitle={th ? 'รวมทุกหน้าของเว็บไซต์สมาคมวิศวกรรมเกษตรแห่งประเทศไทย' : 'All pages of the TSAE website'}
+/>
+
+<div class="max-w-7xl mx-auto px-4 py-12">
+  <a href={`${base}/`} class="inline-flex items-center gap-2 mb-8 font-semibold text-gray-800 hover:text-green-700 transition-colors">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V10"/></svg>
+    {t('ui.home')}
+  </a>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    {groups.map((g) => (
+      <section class="bg-white rounded-xl p-5 shadow-sm ring-1 ring-gray-100">
+        <h2 class="text-sm font-bold uppercase tracking-wide mb-3 pb-2 border-b" style={`color:${g.color}; border-color:${g.color}22;`}>{g.title}</h2>
+        <ul class="space-y-2">
+          {g.items.map((it) => (
+            <li>
+              <a href={it.href} class="group inline-flex items-start gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                <span class="mt-0.5 transition-transform group-hover:translate-x-0.5" style={`color:${g.color};`}>›</span>
+                <span>{it.label}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+
+  <p class="mt-10 text-xs text-gray-400">
+    {th ? 'สำหรับเครื่องมือค้นหา (Search engine): ' : 'For search engines: '}
+    <a href="/sitemap-index.xml" class="underline hover:text-gray-600">sitemap-index.xml</a>
+  </p>
+</div>

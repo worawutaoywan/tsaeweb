@@ -1,0 +1,128 @@
+---
+/** Admin toolbar — visible when logged in via /api/admin cookie.
+ *  Static pages  -> inline editor (Brizy-like, edits data/cms/pages.json in place)
+ *  Time-series   -> opens the CMS in a new tab at the right section (news/events/hero)
+ */
+---
+
+<div id="tsae-admin-bar" class="hidden" aria-hidden="true">
+  <div class="tsae-admin-bar-inner">
+    <span class="tsae-admin-brand">TSAE Admin</span>
+    <span id="tsae-admin-context" class="tsae-admin-context"></span>
+    <div class="tsae-admin-actions">
+      <button type="button" id="tsae-admin-edit" class="tsae-admin-btn tsae-admin-btn-primary">แก้ไขหน้านี้</button>
+      <a href="/api/admin/cms" class="tsae-admin-btn" target="_blank" rel="noopener">CMS ข่าว/กิจกรรม</a>
+      <a href="/api/admin/logout" class="tsae-admin-btn">ออกจากระบบ</a>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  #tsae-admin-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: linear-gradient(90deg, #0f5a30, #1a7a42);
+    color: #fff;
+    font-size: 13px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.18);
+  }
+  #tsae-admin-bar.hidden {
+    display: none !important;
+  }
+  body.tsae-admin-active { padding-top: 42px !important; }
+  body.tsae-admin-active header.sticky { top: 42px !important; }
+  /* When the inline editor bar is showing, hide the admin bar to avoid stacking */
+  body.tsae-ie-active #tsae-admin-bar { display: none !important; }
+
+  .tsae-admin-bar-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .tsae-admin-brand { font-weight: 800; letter-spacing: .02em; }
+  .tsae-admin-context { opacity: .85; font-size: 12px; flex: 1; min-width: 120px; }
+  .tsae-admin-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+  .tsae-admin-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+    border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.12);
+    color: #fff; cursor: pointer; text-decoration: none; font-family: inherit;
+  }
+  .tsae-admin-btn:hover { background: rgba(255,255,255,.22); }
+  .tsae-admin-btn-primary { background: #fff; color: #0f5a30; border-color: #fff; }
+  .tsae-admin-btn-primary:hover { background: #f0fdf4; }
+</style>
+
+<script>
+  (function initAdminBar() {
+    const bar = document.getElementById('tsae-admin-bar');
+    const ctx = document.getElementById('tsae-admin-context');
+    const editBtn = document.getElementById('tsae-admin-edit') as HTMLButtonElement | null;
+    if (!bar || !ctx || !editBtn) return;
+
+    const TYPE_LABELS: Record<string, string> = {
+      hero: 'Hero Banner หน้าแรก',
+      page: 'หน้า Static (แก้ inline)',
+      news: 'ข่าว (แก้ใน CMS)',
+      event: 'กิจกรรม (แก้ใน CMS)',
+      none: 'หน้านี้ยังไม่รองรับการแก้ไข',
+    };
+
+    async function api(path: string) {
+      const res = await fetch('/api/admin/cms/api' + path, { credentials: 'same-origin' });
+      if (!res.ok) return null;
+      return res.json();
+    }
+
+    (async () => {
+      const me = await api('/me');
+      if (!me?.authenticated) return;
+
+      const path = location.pathname;
+      // A static page-builder page renders [data-cms-page]; edit it inline.
+      const isStaticPage = !!document.querySelector('[data-cms-page]');
+
+      let type = 'none';
+      let cmsHash = '';
+      if (isStaticPage) {
+        type = 'page';
+      } else {
+        const resolved = await api('/pages/resolve?path=' + encodeURIComponent(path));
+        if (resolved) {
+          type = resolved.type;
+          cmsHash = resolved.editHash || '';
+        }
+      }
+
+      ctx.textContent = path + ' · ' + (TYPE_LABELS[type] || 'CMS');
+
+      if (type === 'page') {
+        editBtn.textContent = 'แก้ไขหน้านี้ (Inline)';
+        editBtn.addEventListener('click', () => {
+          const fn = (window as any).tsaeInlineEdit;
+          if (typeof fn === 'function') fn();
+          else document.dispatchEvent(new CustomEvent('tsae:inline-edit'));
+        });
+      } else if (type === 'hero' || type === 'news' || type === 'event') {
+        editBtn.textContent = 'แก้ใน CMS';
+        editBtn.addEventListener('click', () => {
+          window.open('/api/admin/cms' + (cmsHash || ''), '_blank', 'noopener');
+        });
+      } else {
+        // No CMS mapping for this page — hide the edit button, keep the bar for CMS/logout.
+        editBtn.style.display = 'none';
+      }
+
+      bar.classList.remove('hidden');
+      bar.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('tsae-admin-active');
+    })();
+  })();
+</script>

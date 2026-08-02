@@ -1,0 +1,10 @@
+# Umami analytics — umami.tsae.asia
+# /opt/umami/docker-compose.yml (port 127.0.0.1:13001 -> 3000)
+
+http://umami.tsae.asia {
+	reverse_proxy 127.0.0.1:13001
+}
+
+umami.tsae.asia {
+	reverse_proxy 127.0.0.1:13001
+}

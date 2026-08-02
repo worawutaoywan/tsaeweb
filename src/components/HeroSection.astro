@@ -1,0 +1,328 @@
+---
+import type { Lang } from '../i18n/ui';
+import { useTranslations } from '../i18n/utils';
+import { loadHeroSlides } from '../loaders/cms';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'en' } = Astro.props;
+const t = useTranslations(lang);
+
+const isTH = lang === 'th';
+const detailsLabel = isTH ? 'ดูรายละเอียด' : 'View details';
+const registerLabel = isTH ? 'ลงทะเบียน' : 'Register';
+
+const slides = loadHeroSlides().map((s) => ({
+  fullImage: s.fullImage !== false,
+  badge: isTH ? s.badgeTH : s.badgeEN,
+  title: isTH ? (s.titleTH ?? 'TSAE') : (s.titleEN ?? 'TSAE'),
+  titleAccent: isTH ? (s.titleAccentTH ?? '2026') : (s.titleAccentEN ?? '2026'),
+  theme: isTH ? (s.themeTH ?? '') : (s.themeEN ?? ''),
+  date: isTH ? (s.dateTH ?? '') : (s.dateEN ?? ''),
+  location: isTH ? (s.locationTH ?? '') : (s.locationEN ?? ''),
+  tag: isTH ? (s.tagTH ?? '') : (s.tagEN ?? ''),
+  poster: s.image,
+  image: s.image,
+  href: s.href,
+  href2: s.href2 || '',
+  href2Label: isTH ? (s.href2LabelTH || s.badgeTH) : (s.href2LabelEN || s.badgeEN),
+  registerHref: s.registerHref || s.href,
+  bg: s.bg,
+  overlay: s.overlay,
+  glow: s.glow,
+}));
+const hasSlides = slides.length > 0;
+---
+
+<section id="hero" class="hero relative overflow-hidden">
+  <h1 class="sr-only">{t('hero.title')} — {t('hero.subtitle')}</h1>
+
+  <div id="hero-stage" class="relative w-full overflow-hidden transition-[height] duration-700 ease-out" style={hasSlides ? 'height:480px' : 'height:0;display:none'}>
+    {slides.map((slide, i) => (
+      <div
+        class:list={['hero-slide', 'absolute', 'inset-0', 'transition-opacity', 'duration-700', 'ease-out', i === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none']}
+        data-slide={i}
+        data-fullimage={String(!!slide.fullImage)}
+        aria-hidden={i === 0 ? 'false' : 'true'}
+        style={`background:${slide.bg};`}
+      >
+        <img src={slide.image} alt="" aria-hidden="true" class="absolute inset-0 w-full h-full object-cover blur-2xl scale-110" loading={i === 0 ? 'eager' : 'lazy'} decoding="async" />
+        <div class="absolute inset-0" style={`background:${slide.overlay};`}></div>
+        <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <div class="absolute -top-28 -right-24 w-[26rem] h-[26rem] rounded-full" style={`background: radial-gradient(circle, ${slide.glow}, transparent 70%);`}></div>
+        </div>
+
+        {slide.fullImage ? (
+          <div class="absolute inset-0">
+            <img
+              src={slide.image}
+              alt={slide.badge}
+              class="hero-fullimg absolute inset-0 w-full h-full object-contain object-center pointer-events-none"
+              loading={i === 0 ? 'eager' : 'lazy'}
+              decoding="async"
+            />
+            {slide.href2 ? (
+              <>
+                <a
+                  href={slide.href}
+                  target="_blank"
+                  rel="noopener"
+                  class="group/l absolute inset-y-0 left-0 w-1/2 z-10 flex flex-col items-center pt-3 sm:pt-4 px-2"
+                  aria-label={isTH ? 'สาส์นจากนายกสมาคม · กษ. กรุงเทพฯ' : 'Message from the TSAE President · DOAE Bangkok'}
+                >
+                  <span class="max-w-[92%] rounded-xl bg-white/95 text-[#1a6b3a] shadow-lg ring-1 ring-black/5 px-3 py-2 text-center leading-snug">
+                    <span class="block text-xs sm:text-sm font-bold">{isTH ? 'สาส์นจากนายกสมาคม' : 'President’s message'}</span>
+                    <span class="block text-[10px] sm:text-xs font-medium text-gray-600 mt-0.5">{isTH ? 'กษ. กรุงเทพฯ · กดเพื่อเปิด PDF' : 'DOAE Bangkok · Open PDF'}</span>
+                  </span>
+                  <span class="mt-auto mb-3 sm:mb-4 opacity-0 group-hover/l:opacity-100 transition-opacity text-[10px] sm:text-xs font-semibold text-white bg-black/40 rounded-full px-3 py-1">{isTH ? 'เปิด PDF' : 'Open PDF'}</span>
+                </a>
+                <a
+                  href={slide.href2}
+                  target="_blank"
+                  rel="noopener"
+                  class="group/r absolute inset-y-0 right-0 w-1/2 z-10 flex flex-col items-center pt-3 sm:pt-4 px-2"
+                  aria-label={slide.href2Label}
+                >
+                  <span class="max-w-[92%] rounded-xl bg-white/95 text-[#92400e] shadow-lg ring-1 ring-black/5 px-3 py-2 text-center leading-snug">
+                    <span class="block text-xs sm:text-sm font-bold">{isTH ? 'Presentation ยุทธศาสตร์' : 'Strategy presentation'}</span>
+                    <span class="block text-[10px] sm:text-xs font-medium text-gray-600 mt-0.5">{isTH ? 'เครื่องจักรกลการเกษตร · กดเพื่อเปิด PDF' : 'Ag machinery · Open PDF'}</span>
+                  </span>
+                  <span class="mt-auto mb-3 sm:mb-4 opacity-0 group-hover/r:opacity-100 transition-opacity text-[10px] sm:text-xs font-semibold text-white bg-black/40 rounded-full px-3 py-1">{isTH ? 'เปิด PDF' : 'Open PDF'}</span>
+                </a>
+              </>
+            ) : (
+              <a
+                href={slide.href}
+                target={/^https?:|\.pdf$/.test(slide.href) ? '_blank' : undefined}
+                rel={/^https?:|\.pdf$/.test(slide.href) ? 'noopener' : undefined}
+                class="absolute inset-0 z-10"
+                aria-label={slide.badge}
+              ></a>
+            )}
+          </div>
+        ) : (
+        <div class="relative h-full max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 grid lg:grid-cols-12 items-center gap-4 lg:gap-6">
+          <div class="lg:col-span-7 flex flex-col justify-center">
+            <a href={slide.href} target={/^https?:|\.pdf$/.test(slide.href) ? '_blank' : undefined} rel={/^https?:|\.pdf$/.test(slide.href) ? 'noopener' : undefined} class="lg:hidden flex justify-center mb-3">
+              <img
+                src={slide.poster}
+                alt=""
+                class="max-h-44 sm:max-h-52 w-auto rounded-xl ring-1 ring-white/25 shadow-2xl"
+                loading={i === 0 ? 'eager' : 'lazy'}
+                decoding="async"
+              />
+            </a>
+            <div class="w-full max-w-xl lg:max-w-none text-white text-center lg:text-left lg:rounded-3xl lg:p-9 lg:bg-white/[0.1] lg:ring-1 lg:ring-white/20 lg:backdrop-blur-md lg:shadow-2xl">
+            <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-3.5" style="background-color: rgba(200,169,81,0.22); color:#fde68a;">
+              <span class="w-1.5 h-1.5 rounded-full" style="background-color:#fde68a;"></span>
+              {slide.badge}
+            </span>
+            <h2 class="font-extrabold leading-tight tracking-tight text-3xl sm:text-4xl lg:text-5xl mb-3">
+              {slide.title}{slide.titleAccent ? <> <span style="color:#f2cf6b;">{slide.titleAccent}</span></> : null}
+            </h2>
+            {slide.theme && (
+              <p class="text-white/90 text-sm sm:text-base max-w-2xl mx-auto lg:mx-0 mb-4 leading-relaxed line-clamp-3">{slide.theme}</p>
+            )}
+
+            {(slide.date || slide.location) && (
+            <div class="flex flex-wrap justify-center lg:justify-start gap-2.5 mb-5">
+              {slide.date && (
+              <span class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium" style="background-color: rgba(255,255,255,0.12);">
+                <svg class="w-4 h-4 shrink-0" style="color:#f2cf6b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                {slide.date}
+              </span>
+              )}
+              {slide.location && (
+              <span class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium" style="background-color: rgba(255,255,255,0.12);">
+                <svg class="w-4 h-4 shrink-0" style="color:#f2cf6b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                {slide.location}
+              </span>
+              )}
+            </div>
+            )}
+
+            <div class="flex flex-wrap justify-center lg:justify-start gap-3">
+              <a href={slide.href} target={/^https?:|\.pdf$/.test(slide.href) ? '_blank' : undefined} rel={/^https?:|\.pdf$/.test(slide.href) ? 'noopener' : undefined} class="inline-flex items-center gap-2 px-7 py-3.5 font-bold rounded-xl text-white shadow-lg transition-transform hover:scale-105" style="background-color:#c8a951;">
+                {detailsLabel}
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" /></svg>
+              </a>
+              <a href={slide.registerHref} target={/^https?:/.test(slide.registerHref) ? '_blank' : undefined} rel={/^https?:/.test(slide.registerHref) ? 'noopener' : undefined} class="inline-flex items-center gap-2 px-7 py-3.5 font-bold rounded-xl border-2 border-white/60 text-white hover:bg-white/10 transition-colors">
+                {registerLabel}
+              </a>
+            </div>
+
+            {slide.tag && (
+            <p class="mt-4 text-xs sm:text-sm text-white/75 flex items-center justify-center lg:justify-start gap-2">
+              <svg class="w-4 h-4 shrink-0" style="color:#f2cf6b;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 011.4-1.4l3.3 3.3 6.8-6.8a1 1 0 011.4 0z" clip-rule="evenodd"/></svg>
+              {slide.tag}
+            </p>
+            )}
+            </div>
+          </div>
+
+          <div class="hidden lg:flex lg:col-span-5 relative h-full items-center justify-end pr-1">
+            <div class="absolute right-6 top-1/2 -translate-y-1/2 w-[24rem] h-[24rem] rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(242,207,107,0.30), transparent 70%);"></div>
+            <a href={slide.href} target={/^https?:|\.pdf$/.test(slide.href) ? '_blank' : undefined} rel={/^https?:|\.pdf$/.test(slide.href) ? 'noopener' : undefined} class="group relative inline-block">
+              <span class="absolute -inset-2.5 rounded-3xl bg-white/10 ring-1 ring-white/15 rotate-6 transition-transform duration-500 group-hover:rotate-3"></span>
+              <img
+                src={slide.poster}
+                alt={slide.badge}
+                class="relative max-h-[440px] w-auto rounded-2xl ring-1 ring-white/25 rotate-2 group-hover:rotate-0 transition-transform duration-500"
+                style="box-shadow: 0 30px 60px -15px rgba(0,0,0,0.65);"
+                loading={i === 0 ? 'eager' : 'lazy'}
+                decoding="async"
+              />
+            </a>
+          </div>
+        </div>
+        )}
+      </div>
+    ))}
+
+    {hasSlides && (
+    <>
+    <button
+      type="button"
+      class="hero-prev group absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-black/25 hover:bg-black/50 backdrop-blur-sm ring-1 ring-white/40 text-white flex items-center justify-center shadow-lg transition-all hover:scale-105 active:scale-95"
+      aria-label="Previous slide"
+    >
+      <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+    <button
+      type="button"
+      class="hero-next group absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-black/25 hover:bg-black/50 backdrop-blur-sm ring-1 ring-white/40 text-white flex items-center justify-center shadow-lg transition-all hover:scale-105 active:scale-95"
+      aria-label="Next slide"
+    >
+      <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+
+    <div class="hero-dots absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1">
+      {slides.map((_, i) => (
+        <button
+          type="button"
+          class="hero-dot p-2.5 -m-1 flex items-center"
+          data-dot={i}
+          aria-label={`Go to slide ${i + 1}`}
+        >
+          <span
+            class:list={['hero-dot-bar', 'block', 'h-2.5', 'rounded-full', 'shadow', 'transition-all', 'duration-300', i === 0 ? 'w-7' : 'w-2.5']}
+            style={i === 0 ? 'background-color:#f2cf6b' : 'background-color:rgba(255,255,255,0.7)'}
+          ></span>
+        </button>
+      ))}
+    </div>
+    </>
+    )}
+  </div>
+  {!hasSlides && (
+    <div class="py-16 text-center text-gray-500 bg-gray-50 border-b border-gray-100">
+      <p class="text-sm">Hero banner ยังไม่ถูกตั้งค่า — แก้ใน CMS → Hero Banner</p>
+    </div>
+  )}
+</section>
+
+<script>
+  function initHero() {
+    const hero = document.getElementById('hero');
+    if (!hero) return;
+
+    const stage = document.getElementById('hero-stage');
+    const slides = Array.from(hero.querySelectorAll('.hero-slide'));
+    const dots = Array.from(hero.querySelectorAll('.hero-dot'));
+    const bars = Array.from(hero.querySelectorAll('.hero-dot-bar'));
+    if (slides.length === 0) return;
+
+    let current = 0;
+    let timer;
+    const INTERVAL = 5000;
+    const ACTIVE = '#f2cf6b';
+    const INACTIVE = 'rgba(255,255,255,0.7)';
+    const STAGE_H = 480;
+
+    function fitStage() {
+      if (!stage) return;
+      stage.style.height = STAGE_H + 'px';
+    }
+
+    function show(index) {
+      current = (index + slides.length) % slides.length;
+      slides.forEach((slide, i) => {
+        const active = i === current;
+        slide.classList.toggle('opacity-100', active);
+        slide.classList.toggle('opacity-0', !active);
+        slide.classList.toggle('pointer-events-none', !active);
+        slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+      });
+      bars.forEach((bar, i) => {
+        const active = i === current;
+        bar.classList.toggle('w-7', active);
+        bar.classList.toggle('w-2.5', !active);
+        bar.style.backgroundColor = active ? ACTIVE : INACTIVE;
+      });
+      fitStage();
+    }
+
+    function next() { show(current + 1); }
+    function prev() { show(current - 1); }
+
+    function start() {
+      stop();
+      if (slides.length > 1) timer = window.setInterval(next, INTERVAL);
+    }
+    function stop() {
+      if (timer) window.clearInterval(timer);
+    }
+
+    hero.querySelector('.hero-next')?.addEventListener('click', (e) => { e.preventDefault(); next(); start(); });
+    hero.querySelector('.hero-prev')?.addEventListener('click', (e) => { e.preventDefault(); prev(); start(); });
+    dots.forEach((dot, i) => dot.addEventListener('click', (e) => { e.preventDefault(); show(i); start(); }));
+
+    hero.addEventListener('mouseenter', stop);
+    hero.addEventListener('mouseleave', start);
+
+    let touchX = null;
+    let touchY = null;
+    let swiping = false;
+    const SWIPE_MIN = 45;
+    if (stage) {
+      stage.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 1) return;
+        touchX = e.touches[0].clientX;
+        touchY = e.touches[0].clientY;
+        swiping = false;
+        stop();
+      }, { passive: true });
+      stage.addEventListener('touchmove', (e) => {
+        if (touchX === null || touchY === null) return;
+        const dx = e.touches[0].clientX - touchX;
+        const dy = e.touches[0].clientY - touchY;
+        if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) swiping = true;
+      }, { passive: true });
+      stage.addEventListener('touchend', (e) => {
+        if (touchX !== null) {
+          const dx = e.changedTouches[0].clientX - touchX;
+          if (Math.abs(dx) > SWIPE_MIN) { dx < 0 ? next() : prev(); }
+        }
+        touchX = null;
+        touchY = null;
+        start();
+      }, { passive: true });
+      stage.querySelectorAll('a').forEach((a) => {
+        a.addEventListener('click', (e) => { if (swiping) { e.preventDefault(); swiping = false; } });
+      });
+    }
+
+    window.addEventListener('resize', fitStage);
+    fitStage();
+    start();
+  }
+
+  initHero();
+  document.addEventListener('astro:page-load', initHero);
+</script>

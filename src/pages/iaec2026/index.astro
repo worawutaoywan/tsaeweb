@@ -1,0 +1,114 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const registerUrl = 'https://aaaesociety.org/register-iaec2026/';
+const shopUrl = 'https://aaaesociety.org/shop/';
+const upiUrl = 'https://aaaesociety.org/upi-payments/';
+const posterHtmlUrl = '/iaec2026/poster/';
+const posterPdfUrl = '/downloads/IAEC2026-poster.pdf';
+const posterImg = '/images/conf/iaec2026-poster.jpg';
+const contactEmail = 'office@aaaesociety.org';
+
+const facts = [
+  { label: 'Dates', value: '26 – 28 November 2026' },
+  { label: 'Venue', value: 'Prime Plaza Hotel, Bali, Indonesia' },
+  { label: 'Abstracts due', value: '30 July 2026' },
+  { label: 'Publication', value: 'IAEJ (ISSN 0858-2114), Scopus indexed' },
+];
+
+const fees = [
+  { who: 'Member societies (AAAE · TSAE · AMMA · ISAE · NSAE · PERTETA)', usd: 'USD 100', inr: '₹10,000' },
+  { who: 'Non-members', usd: 'USD 150', inr: '₹15,000' },
+];
+---
+
+<Layout
+  title="IAEC 2026 — Appropriate Technologies for Climate Resilient Farming"
+  description="IAEC 2026 hosted by AAAE with PERTETA in Bali, 26–28 November 2026. Abstracts due 30 July 2026. TSAE members register at the member-society rate."
+  lang="en"
+>
+  <section class="relative overflow-hidden text-white" style="background: linear-gradient(145deg, #1F3B2C 0%, #2F5B41 55%, #35667A 100%);">
+    <div class="max-w-6xl mx-auto px-4 py-14 lg:py-16">
+      <p class="text-xs font-semibold tracking-[0.18em] uppercase mb-3" style="color:#C79A3D;">IAEC 2026 · AAAE with PERTETA</p>
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight max-w-3xl mb-4" style="font-family: Georgia, 'Times New Roman', serif;">
+        Appropriate Technologies for Climate Resilient Farming
+      </h1>
+      <p class="text-base sm:text-lg text-white/85 max-w-2xl leading-relaxed mb-8">
+        The Asian Association of Agricultural Engineering, together with PERTETA, convenes researchers and practitioners across Asia.
+        TSAE members qualify for the member-society registration rate.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a href={registerUrl} target="_blank" rel="noopener" class="inline-flex items-center px-6 py-3 rounded-xl font-bold text-white shadow transition-transform hover:scale-105" style="background-color:#C79A3D;">
+          Register / Submit abstract
+        </a>
+        <a href={posterPdfUrl} target="_blank" rel="noopener" class="inline-flex items-center px-6 py-3 rounded-xl font-semibold border-2 border-white/40 text-white hover:bg-white/10 transition-colors">
+          Download poster PDF
+        </a>
+        <a href={posterHtmlUrl} class="inline-flex items-center px-6 py-3 rounded-xl font-semibold border-2 border-white/40 text-white hover:bg-white/10 transition-colors">
+          View interactive poster
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-12" style="background:#FBF7EC;">
+    <div class="max-w-6xl mx-auto px-4 grid lg:grid-cols-2 gap-10 items-start">
+      <a href={posterHtmlUrl} class="block rounded-2xl overflow-hidden shadow-xl ring-1 ring-black/5 bg-white group">
+        <img src={posterImg} alt="IAEC 2026 conference poster" class="w-full h-auto group-hover:opacity-95 transition-opacity" loading="eager" />
+      </a>
+
+      <div>
+        <h2 class="text-2xl font-bold mb-5" style="color:#1F3B2C;">Key information</h2>
+        <dl class="space-y-4 mb-8">
+          {facts.map((f) => (
+            <div class="flex gap-4 border-b border-black/10 pb-3">
+              <dt class="w-32 shrink-0 text-xs font-bold uppercase tracking-wider" style="color:#C79A3D;">{f.label}</dt>
+              <dd class="text-gray-800 font-medium leading-snug">{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <h3 class="text-lg font-bold mb-3" style="color:#1F3B2C;">Registration fees</h3>
+        <div class="rounded-xl overflow-hidden border border-black/10 bg-white mb-6">
+          <table class="w-full text-sm">
+            <thead style="background:#1F3B2C; color:#F3ECD9;">
+              <tr>
+                <th class="text-left px-4 py-3 font-semibold">Category</th>
+                <th class="text-right px-4 py-3 font-semibold">USD</th>
+                <th class="text-right px-4 py-3 font-semibold">INR</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fees.map((row) => (
+                <tr class="border-t border-black/5">
+                  <td class="px-4 py-3 text-gray-700">{row.who}</td>
+                  <td class="px-4 py-3 text-right font-semibold" style="color:#1F3B2C;">{row.usd}</td>
+                  <td class="px-4 py-3 text-right font-semibold" style="color:#1F3B2C;">{row.inr}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex flex-wrap gap-3 mb-6">
+          <a href={shopUrl} target="_blank" rel="noopener" class="px-4 py-2.5 rounded-lg text-sm font-semibold text-white" style="background:#2F5B41;">Pay in USD → Shop</a>
+          <a href={upiUrl} target="_blank" rel="noopener" class="px-4 py-2.5 rounded-lg text-sm font-semibold text-white" style="background:#B5652E;">Pay in INR via UPI</a>
+        </div>
+
+        <p class="text-sm text-gray-600 leading-relaxed">
+          Abstracts and registration use the same form.
+          Questions: <a href={`mailto:${contactEmail}`} class="font-semibold underline" style="color:#2F5B41;">{contactEmail}</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-10 bg-white border-t border-gray-100">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <p class="text-sm text-gray-500">Hosted by AAAE with PERTETA · Partner societies include TSAE</p>
+      <a href={registerUrl} target="_blank" rel="noopener" class="inline-flex self-start px-6 py-3 rounded-xl font-bold text-white" style="background-color:#C79A3D;">
+        Register for IAEC 2026 →
+      </a>
+    </div>
+  </section>
+</Layout>

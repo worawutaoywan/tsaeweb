@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SubmissionPage from '../../components/pages/SubmissionPage.astro';
+import { getLangFromUrl, useTranslations } from '../../i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+<Layout title={t('submit.title')} description={t('submit.subtitle')} lang={lang}>
+  <SubmissionPage lang={lang} />
+</Layout>

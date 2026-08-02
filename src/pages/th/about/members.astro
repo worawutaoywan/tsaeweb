@@ -1,0 +1,10 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import MembersPage from '../../../components/pages/MembersPage.astro';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+<Layout title={t('nav.about.members')} lang={lang}>
+  <MembersPage lang={lang} />
+</Layout>

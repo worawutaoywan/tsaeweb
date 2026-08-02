@@ -1,0 +1,69 @@
+---
+import PageHero from '../PageHero.astro';
+import type { Lang } from '../../i18n/ui';
+import { useTranslations } from '../../i18n/utils';
+import { projectConferences } from '../../data/projectConferences';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+const th = lang === 'th';
+---
+
+<PageHero lang={lang} title={t('projconf.title')} subtitle={t('projconf.subtitle')} />
+
+<div class="max-w-7xl mx-auto px-4 py-12">
+  <div class="mb-10 rounded-2xl p-6 sm:p-7 border border-gray-100 shadow-sm" style="background: linear-gradient(135deg, #eefdf5, #ffffff);">
+    <h2 class="text-lg font-bold mb-2" style="color:#0d9488;">{t('projconf.about')}</h2>
+    <p class="text-sm text-gray-600 leading-relaxed max-w-3xl">{t('projconf.aboutDesc')}</p>
+  </div>
+
+  <h2 class="text-xl font-bold mb-5" style="color:#0d9488;">{t('projconf.listTitle')}</h2>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+    {projectConferences.map((c) => {
+      const inner = (
+        <>
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <div class="text-[10px] font-semibold tracking-widest uppercase" style="color:#0d9488;">{th ? 'ครั้งที่' : 'No.'}</div>
+              <div class="text-3xl font-extrabold leading-none text-gray-900">{c.edition}</div>
+            </div>
+            <div class="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center" style={c.url ? 'background-color:#eefdf5;' : 'background-color:#f3f4f6;'}>
+              <svg class="w-4.5 h-4.5" fill="none" stroke={c.url ? '#0d9488' : '#9ca3af'} viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+            </div>
+          </div>
+          <p class="text-[11px] text-gray-500 mt-3 leading-snug">{th ? 'การประชุมวิชาการโครงงานวิศวกรรมเกษตรแห่งชาติ' : 'National AE Project Conference'}</p>
+          <div class="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+            {c.url ? (
+              <span class="inline-flex items-center gap-1 text-xs font-semibold group-hover:gap-1.5 transition-all" style="color:#0d9488;">
+                {t('projconf.open')}
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              </span>
+            ) : (
+              <span class="text-[11px] italic text-gray-400">{t('projconf.unavailable')}</span>
+            )}
+            {c.url && <span class="text-[10px] text-gray-400">PDF</span>}
+          </div>
+        </>
+      );
+      return c.url ? (
+        <a href={c.url} target="_blank" rel="noopener" class="group flex flex-col bg-white rounded-xl p-4 shadow-sm ring-1 ring-gray-100 hover:shadow-lg hover:ring-teal-200 hover:-translate-y-0.5 transition-all duration-300">
+          {inner}
+        </a>
+      ) : (
+        <div class="flex flex-col bg-white rounded-xl p-4 shadow-sm ring-1 ring-gray-100 opacity-80">
+          {inner}
+        </div>
+      );
+    })}
+  </div>
+
+  <div class="mt-10">
+    <a href={`${base}/academic`} class="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      {t('nav.academic')}
+    </a>
+  </div>
+</div>
