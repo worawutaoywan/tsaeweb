@@ -1,101 +1,344 @@
 ---
 import type { Lang } from '../i18n/ui';
+import SectionHeading from './SectionHeading.astro';
+import { isPastByDate, loadArchivedHeroSlides } from '../loaders/cms';
 import conferenceData from '../../data/cms/home-conferences.json';
 
 interface Props {
   lang?: Lang;
 }
 
+interface HomeItem {
+  enabled?: boolean;
+  kind?: string;
+  sortOrder: number;
+  href: string;
+  image?: string;
+  badgeTH?: string;
+  badgeEN?: string;
+  titleTH?: string;
+  titleEN?: string;
+  themeTH?: string;
+  themeEN?: string;
+  dateTH?: string;
+  dateEN?: string;
+  venueTH?: string;
+  venueEN?: string;
+  target?: string;
+  endDate?: string;
+  submitUrl?: string;
+  ctaTH?: string;
+  ctaEN?: string;
+  campaignId?: string;
+}
+
 const { lang = 'en' } = Astro.props;
 const isTH = lang === 'th';
 
-const sectionTitle = isTH ? 'งานประชุมวิชาการ 2569' : 'Flagship Conferences 2026';
+const sectionTitle = isTH ? 'งานประชุมและกิจกรรม' : 'Conferences & events';
 const sectionDesc = isTH
-  ? 'งานประชุมเรือธงของสมาคมฯ และงานนานาชาติ AAAE ที่สมาชิก TSAE ร่วมด้วย'
-  : 'TSAE flagship conferences plus AAAE’s IAEC 2026 — open for abstracts'
-const detailsBtn = isTH ? 'ดูรายละเอียด' : 'View Details';
-const submitBtn = isTH ? 'ส่งบทความ' : 'Submit Paper';
-const dLabel = isTH ? 'วัน' : 'days';
-const hLabel = isTH ? 'ชม.' : 'hrs';
-const mLabel = isTH ? 'นาที' : 'min';
-const countdownLabel = isTH ? 'เหลืออีก' : 'Starts in';
+  ? 'งานเรือธงที่กำลังจัด และคลังงานที่ผ่านมาของสมาคมฯ รวมถึง IAEC ของ AAAE'
+  : 'Current flagship meetings and past events — TSAE and AAAE’s IAEC';
+const detailsBtn = isTH ? 'ดูรายละเอียด' : 'View details';
+const submitBtn = isTH ? 'ส่งบทความ' : 'Submit paper';
+const nominateBtn = isTH ? 'เสนอชื่อ' : 'Nominate';
+const callsLabel = isTH ? 'ประกาศที่เกี่ยวข้อง' : 'Also from AAAE';
+const flagshipLabel = isTH ? 'งานเรือธง' : 'Flagship';
+const archiveLabel = isTH ? 'คลังงานที่ผ่านมา' : 'Archive';
+const closedLabel = isTH ? 'ปิดแล้ว' : 'Closed';
+const yearHint = isTH ? 'ปี 2569' : '2026';
+const countdownPrefix = isTH ? 'เหลือ' : 'In';
+const dayUnit = isTH ? 'วัน' : 'd';
+const hourUnit = isTH ? 'ชม.' : 'h';
 
-const confs = conferenceData
-  .filter((item) => item.enabled)
-  .sort((a, b) => a.sortOrder - b.sortOrder)
-  .map((item) => ({
+const items = (conferenceData as HomeItem[])
+  .filter((item) => item.enabled !== false)
+  .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+
+const mapItem = (item: HomeItem) => {
+  const kind = item.kind === 'call' ? 'call' : 'conference';
+  const ctaDefault = kind === 'call' ? nominateBtn : submitBtn;
+  const past = isPastByDate(item.target, item.endDate || item.target);
+  return {
+    kind,
+    past,
     href: item.href,
-    img: item.image,
-    badge: isTH ? item.badgeTH : item.badgeEN,
-    title: isTH ? item.titleTH : item.titleEN,
-    theme: isTH ? item.themeTH : item.themeEN,
-    date: isTH ? item.dateTH : item.dateEN,
-    venue: isTH ? item.venueTH : item.venueEN,
-    target: item.target,
-    submit: item.submitUrl,
-  }));
+    image: item.image || '',
+    badge: (isTH ? item.badgeTH : item.badgeEN) || '',
+    title: (isTH ? item.titleTH : item.titleEN) || '',
+    theme: ((isTH ? item.themeTH : item.themeEN) || '').replace(/["“”]/g, ''),
+    date: (isTH ? item.dateTH : item.dateEN) || '',
+    venue: (isTH ? item.venueTH : item.venueEN) || '',
+    target: past ? '' : (item.target || ''),
+    submit: past ? '' : (item.submitUrl || ''),
+    cta: past ? detailsBtn : ((isTH ? item.ctaTH : item.ctaEN) || ctaDefault),
+  };
+};
+
+const mapped = items.map(mapItem);
+const activeConfs = mapped.filter((i) => i.kind !== 'call' && !i.past);
+const activeCalls = mapped.filter((i) => i.kind === 'call' && !i.past);
+const archivedConfs = mapped.filter((i) => i.past);
+
+const archivedSlides = loadArchivedHeroSlides().map((s) => ({
+  href: s.href,
+  image: s.image || '',
+  title: (isTH ? s.badgeTH : s.badgeEN) || s.id,
+  date: (isTH ? s.dateTH : s.dateEN) || '',
+  venue: (isTH ? s.locationTH : s.locationEN) || '',
+  theme: (isTH ? s.themeTH : s.themeEN) || '',
+}));
+
+/** Build archive meta as theme · date · venue without duplicate phrases */
+function archiveMeta(parts: { theme?: string; date?: string; venue?: string }) {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const raw of [parts.theme, parts.date, parts.venue]) {
+    const t = (raw || '').trim();
+    if (!t) continue;
+    const key = t.toLowerCase().replace(/\s+/g, ' ');
+    // skip if already covered (e.g. date repeating theme deadline text)
+    if ([...seen].some((s) => s.includes(key) || key.includes(s))) continue;
+    seen.add(key);
+    out.push(t);
+  }
+  return out.join(' · ');
+}
+
+const archivedRaw = [
+  ...archivedConfs.map((c) => ({
+    href: c.href,
+    image: c.image,
+    title: c.title,
+    meta: archiveMeta({ theme: c.theme, date: c.date, venue: c.venue }),
+  })),
+  ...archivedSlides.map((c) => ({
+    href: c.href,
+    image: c.image,
+    title: c.title,
+    meta: archiveMeta({ theme: c.theme, date: c.date, venue: c.venue }),
+  })),
+];
+
+// Prefer conference/call entries over bare hero slides when same link
+const archived = Array.from(
+  archivedRaw.reduce((map, item) => {
+    const key = item.href.split('?')[0];
+    const prev = map.get(key);
+    if (!prev || (item.meta && item.meta.length > (prev.meta?.length || 0))) {
+      map.set(key, item);
+    }
+    return map;
+  }, new Map<string, (typeof archivedRaw)[number]>()).values()
+);
+
+const tones = [
+  { bar: '#1a6b3a', soft: 'rgba(26,107,58,0.12)', deep: '#0f3d24' },
+  { bar: '#0f766e', soft: 'rgba(15,118,110,0.12)', deep: '#134e4a' },
+  { bar: '#9a3412', soft: 'rgba(154,52,18,0.12)', deep: '#7c2d12' },
+] as const;
+
+const hasFlagship = activeConfs.length > 0 || activeCalls.length > 0;
+const hasArchive = archived.length > 0;
 ---
 
-<section class="py-16" style="background-color:#f6faf7;">
-  <div class="max-w-7xl mx-auto px-4">
-    <div class="text-center mb-10">
-      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-3" style="background-color: rgba(200,169,81,0.18); color:#a8892f;">
-        2026 · 2569
-      </div>
-      <h2 class="text-3xl font-bold mb-1" style="color:#1a6b3a;">{sectionTitle}</h2>
-      <p class="text-gray-500">{sectionDesc}</p>
-    </div>
+{(hasFlagship || hasArchive) && (
+<section class="conf-home relative overflow-hidden py-14 sm:py-16">
+  <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+    <div class="absolute -top-24 -right-16 w-[28rem] h-[28rem] rounded-full opacity-40" style="background: radial-gradient(circle, rgba(26,107,58,0.18), transparent 70%);"></div>
+    <div class="absolute -bottom-28 -left-20 w-[24rem] h-[24rem] rounded-full opacity-35" style="background: radial-gradient(circle, rgba(200,169,81,0.22), transparent 70%);"></div>
+  </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-7">
-      {confs.map((c) => (
-        <div class="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow overflow-hidden flex flex-col sm:flex-row">
-          <a href={c.href} class="block sm:w-44 lg:w-48 shrink-0 bg-gray-50">
-            <img src={c.img} alt={c.title} class="w-full h-48 sm:h-full object-cover" loading="lazy" />
-          </a>
-          <div class="p-6 flex flex-col flex-1">
-            <span class="self-start inline-flex items-center px-3 py-1 rounded-full text-xs font-bold mb-3" style="background-color:#1a6b3a; color:#fff;">{c.badge}</span>
-            <a href={c.href}>
-              <h3 class="text-xl font-bold text-gray-900 mb-1.5 leading-snug group-hover:text-green-800 transition-colors">{c.title}</h3>
-            </a>
-            <p class="text-sm font-medium mb-4" style="color:#a8892f;">{c.theme}</p>
+  <div class="relative max-w-6xl mx-auto px-4 sm:px-6">
+    <SectionHeading eyebrow={yearHint} title={sectionTitle} description={sectionDesc} />
 
-            <div class="space-y-1.5 text-sm text-gray-600 mb-4">
-              <p class="flex items-center gap-2">
-                <svg class="w-4 h-4 shrink-0" style="color:#1a6b3a" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                {c.date}
-              </p>
-              <p class="flex items-center gap-2">
-                <svg class="w-4 h-4 shrink-0" style="color:#1a6b3a" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                {c.venue}
-              </p>
+    <div class="conf-panel rounded-[1.75rem] sm:rounded-[2rem] border border-[#1a6b3a]/12 shadow-sm overflow-hidden">
+      <div class="conf-panel-inner p-5 sm:p-7 lg:p-8 space-y-8 sm:space-y-10">
+
+        {hasFlagship && (
+          <div>
+            <div class="mb-4 flex items-center gap-3">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.14em] text-white" style="background:#1a6b3a;">
+                {flagshipLabel}
+              </span>
+              <span class="h-px flex-1 bg-[#1a6b3a]/15" aria-hidden="true"></span>
             </div>
 
-            <div class="conf-countdown flex items-center gap-2 mb-5" data-target={c.target}>
-              <span class="text-xs text-gray-400 mr-1">{countdownLabel}</span>
-              <div class="text-center px-2.5 py-1 rounded-lg" style="background-color:#eef6f0;">
-                <span class="block text-lg font-extrabold leading-none" style="color:#1a6b3a;" data-cd="days">--</span>
-                <span class="block text-[10px] text-gray-400">{dLabel}</span>
+            {activeCalls.length > 0 && (
+              <div class="mb-5 space-y-3">
+                <p class="text-xs font-bold uppercase tracking-[0.14em] text-gray-400">{callsLabel}</p>
+                {activeCalls.map((c) => (
+                  <a
+                    href={c.href}
+                    class="group conf-call flex flex-col sm:flex-row sm:items-center gap-4 rounded-2xl overflow-hidden border transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                    style="background: linear-gradient(105deg, #fffdf8 0%, #ffffff 55%, #f7f2e6 100%); border-color:#e5d4a3;"
+                  >
+                    {c.image && (
+                      <div class="sm:w-28 h-28 sm:h-auto sm:self-stretch shrink-0 overflow-hidden bg-[#1a6b3a]/10">
+                        <img src={c.image} alt="" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                      </div>
+                    )}
+                    <div class="min-w-0 flex-1 px-5 py-4 sm:pl-2">
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wide mb-2" style="background:#1a6b3a; color:#fff;">
+                        {c.badge || (isTH ? 'ประกาศ' : 'Call')}
+                      </span>
+                      <p class="font-bold text-gray-900 text-lg leading-snug group-hover:underline decoration-[#c8a951] underline-offset-4">{c.title}</p>
+                      {c.theme && <p class="text-sm mt-1" style="color:#8a6a15;">{c.theme}</p>}
+                    </div>
+                    {c.date && <p class="text-sm font-semibold text-gray-600 shrink-0 px-5 sm:px-0">{c.date}</p>}
+                    <span class="inline-flex items-center gap-1 text-sm font-semibold shrink-0 px-5 pb-4 sm:pb-0 sm:pr-5" style="color:#1a6b3a;">
+                      {c.cta}
+                      <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </span>
+                  </a>
+                ))}
               </div>
-              <div class="text-center px-2.5 py-1 rounded-lg" style="background-color:#eef6f0;">
-                <span class="block text-lg font-extrabold leading-none" style="color:#1a6b3a;" data-cd="hours">--</span>
-                <span class="block text-[10px] text-gray-400">{hLabel}</span>
+            )}
+
+            {activeConfs.length > 0 && (
+              <div class={`grid grid-cols-1 gap-5 ${activeConfs.length >= 2 ? 'lg:grid-cols-2' : ''}`}>
+                {activeConfs.map((c, i) => {
+                  const tone = tones[i % tones.length];
+                  return (
+                  <article class="conf-card group relative flex flex-col h-full rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-1">
+                    <div class="relative min-h-[200px] sm:min-h-[240px] overflow-hidden" style={`background:${tone.deep};`}>
+                      {c.image ? (
+                        <img
+                          src={c.image}
+                          alt=""
+                          class="absolute inset-0 w-full h-full object-cover object-top opacity-90 transition-transform duration-700 group-hover:scale-[1.04]"
+                          loading={i === 0 ? 'eager' : 'lazy'}
+                        />
+                      ) : (
+                        <div class="absolute inset-0" style={`background: linear-gradient(145deg, ${tone.deep}, ${tone.bar});`}></div>
+                      )}
+                      <div class="absolute inset-0" style={`background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 55%, ${tone.deep} 100%);`}></div>
+
+                      <div class="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-2">
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.12em] text-white backdrop-blur-md" style={`background:${tone.bar}ee;`}>
+                          {c.badge}
+                        </span>
+                        {c.target && (
+                          <p class="conf-countdown inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold text-white backdrop-blur-md bg-black/35 ring-1 ring-white/20" data-target={c.target}>
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#f2cf6b] animate-pulse"></span>
+                            <span>{countdownPrefix}</span>
+                            <span class="tabular-nums" data-cd="days">--</span>
+                            <span>{dayUnit}</span>
+                            <span class="tabular-nums" data-cd="hours">--</span>
+                            <span>{hourUnit}</span>
+                          </p>
+                        )}
+                      </div>
+
+                      <div class="absolute bottom-0 left-0 right-0 p-5 sm:p-6 text-white">
+                        <h3 class="text-xl sm:text-2xl font-bold leading-snug mb-2 drop-shadow-sm">
+                          <a href={c.href} class="hover:underline decoration-[#f2cf6b] underline-offset-4">{c.title}</a>
+                        </h3>
+                        {c.theme && (
+                          <p class="text-sm text-white/85 leading-relaxed line-clamp-2 max-w-xl">{c.theme}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div class="flex flex-col flex-1 p-5 sm:p-6 bg-white">
+                      <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700 mb-5">
+                        {c.date && (
+                          <div class="flex gap-2.5 items-start rounded-xl px-3 py-2.5" style={`background:${tone.soft};`}>
+                            <svg class="w-4 h-4 mt-0.5 shrink-0" style={`color:${tone.bar};`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span class="font-medium leading-snug">{c.date}</span>
+                          </div>
+                        )}
+                        {c.venue && (
+                          <div class="flex gap-2.5 items-start rounded-xl px-3 py-2.5 bg-gray-50">
+                            <svg class="w-4 h-4 mt-0.5 shrink-0 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span class="font-medium leading-snug">{c.venue}</span>
+                          </div>
+                        )}
+                      </dl>
+
+                      <div class="mt-auto flex flex-wrap gap-2.5">
+                        <a href={c.href} class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 text-sm font-bold rounded-xl text-white shadow-sm transition-transform hover:scale-[1.02]" style={`background-color:${tone.bar};`}>
+                          {detailsBtn}
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                        {c.submit && c.submit !== c.href && (
+                          <a href={c.submit} target="_blank" rel="noopener" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold rounded-xl border-2 text-gray-800 hover:bg-gray-50 transition-colors" style={`border-color:${tone.bar}55;`}>
+                            {c.cta}
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                  );
+                })}
               </div>
-              <div class="text-center px-2.5 py-1 rounded-lg" style="background-color:#eef6f0;">
-                <span class="block text-lg font-extrabold leading-none" style="color:#1a6b3a;" data-cd="minutes">--</span>
-                <span class="block text-[10px] text-gray-400">{mLabel}</span>
-              </div>
+            )}
+          </div>
+        )}
+
+        {hasArchive && (
+          <div class={hasFlagship ? 'pt-2 border-t border-[#1a6b3a]/10' : ''}>
+            <div class="mb-4 flex flex-wrap items-center gap-3">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.14em] text-white" style="background:#64748b;">
+                {archiveLabel}
+              </span>
+              <span class="h-px flex-1 bg-gray-200/90 min-w-[2rem]" aria-hidden="true"></span>
+              <span class="text-xs font-semibold text-gray-400">
+                {archived.length} {isTH ? 'รายการ' : 'items'}
+              </span>
             </div>
 
-            <div class="mt-auto flex flex-wrap gap-2.5">
-              <a href={c.href} class="inline-flex items-center gap-1.5 px-5 py-2.5 text-white text-sm font-semibold rounded-lg transition-transform hover:scale-105" style="background-color:#1a6b3a;">{detailsBtn}</a>
-              <a href={c.submit} target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold rounded-lg border-2 transition-colors" style="border-color:#c8a951; color:#a8892f;">{submitBtn}</a>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 items-stretch">
+              {archived.map((c) => (
+                <a
+                  href={c.href}
+                  class="conf-archive group flex flex-col items-center text-center h-full rounded-3xl bg-white/90 border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 hover:-translate-y-0.5 transition-all px-5 pt-6 pb-5"
+                >
+                  <div class="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 mb-4">
+                    <div class="absolute inset-0 rounded-full overflow-hidden ring-2 ring-white shadow-md bg-gray-100">
+                      {c.image ? (
+                        <img src={c.image} alt="" class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+                      ) : (
+                        <div class="w-full h-full" style="background: linear-gradient(160deg, #1a6b3a, #374151);"></div>
+                      )}
+                    </div>
+                    <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] font-bold uppercase tracking-wide text-white bg-slate-600 rounded-full px-2 py-0.5 shadow-sm ring-2 ring-white">
+                      {closedLabel}
+                    </span>
+                  </div>
+                  <p class="text-sm sm:text-[15px] font-bold text-gray-900 leading-snug group-hover:underline decoration-[#c8a951] underline-offset-4 line-clamp-2 min-h-[2.5rem]">{c.title}</p>
+                  <p class="text-xs text-gray-500 mt-2 leading-relaxed line-clamp-2 min-h-[2.25rem] flex-1">
+                    {c.meta || '\u00a0'}
+                  </p>
+                  <span class="mt-3 inline-flex items-center gap-1 text-xs font-semibold" style="color:#1a6b3a;">
+                    {detailsBtn}
+                    <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                  </span>
+                </a>
+              ))}
             </div>
           </div>
-        </div>
-      ))}
+        )}
+
+      </div>
     </div>
   </div>
 </section>
+)}
+
+<style>
+  .conf-home {
+    background:
+      linear-gradient(180deg, #f3f8f4 0%, #eef5f0 48%, #f7faf8 100%);
+  }
+  .conf-panel {
+    background:
+      linear-gradient(165deg, rgba(255,255,255,0.92) 0%, rgba(246,250,247,0.96) 55%, rgba(255,252,245,0.9) 100%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.8) inset,
+      0 18px 40px -24px rgba(20,59,34,0.35);
+  }
+</style>
 
 <script>
   function initConfCountdowns() {
@@ -108,10 +351,9 @@ const confs = conferenceData
       };
       const tick = () => {
         const diff = target - Date.now();
-        if (diff <= 0) { set('days',0); set('hours',0); set('minutes',0); return; }
+        if (diff <= 0) { set('days', 0); set('hours', 0); return; }
         set('days', Math.floor(diff / 86400000));
         set('hours', Math.floor((diff % 86400000) / 3600000));
-        set('minutes', Math.floor((diff % 3600000) / 60000));
       };
       tick();
       setInterval(tick, 30000);

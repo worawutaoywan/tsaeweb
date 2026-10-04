@@ -1,5 +1,6 @@
 ---
 import type { Lang } from '../i18n/ui';
+import SectionHeading from './SectionHeading.astro';
 import { getWatchCategories, getWatchPicks, getWatchVideos } from '../data/watchVideos';
 
 interface Props {
@@ -12,16 +13,14 @@ const isTH = lang === 'th';
 const sectionBadge = isTH ? 'สื่อวิดีโอ' : 'TSAE Media';
 const sectionTitle = isTH ? 'วิดีโอจากสมาคมฯ' : 'Watch & Learn';
 const sectionDesc = isTH
-  ? 'อ่านคำอธิบายสั้น ๆ แล้วเลือกเล่น — กรองได้เฉพาะประเภทที่ระบุชัดจากคลิป'
-  : 'Read the short description and play — filter only when the clip type is clear';
-const picksLabel = isTH ? 'ไม่แน่ใจ? เริ่มจากที่นี่' : 'Not sure? Start here';
-const picksDesc = isTH ? 'คลิปแนะนำ 3 รายการ — อ่านคำอธิบายสั้น ๆ แล้วกดเล่นได้เลย' : 'Three curated picks with short descriptions';
+  ? 'กดเล่นด้านล่าง หรือเลือกจากรายการแนะนำ'
+  : 'Hit play below, or pick a suggested clip';
+const picksLabel = isTH ? 'แนะนำ' : 'Picks';
 const playlistLabel = isTH ? 'วิดีโอทั้งหมด' : 'All videos';
 const articleLabel = isTH ? 'อ่านบทความ' : 'Read article';
 const openLinkLabel = isTH ? 'เปิดลิงก์' : 'Open link';
 const scrollHint = isTH ? 'เลื่อนดูเพิ่ม' : 'Scroll for more';
-const playLabel = isTH ? 'เล่น' : 'Play';
-const filterLabel = isTH ? 'เลือกหมวด' : 'Filter by topic';
+const filterLabel = isTH ? 'หมวด' : 'Topic';
 const showingLabel = isTH ? 'แสดง' : 'Showing';
 
 const videos = getWatchVideos(lang);
@@ -39,135 +38,109 @@ function formatCardDate(date: string, isThai: boolean) {
 }
 ---
 
-<section class="video-feature py-14 lg:py-16" style="background: linear-gradient(135deg, #0d3b1e 0%, #1a6b3a 100%);">
-  <div class="max-w-6xl mx-auto px-4">
-    <!-- Header -->
-    <div class="mb-8">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-2" style="background-color: rgba(200,169,81,0.2); color:#fde68a;">
-        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        {sectionBadge}
-      </div>
-      <h2 class="text-2xl lg:text-3xl font-bold text-white">{sectionTitle}</h2>
-      <p class="text-green-200/90 text-sm mt-1 max-w-xl">{sectionDesc}</p>
-    </div>
+<section class="video-feature py-14 sm:py-16 bg-white">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <SectionHeading eyebrow={sectionBadge} title={sectionTitle} description={sectionDesc} />
 
-    <!-- Quick picks -->
-    <div class="mb-8">
-      <div class="mb-3">
-        <h3 class="text-sm font-bold text-yellow-100">{picksLabel}</h3>
-        <p class="text-green-300/70 text-xs mt-0.5">{picksDesc}</p>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {picks.map((v) => (
-          <button
-            type="button"
-            class="yt-pick group text-left rounded-xl p-3 flex gap-3 border transition-all hover:border-yellow-200/40"
-            style="background: rgba(255,255,255,0.07); border-color: rgba(200,169,81,0.25);"
-            data-yt={v.id}
-            data-title={v.title}
-            data-meta={v.meta}
-            data-summary={v.summary}
-            data-web={v.web ?? ''}
-            data-thumb={v.id ? thumb(v.id) : ''}
-            data-category={v.category ?? ''}
-            data-cat-label={v.categoryLabel}
-          >
-            <span class="relative shrink-0 w-24 aspect-video rounded-lg overflow-hidden bg-black">
-              {v.id && <img src={thumb(v.id)} alt="" class="w-full h-full object-cover" loading="lazy" />}
-              <span class="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/10 transition-colors">
-                <span class="w-7 h-7 rounded-full flex items-center justify-center opacity-90 group-hover:opacity-100" style="background:#c8a951;">
-                  <svg class="w-3.5 h-3.5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                </span>
+    <!-- One stage: player + details + picks -->
+    <div class="mb-8 grid grid-cols-1 lg:grid-cols-[minmax(0,1.55fr)_minmax(280px,1fr)] gap-4 lg:gap-5 items-start">
+      <div class="yt-main relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-md ring-1 ring-black/5">
+        {featured.id ? (
+          <button type="button" class="yt-play group absolute inset-0 w-full h-full cursor-pointer" data-yt={featured.id} aria-label={featured.title}>
+            <img src={thumb(featured.id)} alt="" class="yt-main-thumb w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" loading="eager" />
+            <span class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></span>
+            <span class="absolute inset-0 flex items-center justify-center">
+              <span class="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-xl transition-transform duration-300 group-hover:scale-110" style="background-color:#1a6b3a;">
+                <svg class="w-6 h-6 sm:w-7 sm:h-7 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
               </span>
             </span>
-            <span class="min-w-0 flex-1">
-              {v.categoryLabel && (
-                <span class="inline-block text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded mb-1" style="background:rgba(200,169,81,0.25); color:#fde68a;">{v.categoryLabel}</span>
-              )}
-              <span class="block text-white text-xs font-bold leading-snug line-clamp-2 group-hover:text-yellow-100">{v.title}</span>
-              <span class="block text-green-200/80 text-[11px] mt-1 leading-snug line-clamp-2">{v.summary}</span>
-              <span class="inline-flex items-center gap-1 mt-2 text-[11px] font-semibold text-yellow-200/90">{playLabel} →</span>
-            </span>
           </button>
-        ))}
+        ) : (
+          <a href={featured.href} target="_blank" rel="noopener noreferrer" class="absolute inset-0 flex items-center justify-center bg-gray-900 text-white text-sm font-semibold">
+            {openLinkLabel}
+          </a>
+        )}
       </div>
-    </div>
 
-    <!-- Player -->
-    <div class="yt-main relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl bg-black ring-1 ring-white/10 mb-4">
-      {featured.id ? (
-        <button type="button" class="yt-play group absolute inset-0 w-full h-full cursor-pointer" data-yt={featured.id} aria-label={featured.title}>
-          <img src={thumb(featured.id)} alt="" class="yt-main-thumb w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" loading="eager" />
-          <span class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></span>
-          <span class="absolute inset-0 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity">
-            <span class="flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 rounded-full shadow-2xl transition-transform duration-300 group-hover:scale-110" style="background-color:#c8a951;">
-              <svg class="w-7 h-7 lg:w-8 lg:h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            </span>
-          </span>
-        </button>
-      ) : (
-        <a href={featured.href} target="_blank" rel="noopener noreferrer" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center" style="background: rgba(0,0,0,0.4);">
-          <span class="text-yellow-200 text-sm">{openLinkLabel}</span>
-        </a>
-      )}
-    </div>
-
-    <!-- Now playing -->
-    <div class="yt-now-playing mb-5 rounded-xl px-4 py-3.5" style="background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);">
-      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-        <div class="min-w-0 flex-1">
-          <p class="text-yellow-200/70 text-[10px] font-bold uppercase tracking-widest mb-0.5">{isTH ? 'กำลังเลือก' : 'Now selected'}</p>
-          {featured.categoryLabel && (
-            <span class="yt-now-cat inline-block text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded mb-1.5" style="background:rgba(200,169,81,0.2); color:#fde68a;">{featured.categoryLabel}</span>
-          )}
-          <h3 class="yt-now-title text-white font-bold text-sm lg:text-base leading-snug">{featured.title}</h3>
-          <p class="yt-now-summary text-green-100/85 text-xs mt-1.5 leading-relaxed">{featured.summary}</p>
-          <p class="yt-now-meta text-green-300/70 text-[11px] mt-1">{featured.meta}</p>
-        </div>
-        <div class="yt-now-actions shrink-0">
+      <div class="yt-now-playing flex flex-col min-h-0">
+        {featured.categoryLabel && (
+          <span class="yt-now-cat self-start text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded mb-2" style="background:#1a6b3a; color:#fff;">{featured.categoryLabel}</span>
+        )}
+        {!featured.categoryLabel && <span class="yt-now-cat hidden"></span>}
+        <h3 class="yt-now-title text-lg font-bold leading-snug mb-1.5" style="color:#143b22;">{featured.title}</h3>
+        <p class="yt-now-summary text-gray-600 text-sm leading-relaxed mb-1.5 line-clamp-3">{featured.summary}</p>
+        <p class="yt-now-meta text-gray-400 text-xs mb-3">{featured.meta}</p>
+        <div class="yt-now-actions mb-4">
           {featured.web && (
-            <a href={featured.web} target="_blank" rel="noopener noreferrer" class="yt-now-web inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:rgba(200,169,81,0.2); color:#fde68a;">
+            <a href={featured.web} target="_blank" rel="noopener noreferrer" class="yt-now-web inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg text-white hover:opacity-90" style="background:#1a6b3a;">
               {articleLabel}
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
           )}
         </div>
+
+        <div class="pt-3 border-t border-gray-100">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">{picksLabel}</p>
+          <div class="flex flex-col gap-1.5">
+            {picks.map((v) => (
+              <button
+                type="button"
+                class="yt-pick group text-left rounded-lg px-2 py-1.5 flex gap-2.5 items-center hover:bg-gray-50 transition-colors"
+                data-yt={v.id}
+                data-title={v.title}
+                data-meta={v.meta}
+                data-summary={v.summary}
+                data-web={v.web ?? ''}
+                data-thumb={v.id ? thumb(v.id) : ''}
+                data-category={v.category ?? ''}
+                data-cat-label={v.categoryLabel}
+              >
+                <span class="relative shrink-0 w-16 aspect-video rounded-md overflow-hidden bg-gray-200">
+                  {v.id && <img src={thumb(v.id)} alt="" class="w-full h-full object-cover" loading="lazy" />}
+                  <span class="absolute inset-0 flex items-center justify-center bg-black/25">
+                    <span class="w-5 h-5 rounded-full flex items-center justify-center" style="background:#1a6b3a;">
+                      <svg class="w-2.5 h-2.5 text-white ml-px" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </span>
+                  </span>
+                </span>
+                <span class="min-w-0 flex-1">
+                  <span class="block text-gray-900 text-xs font-semibold leading-snug line-clamp-2 group-hover:text-green-800">{v.title}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Category filters -->
-    <div class="mb-4">
-      <p class="text-[10px] font-bold uppercase tracking-wider text-yellow-200/80 mb-2">{filterLabel}</p>
-      <div class="yt-filters flex flex-wrap gap-2">
-        {categories.map((c, i) => (
-          <button
-            type="button"
-            class={`yt-filter px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${i === 0 ? 'is-on' : ''}`}
-            data-filter={c.key}
-            style={i === 0
-              ? 'background:rgba(200,169,81,0.25); color:#fde68a; border-color:rgba(200,169,81,0.45);'
-              : 'background:rgba(255,255,255,0.06); color:#d1fae5; border-color:rgba(255,255,255,0.12);'}
-          >
-            {c.label}
-            <span class="yt-filter-count ml-1 opacity-70">({c.count})</span>
-          </button>
-        ))}
-      </div>
-      <p class="yt-filter-status text-green-300/60 text-[11px] mt-2">{showingLabel} {videos.length} / {videos.length}</p>
-    </div>
-
-    <!-- Rail -->
+    <!-- Filters + rail as one block -->
     <div class="relative">
-      <div class="flex items-center justify-between mb-3">
-        <span class="text-xs font-semibold uppercase tracking-wider text-yellow-200/90">{playlistLabel}</span>
-        <span class="text-green-300/60 text-[11px] hidden sm:inline">{scrollHint}</span>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <h3 class="text-sm font-bold shrink-0" style="color:#143b22;">{playlistLabel}</h3>
+          <span class="yt-filter-status text-gray-400 text-xs shrink-0">{showingLabel} {videos.length}/{videos.length}</span>
+        </div>
+        <div class="yt-filters flex flex-wrap gap-1.5" aria-label={filterLabel}>
+          {categories.map((c, i) => (
+            <button
+              type="button"
+              class={`yt-filter px-2.5 py-1 rounded-full text-xs font-semibold transition-all border ${i === 0 ? 'is-on' : ''}`}
+              data-filter={c.key}
+            >
+              {c.label}
+              <span class="yt-filter-count ml-0.5 opacity-60">({c.count})</span>
+            </button>
+          ))}
+        </div>
       </div>
 
-      <button type="button" class="yt-rail-prev hidden sm:flex absolute left-0 top-[calc(50%+12px)] -translate-y-1/2 -translate-x-3 z-10 w-9 h-9 items-center justify-center rounded-full shadow-lg transition-opacity opacity-0 pointer-events-none" style="background:#c8a951; color:#fff;" aria-label="Previous">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      <p class="text-gray-400 text-[11px] mb-2 sm:hidden">{scrollHint}</p>
+
+      <button type="button" class="yt-rail-prev hidden sm:flex absolute left-0 top-[calc(50%+8px)] -translate-y-1/2 -translate-x-1 z-10 w-9 h-9 items-center justify-center rounded-full bg-white border border-gray-200 shadow text-gray-600 transition-all opacity-0 pointer-events-none hover:border-green-300" aria-label="Previous">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
-      <button type="button" class="yt-rail-next hidden sm:flex absolute right-0 top-[calc(50%+12px)] -translate-y-1/2 translate-x-3 z-10 w-9 h-9 items-center justify-center rounded-full shadow-lg transition-opacity" style="background:#c8a951; color:#fff;" aria-label="Next">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+      <button type="button" class="yt-rail-next hidden sm:flex absolute right-0 top-[calc(50%+8px)] -translate-y-1/2 translate-x-1 z-10 w-9 h-9 items-center justify-center rounded-full bg-white border border-gray-200 shadow text-gray-600 transition-all opacity-0 pointer-events-none hover:border-green-300" aria-label="Next">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
       </button>
 
       <div class="yt-rail flex gap-3 overflow-x-auto pb-2 scroll-smooth snap-x snap-mandatory" tabindex="0">
@@ -177,25 +150,23 @@ function formatCardDate(date: string, isThai: boolean) {
               href={v.href}
               target="_blank"
               rel="noopener noreferrer"
-              class="yt-card yt-card-ext snap-start shrink-0 w-[168px] sm:w-[188px] rounded-xl overflow-hidden border border-white/10 hover:border-white/25 transition-all no-underline group"
+              class="yt-card yt-card-ext snap-start shrink-0 w-[168px] sm:w-[184px] rounded-xl overflow-hidden border border-gray-100 bg-white hover:shadow-md hover:border-gray-200 transition-all no-underline group"
               data-category={v.category ?? ''}
-              style="background: rgba(255,255,255,0.05);"
             >
-              <div class="aspect-video flex items-center justify-center" style="background: rgba(0,0,0,0.35);">
-                <svg class="w-8 h-8 text-yellow-200/80" fill="currentColor" viewBox="0 0 24 24"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h7v2H7v10h10v-5h2v7H5V5z"/></svg>
+              <div class="aspect-video flex items-center justify-center bg-gray-50">
+                <svg class="w-6 h-6 text-gray-300 group-hover:text-green-700 transition-colors" fill="currentColor" viewBox="0 0 24 24"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h7v2H7v10h10v-5h2v7H5V5z"/></svg>
               </div>
               <div class="p-2.5">
                 {v.categoryLabel && (
-                  <span class="inline-block text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded mb-1.5" style="background:rgba(200,169,81,0.2); color:#fde68a;">{v.categoryLabel}</span>
+                  <span class="inline-block text-[9px] font-bold uppercase tracking-wide mb-1" style="color:#1a6b3a;">{v.categoryLabel}</span>
                 )}
-                <p class="text-white text-xs font-semibold leading-snug line-clamp-2">{v.title}</p>
-                <p class="text-green-300/70 text-[10px] mt-1 line-clamp-2 leading-snug">{v.summary}</p>
+                <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">{v.title}</p>
               </div>
             </a>
           ) : (
             <button
               type="button"
-              class={`yt-card yt-item snap-start shrink-0 w-[168px] sm:w-[188px] rounded-xl overflow-hidden border text-left transition-all group ${v.id === featured.id ? 'is-active' : 'border-white/10 hover:border-white/25'}`}
+              class={`yt-card yt-item snap-start shrink-0 w-[168px] sm:w-[184px] rounded-xl overflow-hidden border text-left transition-all group bg-white ${v.id === featured.id ? 'is-active' : 'border-gray-100 hover:shadow-md hover:border-gray-200'}`}
               data-yt={v.id}
               data-title={v.title}
               data-meta={v.meta}
@@ -204,21 +175,18 @@ function formatCardDate(date: string, isThai: boolean) {
               data-thumb={thumb(v.id!)}
               data-category={v.category ?? ''}
               data-cat-label={v.categoryLabel}
-              style={v.id === featured.id ? 'background: rgba(200,169,81,0.14); border-color: rgba(200,169,81,0.45);' : 'background: rgba(255,255,255,0.05);'}
             >
-              <div class="relative aspect-video bg-black overflow-hidden">
-                <img src={thumb(v.id!)} alt="" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
-                <span class="absolute inset-0 bg-black/25 group-hover:bg-black/10 transition-colors"></span>
-                <span class="absolute bottom-1.5 right-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded" style="background:rgba(0,0,0,0.65); color:#fff;">{formatCardDate(v.date, isTH)}</span>
+              <div class="relative aspect-video bg-gray-100 overflow-hidden">
+                <img src={thumb(v.id!)} alt="" class="w-full h-full object-cover transition-transform duration-400 group-hover:scale-105" loading="lazy" />
+                <span class="absolute bottom-1.5 right-1.5 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-black/70 text-white">{formatCardDate(v.date, isTH)}</span>
               </div>
               <div class="p-2.5">
                 {v.categoryLabel ? (
-                  <span class="inline-block text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded mb-1.5" style="background:rgba(255,255,255,0.08); color:#a7f3d0;">{v.categoryLabel}</span>
+                  <span class="inline-block text-[9px] font-bold uppercase tracking-wide mb-1" style="color:#1a6b3a;">{v.categoryLabel}</span>
                 ) : (
-                  <span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded mb-1.5 text-green-300/70">{v.meta.split(' · ')[0]}</span>
+                  <span class="inline-block text-[9px] font-medium mb-1 text-gray-400">{v.meta.split(' · ')[0]}</span>
                 )}
-                <p class="text-white text-xs font-semibold leading-snug line-clamp-2">{v.title}</p>
-                <p class="text-green-300/70 text-[10px] mt-1 line-clamp-2 leading-snug">{v.summary}</p>
+                <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">{v.title}</p>
               </div>
             </button>
           )
@@ -230,20 +198,37 @@ function formatCardDate(date: string, isThai: boolean) {
 
 <style>
   .yt-rail {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    mask-image: linear-gradient(to right, transparent, black 12px, black calc(100% - 12px), transparent);
+    scrollbar-width: thin;
+    scrollbar-color: #cfd8d3 transparent;
   }
-  .yt-rail::-webkit-scrollbar { display: none; }
+  .yt-rail::-webkit-scrollbar { height: 5px; }
+  .yt-rail::-webkit-scrollbar-thumb {
+    background: #cfd8d3;
+    border-radius: 999px;
+  }
   .yt-card.is-active {
-    box-shadow: 0 0 0 1px rgba(200, 169, 81, 0.35), 0 8px 24px rgba(0, 0, 0, 0.25);
+    border-color: #1a6b3a !important;
+    box-shadow: 0 0 0 1px #1a6b3a, 0 6px 18px rgba(20, 59, 34, 0.1);
   }
   .yt-card.is-hidden { display: none !important; }
-  .yt-rail-prev.is-visible, .yt-rail-next.is-visible { opacity: 1; pointer-events: auto; }
+  .yt-rail-prev.is-visible,
+  .yt-rail-next.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .yt-filter {
+    background: #f3f4f6;
+    color: #4b5563;
+    border-color: transparent;
+  }
+  .yt-filter:hover {
+    background: #eef6f0;
+    color: #143b22;
+  }
   .yt-filter.is-on {
-    background: rgba(200, 169, 81, 0.25) !important;
-    color: #fde68a !important;
-    border-color: rgba(200, 169, 81, 0.45) !important;
+    background: #1a6b3a !important;
+    color: #fff !important;
+    border-color: #1a6b3a !important;
   }
 </style>
 
@@ -253,6 +238,9 @@ function formatCardDate(date: string, isThai: boolean) {
     const showingTpl = document.documentElement.lang === 'th' ? 'แสดง' : 'Showing';
 
     document.querySelectorAll<HTMLElement>('.video-feature').forEach((root) => {
+      if (root.dataset.ytReady === '1') return;
+      root.dataset.ytReady = '1';
+
       const main = root.querySelector<HTMLElement>('.yt-main');
       const rail = root.querySelector<HTMLElement>('.yt-rail');
       const prevBtn = root.querySelector<HTMLElement>('.yt-rail-prev');
@@ -267,7 +255,6 @@ function formatCardDate(date: string, isThai: boolean) {
 
       const totalCards = root.querySelectorAll<HTMLElement>('.yt-card').length;
       let playing = false;
-      let currentFilter = 'all';
 
       const updateNowPlaying = (title: string, meta: string, summary: string, web: string, catLabel: string) => {
         if (nowTitle) nowTitle.textContent = title;
@@ -276,28 +263,24 @@ function formatCardDate(date: string, isThai: boolean) {
         if (nowCat) {
           if (catLabel) {
             nowCat.textContent = catLabel;
+            nowCat.classList.remove('hidden');
             nowCat.style.display = '';
           } else {
+            nowCat.classList.add('hidden');
             nowCat.style.display = 'none';
           }
         }
         if (nowActions) {
           nowActions.innerHTML = web
-            ? `<a href="${web}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:rgba(200,169,81,0.2); color:#fde68a;">${articleLabel}<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`
+            ? `<a href="${web}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg text-white hover:opacity-90" style="background:#1a6b3a;">${articleLabel}<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`
             : '';
         }
       };
 
       const setActiveCard = (item: HTMLElement) => {
-        root.querySelectorAll<HTMLElement>('.yt-item').forEach((b) => {
-          b.classList.remove('is-active');
-          b.style.background = 'rgba(255,255,255,0.05)';
-          b.style.borderColor = 'rgba(255,255,255,0.1)';
-        });
+        root.querySelectorAll<HTMLElement>('.yt-item').forEach((b) => b.classList.remove('is-active'));
         if (item.classList.contains('yt-item')) {
           item.classList.add('is-active');
-          item.style.background = 'rgba(200,169,81,0.14)';
-          item.style.borderColor = 'rgba(200,169,81,0.45)';
           item.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         }
       };
@@ -307,10 +290,10 @@ function formatCardDate(date: string, isThai: boolean) {
         main.innerHTML = `
           <button type="button" class="yt-play group absolute inset-0 w-full h-full cursor-pointer" data-yt="${id}" aria-label="${title.replace(/"/g, '&quot;')}">
             <img src="${thumb}" alt="" class="yt-main-thumb w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
-            <span class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></span>
-            <span class="absolute inset-0 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity">
-              <span class="flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 rounded-full shadow-2xl transition-transform duration-300 group-hover:scale-110" style="background-color:#c8a951;">
-                <svg class="w-7 h-7 lg:w-8 lg:h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <span class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></span>
+            <span class="absolute inset-0 flex items-center justify-center">
+              <span class="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-xl transition-transform duration-300 group-hover:scale-110" style="background-color:#1a6b3a;">
+                <svg class="w-6 h-6 sm:w-7 sm:h-7 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
               </span>
             </span>
           </button>`;
@@ -362,7 +345,6 @@ function formatCardDate(date: string, isThai: boolean) {
       });
 
       const applyFilter = (key: string) => {
-        currentFilter = key;
         let visible = 0;
         root.querySelectorAll<HTMLElement>('.yt-card').forEach((card) => {
           const cat = card.dataset.category ?? '';
@@ -370,23 +352,15 @@ function formatCardDate(date: string, isThai: boolean) {
           card.classList.toggle('is-hidden', !show);
           if (show) visible += 1;
         });
-        if (filterStatus) filterStatus.textContent = `${showingTpl} ${visible} / ${totalCards}`;
+        if (filterStatus) filterStatus.textContent = `${showingTpl} ${visible}/${totalCards}`;
         root.querySelectorAll<HTMLElement>('.yt-filter').forEach((btn) => {
-          const on = btn.dataset.filter === key;
-          btn.classList.toggle('is-on', on);
-          if (!on) {
-            btn.style.background = 'rgba(255,255,255,0.06)';
-            btn.style.color = '#d1fae5';
-            btn.style.borderColor = 'rgba(255,255,255,0.12)';
-          }
+          btn.classList.toggle('is-on', btn.dataset.filter === key);
         });
         updateArrows();
       };
 
       root.querySelectorAll<HTMLElement>('.yt-filter').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          applyFilter(btn.dataset.filter ?? 'all');
-        });
+        btn.addEventListener('click', () => applyFilter(btn.dataset.filter ?? 'all'));
       });
 
       const updateArrows = () => {

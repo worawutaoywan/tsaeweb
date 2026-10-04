@@ -1,0 +1,76 @@
+---
+import type { Lang } from '../i18n/ui';
+import { useTranslations } from '../i18n/utils';
+import SectionHeading from './SectionHeading.astro';
+
+interface Props {
+  lang?: Lang;
+  volume: number;
+  issue: number;
+  year: number;
+  url: string;
+}
+
+const { lang = 'en', volume, issue, year, url } = Astro.props;
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+const th = lang === 'th';
+---
+
+<section class="py-14 sm:py-16 bg-white">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <SectionHeading
+      title={t('home.latestJournal')}
+      description={t('journal.subtitle')}
+      actionHref={`${base}/journal`}
+      actionLabel={t('ui.allIssues')}
+    />
+
+    <div class="rounded-2xl border border-gray-100 shadow-sm overflow-hidden bg-white">
+      <div class="grid grid-cols-1 sm:grid-cols-[220px_1fr]">
+        <div class="p-6 flex items-center justify-center" style="background: linear-gradient(135deg, #1a6b3a, #0d3b1e);">
+          <div class="text-center">
+            <div class="w-24 h-32 mx-auto rounded-lg shadow-lg flex flex-col items-center justify-center mb-3" style="background: linear-gradient(160deg, #c8a951 0%, #a8892f 100%);">
+              <span class="text-white font-bold text-[10px] mb-0.5">TSAE</span>
+              <span class="text-white text-xl font-bold leading-none">Vol.{volume}</span>
+              <span class="text-white/85 text-xs mt-0.5">No.{issue}</span>
+              <span class="text-white/70 text-[10px] mt-1">{year}</span>
+            </div>
+            <p class="text-green-200 text-xs font-medium">TSAE Journal</p>
+            <p class="text-green-300/80 text-[10px]">ISSN 0858-2114</p>
+          </div>
+        </div>
+
+        <div class="p-6 flex flex-col justify-center">
+          <span class="self-start text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded mb-2" style="background:#eef6f0; color:#1a6b3a;">
+            {th ? 'ฉบับปัจจุบัน' : 'Current issue'}
+          </span>
+          <h3 class="text-lg sm:text-xl font-bold text-gray-900 leading-snug mb-1">
+            {th ? `วารสาร สวกท. ปีที่ ${volume} ฉบับที่ ${issue}` : `TSAE Journal Vol. ${volume} No. ${issue}`}
+          </h3>
+          <p class="text-gray-400 text-xs mb-4">{th ? `พ.ศ. ${year + 543} (${year})` : year}</p>
+          <div class="flex gap-2 flex-wrap">
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener"
+              class="inline-flex items-center gap-1.5 px-4 py-2 text-white text-xs font-semibold rounded-lg transition-colors"
+              style="background-color:#1a6b3a;"
+              onmouseover="this.style.backgroundColor='#124d2a'"
+              onmouseout="this.style.backgroundColor='#1a6b3a'"
+            >
+              {th ? 'อ่านฉบับปัจจุบัน' : 'Read current issue'}
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+            <a
+              href={`${base}/journal`}
+              class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg border border-gray-200 text-gray-700 hover:border-gray-300 transition-colors"
+            >
+              {t('ui.allIssues')}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

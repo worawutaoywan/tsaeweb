@@ -443,7 +443,7 @@ def render_membership_application_notify(
     submission_id: int,
     site_url: str = SITE_URL,
 ) -> tuple[str, str, str]:
-    admin_url = f"{site_url}/api/admin/members?tab=applications"
+    admin_url = f"{site_url}/admin/members?tab=applications"
     subject = f"TSAE — ใบสมัครสมาชิกใหม่ #{submission_id} · {name}"
     msg_block = ""
     if message.strip():

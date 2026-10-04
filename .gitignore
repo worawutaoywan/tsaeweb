@@ -11,7 +11,7 @@ node_modules/
 __pycache__/
 *.py[cod]
 
-# Runtime databases, uploads, and private member data
+# Runtime databases, uploads, and private member data (PII — see ops/MIGRATE.md)
 server/registration/data/
 server/registration/uploads/
 *.db
@@ -21,6 +21,17 @@ src/data/members.json
 data/*.xlsx
 data/*.pdf
 data/*.png
+
+# CMS publish runtime (server-only)
+data/cms/.publish.*
+data/cms/.needs_publish
+data/cms/.publish.pid
+
+# Local scratch / agent rules (not required to run the site)
+.claude/
+.clinerules/
+survey-early-retiree.html
+public/uploads/news/ทดสอบ/
 
 # logs
 npm-debug.log*

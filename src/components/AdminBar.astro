@@ -1,5 +1,5 @@
 ---
-/** Admin toolbar — visible when logged in via /api/admin cookie.
+/** Admin toolbar — visible when logged in via /admin cookie.
  *  Static pages  -> inline editor (Brizy-like, edits data/cms/pages.json in place)
  *  Time-series   -> opens the CMS in a new tab at the right section (news/events/hero)
  */
@@ -11,8 +11,8 @@
     <span id="tsae-admin-context" class="tsae-admin-context"></span>
     <div class="tsae-admin-actions">
       <button type="button" id="tsae-admin-edit" class="tsae-admin-btn tsae-admin-btn-primary">แก้ไขหน้านี้</button>
-      <a href="/api/admin/cms" class="tsae-admin-btn" target="_blank" rel="noopener">CMS ข่าว/กิจกรรม</a>
-      <a href="/api/admin/logout" class="tsae-admin-btn">ออกจากระบบ</a>
+      <a href="/admin/cms" class="tsae-admin-btn" target="_blank" rel="noopener">CMS ข่าว/กิจกรรม</a>
+      <a href="/admin/logout" class="tsae-admin-btn">ออกจากระบบ</a>
     </div>
   </div>
 </div>
@@ -76,7 +76,7 @@
     };
 
     async function api(path: string) {
-      const res = await fetch('/api/admin/cms/api' + path, { credentials: 'same-origin' });
+      const res = await fetch('/admin/cms/api' + path, { credentials: 'same-origin' });
       if (!res.ok) return null;
       return res.json();
     }
@@ -113,7 +113,7 @@
       } else if (type === 'hero' || type === 'news' || type === 'event') {
         editBtn.textContent = 'แก้ใน CMS';
         editBtn.addEventListener('click', () => {
-          window.open('/api/admin/cms' + (cmsHash || ''), '_blank', 'noopener');
+          window.open('/admin/cms' + (cmsHash || ''), '_blank', 'noopener');
         });
       } else {
         // No CMS mapping for this page — hide the edit button, keep the bar for CMS/logout.

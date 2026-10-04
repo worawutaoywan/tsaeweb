@@ -6,8 +6,8 @@ uploaded proof-of-payment file to disk. Includes a cookie-session admin
 dashboard for listing / downloading submissions and exporting CSV.
 
 Front-end (Astro static) posts multipart/form-data to /register.
-nginx reverse-proxies https://www.tsae.asia/api/ -> this app, so all admin
-links/redirects are prefixed with /api/.
+Caddy proxies https://www.tsae.asia/admin and /member to this app.
+Public form endpoints remain under /api/ (register, submit, search).
 """
 
 from __future__ import annotations
@@ -44,12 +44,18 @@ ADMIN_PASS = os.getenv("ADMIN_PASS", "change-me")
 SECRET_KEY = os.getenv("SECRET_KEY") or secrets.token_hex(32)
 
 MAX_FILE_BYTES = int(os.getenv("MAX_FILE_BYTES", str(45 * 1024 * 1024)))  # 45 MB
+PRESENTATION_MAX_VIDEO_BYTES = int(
+    os.getenv("PRESENTATION_MAX_VIDEO_BYTES", str(150 * 1024 * 1024))
+)  # 150 MB for pre-recorded talks
 ALLOWED_EXT = {".pdf", ".jpg", ".jpeg", ".png", ".webp", ".heic"}
+PRESENTATION_SLIDE_EXT = {".pdf", ".ppt", ".pptx", ".key"}
+PRESENTATION_VIDEO_EXT = {".mp4", ".mov", ".m4v", ".webm"}
 ALLOWED_CONF = {"national": "TSAE 2026 National", "intl": "TSAE 2026 International"}
 SUBMISSION_KINDS = {
     "training": "แจ้งความสนใจฝึกอบรม",
     "membership": "สมัครสมาชิก",
     "contact": "ข้อความติดต่อ",
+    "presentation": "ไฟล์นำเสนอประชุม",
 }
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
@@ -402,15 +408,19 @@ async def _save_submission_upload(
     *,
     kind: str,
     label: str,
+    allowed_ext: set[str] | None = None,
+    max_bytes: int | None = None,
 ) -> dict | None:
     if file is None or not file.filename:
         return None
     ext = Path(file.filename).suffix.lower()
-    if ext not in ALLOWED_EXT and ext not in {".doc", ".docx"}:
+    allowed = allowed_ext if allowed_ext is not None else (ALLOWED_EXT | {".doc", ".docx"})
+    limit = MAX_FILE_BYTES if max_bytes is None else max_bytes
+    if ext not in allowed:
         raise HTTPException(status_code=400, detail=f"{label}: file type not allowed")
     blob = await file.read()
-    if len(blob) > MAX_FILE_BYTES:
-        mb = MAX_FILE_BYTES // (1024 * 1024)
+    if len(blob) > limit:
+        mb = limit // (1024 * 1024)
         raise HTTPException(status_code=413, detail=f"{label}: file too large (max {mb}MB)")
     safe_kind = re.sub(r"[^a-z0-9_-]+", "-", kind.lower()).strip("-") or "submission"
     dest_dir = UPLOAD_DIR / "submissions" / safe_kind
@@ -423,6 +433,79 @@ async def _save_submission_upload(
         "stored_path": stored,
         "uploaded_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
+
+
+@app.post("/submit/presentation")
+async def submit_presentation(
+    request: Request,
+    name: str = Form(...),
+    email: str = Form(...),
+    phone: str = Form(""),
+    organization: str = Form(""),
+    paper_title: str = Form(""),
+    easychair_id: str = Form(""),
+    mode: str = Form(...),
+    slides: UploadFile = File(...),
+    video: UploadFile | None = File(None),
+    company_url: str = Form(""),
+    form_token: str = Form(""),
+):
+    name, email = name.strip(), email.strip()
+    if not name or not EMAIL_RE.match(email):
+        raise HTTPException(status_code=400, detail="missing or invalid fields")
+    mode = mode.strip().lower()
+    if mode not in {"oral", "online", "poster"}:
+        raise HTTPException(status_code=400, detail="invalid presentation mode")
+    if company_url.strip():
+        return JSONResponse({"ok": True})
+    try:
+        elapsed = time.time() - float(form_token)
+        if elapsed < MIN_FORM_SEC:
+            return JSONResponse({"ok": True})
+    except (ValueError, TypeError):
+        pass
+    ip = request.client.host if request.client else ""
+    if not _check_rate_limit(ip):
+        return JSONResponse({"ok": True})
+
+    if slides is None or not (slides.filename or "").strip():
+        raise HTTPException(status_code=400, detail="slides file required")
+    if mode == "online" and (video is None or not (video.filename or "").strip()):
+        raise HTTPException(status_code=400, detail="video required for online presenters")
+
+    files = []
+    saved_slides = await _save_submission_upload(
+        slides, kind="presentation", label="slides",
+        allowed_ext=PRESENTATION_SLIDE_EXT, max_bytes=MAX_FILE_BYTES,
+    )
+    if saved_slides:
+        files.append(saved_slides)
+    saved_video = await _save_submission_upload(
+        video, kind="presentation", label="video",
+        allowed_ext=PRESENTATION_VIDEO_EXT, max_bytes=PRESENTATION_MAX_VIDEO_BYTES,
+    )
+    if saved_video:
+        files.append(saved_video)
+
+    reason = _spam_reason(
+        company_url=company_url, form_token=form_token,
+        name=name, email=email, message=paper_title, organization=organization,
+    )
+    mode_label = {"oral": "Oral", "online": "Online", "poster": "Poster"}[mode]
+    _save_submission(
+        request, "presentation",
+        name=name, email=email, phone=phone, organization=organization,
+        subject=f"{mode_label} · {paper_title.strip() or 'Untitled'}",
+        message=paper_title.strip(),
+        extra={
+            "mode": mode,
+            "paper_title": paper_title.strip(),
+            "easychair_id": easychair_id.strip(),
+            "files": files,
+        },
+        is_spam=1 if reason else 0, spam_reason=reason,
+    )
+    return JSONResponse({"ok": True})
 
 
 @app.post("/submit/training")
@@ -792,6 +875,7 @@ tbody tr.detail:hover{background:var(--green-50)}
 .badge.tr{background:var(--green-100);color:var(--green-700)}
 .badge.mb{background:var(--gold-100);color:var(--gold-600)}
 .badge.ct{background:#eef0fb;color:#3d4db0}
+.badge.pr{background:#e8f4ee;color:#1a6b3a}
 .badge.sp{background:#fdecea;color:var(--danger)}
 .nm{font-weight:700;color:var(--ink-900);display:block;line-height:1.35}
 .sub{color:var(--ink-500);font-size:12px;line-height:1.35}
@@ -920,10 +1004,10 @@ td.act{width:150px;white-space:nowrap;vertical-align:middle}
 def _admin_nav(active: str) -> str:
     """Render sidebar nav items — used by all admin pages (legacy + new shell)."""
     items = (
-        ("reg", "ลงทะเบียนประชุม", "/api/admin", "M4 4h16v4H4V4zm0 8h16v8H4v-8z"),
-        ("forms", "แบบฟอร์มอื่น ๆ", "/api/admin/submissions", "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"),
-        ("members", "สมาชิก", "/api/admin/members", "M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z"),
-        ("content", "จัดการเนื้อหา ↗", "https://cms.tsae.asia", "M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"),
+        ("reg", "ลงทะเบียนประชุม", "/admin", "M4 4h16v4H4V4zm0 8h16v8H4v-8z"),
+        ("forms", "แบบฟอร์มอื่น ๆ", "/admin/submissions", "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"),
+        ("members", "สมาชิก", "/admin/members", "M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z"),
+        ("content", "จัดการเนื้อหา", "/admin/cms", "M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"),
     )
     parts = []
     for key, label, href, icon in items:
@@ -944,7 +1028,7 @@ def _admin_shell(active: str, title: str, breadcrumb: tuple[tuple[str, str], ...
 
     Usage in a page:
         head, top = _admin_shell("reg", "title",
-            breadcrumb=(("/api/admin", "home"),), desc="...", actions="<a>...</a>")
+            breadcrumb=(("/admin", "home"),), desc="...", actions="<a>...</a>")
         return f-string with {PAGE_CSS} in head and {top} in body.
     """
     crumb_parts = []
@@ -976,7 +1060,7 @@ def _admin_shell(active: str, title: str, breadcrumb: tuple[tuple[str, str], ...
       <div class="nav-label">เมนูหลัก</div>
       {_admin_nav(active)}
       <div class="sep"></div>
-      <a class="logout" href="/api/admin/logout" data-tip="ออกจากระบบ">
+      <a class="logout" href="/admin/logout" data-tip="ออกจากระบบ">
         <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h6a2 2 0 012 2v1"/></svg>
         <span>ออกจากระบบ</span></a>
     </nav>
@@ -1011,12 +1095,17 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementB
 
 
 def _safe_next(url: str | None) -> str:
-    if url and url.startswith("/api/admin") and "://" not in url:
-        return url
-    return "/api/admin"
+    if not url or "://" in url:
+        return "/admin"
+    # Accept legacy /api/admin… bookmarks and normalize to /admin…
+    if url.startswith("/api/admin"):
+        url = "/admin" + url[len("/api/admin") :]
+    if url.startswith("/admin"):
+        return url or "/admin"
+    return "/admin"
 
 
-def _login_page(error: str = "", next_url: str = "/api/admin") -> str:
+def _login_page(error: str = "", next_url: str = "/admin") -> str:
     err_html = (
         f'<p class="err">{_esc(error)}</p>' if error else ""
     )
@@ -1059,7 +1148,7 @@ def _login_page(error: str = "", next_url: str = "/api/admin") -> str:
       <div class="lbl">ระบบผู้ดูแล</div>
       <h1>เข้าสู่ระบบ</h1>
       <p class="lead">ลงชื่อเข้าใช้เพื่อจัดการการลงทะเบียน แบบฟอร์ม และข้อมูลสมาชิก</p>
-      <form method="post" action="/api/admin/login">
+      <form method="post" action="/admin/login">
         <input type="hidden" name="next" value="{_esc(next_url)}">
         <label>ชื่อผู้ใช้</label>
         <input name="username" autocomplete="username" autofocus required>
@@ -1077,10 +1166,10 @@ def _login_page(error: str = "", next_url: str = "/api/admin") -> str:
 
 
 @app.get("/admin/login", response_class=HTMLResponse)
-def admin_login_page(request: Request, next: str = "/api/admin"):
+def admin_login_page(request: Request, next: str = "/admin"):
     nxt = _safe_next(next)
     if current_admin(request):
-        return RedirectResponse(nxt if nxt != "/api/admin" else "/api/admin", status_code=303)
+        return RedirectResponse(nxt if nxt != "/admin" else "/admin", status_code=303)
     return HTMLResponse(_login_page(next_url=nxt))
 
 
@@ -1088,7 +1177,7 @@ def admin_login_page(request: Request, next: str = "/api/admin"):
 def admin_login(
     username: str = Form(...),
     password: str = Form(...),
-    next: str = Form("/api/admin"),
+    next: str = Form("/admin"),
 ):
     nxt = _safe_next(next)
     ok_user = secrets.compare_digest(username, ADMIN_USER)
@@ -1105,7 +1194,7 @@ def admin_login(
 
 @app.get("/admin/logout")
 def admin_logout():
-    resp = RedirectResponse("/api/admin/login", status_code=303)
+    resp = RedirectResponse("/admin/login", status_code=303)
     resp.delete_cookie(COOKIE_NAME, path="/")
     return resp
 
@@ -1113,7 +1202,7 @@ def admin_logout():
 @app.get("/admin", response_class=HTMLResponse)
 def admin(request: Request, conf: str = ""):
     if not current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
 
     con = db()
     if conf in ALLOWED_CONF:
@@ -1142,7 +1231,7 @@ def admin(request: Request, conf: str = ""):
         conf_label = "National" if r["conf"] == "national" else "International"
         if r["file_name"]:
             file_cell = (
-                f'<a class="dl" href="/api/admin/file/{r["id"]}">'
+                f'<a class="dl" href="/admin/file/{r["id"]}">'
                 '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
                 'stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>'
                 '<polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
@@ -1172,8 +1261,8 @@ def admin(request: Request, conf: str = ""):
             f'<td class="country">{_esc(r["country"]) or "—"}</td>'
             f'<td class="nw" onclick="event.stopPropagation()">{file_cell}</td>'
             f'<td class="act" onclick="event.stopPropagation()"><div class="act-btns">'
-            f'<a class="dl" href="/api/admin/edit/{r["id"]}">แก้ไข</a>'
-            f'<form method="post" action="/api/admin/delete/{r["id"]}" '
+            f'<a class="dl" href="/admin/edit/{r["id"]}">แก้ไข</a>'
+            f'<form method="post" action="/admin/delete/{r["id"]}" '
             f"onsubmit=\"return confirm('ลบรายการ #{r['id']} ถาวร? ข้อมูลและไฟล์แนบจะถูกลบและกู้คืนไม่ได้')\">"
             f'<button type="submit" class="del-btn">ลบ</button></form>'
             f'</div></td>'
@@ -1202,14 +1291,14 @@ def admin(request: Request, conf: str = ""):
     )
 
     export_actions = (
-        f'<a class="btn btn-gold" href="/api/admin/export.csv{export_q}">'
+        f'<a class="btn btn-gold" href="/admin/export.csv{export_q}">'
         '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
         '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/>'
         '<line x1="12" y1="15" x2="12" y2="3"/></svg> Export CSV</a>'
     )
     top, bottom = _admin_shell(
         "reg", "การลงทะเบียนประชุม",
-        breadcrumb=(("/api/admin", "หน้าหลัก"), ("/api/admin", "การลงทะเบียนประชุม")),
+        breadcrumb=(("/admin", "หน้าหลัก"), ("/admin", "การลงทะเบียนประชุม")),
         desc="รายการผู้ลงทะเบียนเข้าร่วมการประชุม TSAE 2026 (ระดับชาติและนานาชาติ)",
         actions=export_actions,
     )
@@ -1253,9 +1342,9 @@ def admin(request: Request, conf: str = ""):
       <input id="q" placeholder="ค้นหา ชื่อ / อีเมล / หน่วยงาน / ประเทศ…" oninput="flt()">
     </div>
     <div class="seg">
-      {seg('ทั้งหมด','all','/api/admin')}
-      {seg('ระดับชาติ','national','/api/admin?conf=national')}
-      {seg('นานาชาติ','intl','/api/admin?conf=intl')}
+      {seg('ทั้งหมด','all','/admin')}
+      {seg('ระดับชาติ','national','/admin?conf=national')}
+      {seg('นานาชาติ','intl','/admin?conf=intl')}
     </div>
   </div>
   <div class="tablecard"><div class="table-wrap"><table>
@@ -1379,7 +1468,7 @@ def _edit_page(d: dict, error: str = "") -> str:
     int_sel = "selected" if conf == "intl" else ""
     err_html = f'<div class="ferr">{_esc(error)}</div>' if error else ""
     file_html = (
-        f'<a class="dl" href="/api/admin/file/{rid}">ดาวน์โหลดไฟล์แนบปัจจุบัน</a>'
+        f'<a class="dl" href="/admin/file/{rid}">ดาวน์โหลดไฟล์แนบปัจจุบัน</a>'
         if d.get("file_name")
         else '<span class="muted">ไม่มีไฟล์แนบ</span>'
     )
@@ -1390,9 +1479,9 @@ def _edit_page(d: dict, error: str = "") -> str:
     )
     top, bottom = _admin_shell(
         "reg", f"แก้ไขการลงทะเบียน #{rid}",
-        breadcrumb=(("/api/admin", "หน้าหลัก"), ("/api/admin", "การลงทะเบียนประชุม"), ("/api/admin", f"แก้ไข #{rid}")),
+        breadcrumb=(("/admin", "หน้าหลัก"), ("/admin", "การลงทะเบียนประชุม"), ("/admin", f"แก้ไข #{rid}")),
         desc=f"Registration #{rid} · แก้ไขข้อมูลผู้ลงทะเบียนแล้วกดบันทึก",
-        actions='<a class="btn btn-line" href="/api/admin">&larr; กลับ</a>',
+        actions='<a class="btn btn-line" href="/admin">&larr; กลับ</a>',
     )
     return f"""<!doctype html><html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1407,7 +1496,7 @@ def _edit_page(d: dict, error: str = "") -> str:
     <h2>แก้ไขข้อมูล #{rid}</h2>
     <p class="s">แก้ไขข้อมูลผู้ลงทะเบียนแล้วกดบันทึก</p>
     {err_html}
-    <form method="post" action="/api/admin/edit/{rid}">
+    <form method="post" action="/admin/edit/{rid}">
       <div class="fgrid">
         <div class="fld full"><label>งานประชุม *</label>
           <select name="conf">
@@ -1420,7 +1509,7 @@ def _edit_page(d: dict, error: str = "") -> str:
       </div>
       <div class="factions">
         <button type="submit" class="btn btn-save">บันทึกการแก้ไข</button>
-        <a class="btn btn-line" href="/api/admin">ยกเลิก</a>
+        <a class="btn btn-line" href="/admin">ยกเลิก</a>
       </div>
     </form>
   </div>
@@ -1432,7 +1521,7 @@ def _edit_page(d: dict, error: str = "") -> str:
 @app.get("/admin/edit/{rid}", response_class=HTMLResponse)
 def admin_edit_page(rid: int, request: Request):
     if not current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     con = db()
     row = con.execute("SELECT * FROM registrations WHERE id=?", (rid,)).fetchone()
     con.close()
@@ -1460,7 +1549,7 @@ def admin_edit(
     country: str = Form(""),
 ):
     if not current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     con = db()
     row = con.execute("SELECT * FROM registrations WHERE id=?", (rid,)).fetchone()
     if not row:
@@ -1504,13 +1593,13 @@ def admin_edit(
     )
     con.commit()
     con.close()
-    return RedirectResponse("/api/admin", status_code=303)
+    return RedirectResponse("/admin", status_code=303)
 
 
 @app.post("/admin/delete/{rid}")
 def admin_delete(rid: int, request: Request):
     if not current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     con = db()
     row = con.execute(
         "SELECT file_name FROM registrations WHERE id=?", (rid,)
@@ -1520,33 +1609,33 @@ def admin_delete(rid: int, request: Request):
         con.execute("DELETE FROM registrations WHERE id=?", (rid,))
         con.commit()
     con.close()
-    return RedirectResponse("/api/admin", status_code=303)
+    return RedirectResponse("/admin", status_code=303)
 
 
 # --------------------------------------------------------------------------- #
 # admin: other form submissions (training / membership / contact)
 # --------------------------------------------------------------------------- #
-_KIND_BADGE = {"training": "tr", "membership": "mb", "contact": "ct"}
-_KIND_LABEL = {"training": "ฝึกอบรม", "membership": "สมัครสมาชิก", "contact": "ติดต่อ"}
+_KIND_BADGE = {"training": "tr", "membership": "mb", "contact": "ct", "presentation": "pr"}
+_KIND_LABEL = {"training": "ฝึกอบรม", "membership": "สมัครสมาชิก", "contact": "ติดต่อ", "presentation": "นำเสนอ"}
 
 
 def _submissions_back_url(kind: str = "") -> str:
     if kind == "membership":
-        return "/api/admin/members?tab=applications"
+        return "/admin/members?tab=applications"
     if kind == "spam":
-        return "/api/admin/submissions?kind=spam"
+        return "/admin/submissions?kind=spam"
     if kind in SUBMISSION_KINDS:
-        return f"/api/admin/submissions?kind={kind}"
-    return "/api/admin/submissions"
+        return f"/admin/submissions?kind={kind}"
+    return "/admin/submissions"
 
 
 @app.get("/admin/submissions", response_class=HTMLResponse)
 def admin_submissions(request: Request, kind: str = ""):
     if not current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
 
     if kind == "membership":
-        return RedirectResponse("/api/admin/members?tab=applications", status_code=303)
+        return RedirectResponse("/admin/members?tab=applications", status_code=303)
 
     con = db()
     if kind == "spam":
@@ -1570,6 +1659,9 @@ def admin_submissions(request: Request, kind: str = ""):
         "membership": con.execute(
             "SELECT COUNT(*) c FROM submissions WHERE kind='membership' AND is_spam=0"
         ).fetchone()["c"],
+        "presentation": con.execute(
+            "SELECT COUNT(*) c FROM submissions WHERE kind='presentation' AND is_spam=0"
+        ).fetchone()["c"],
         "spam": con.execute("SELECT COUNT(*) c FROM submissions WHERE is_spam=1").fetchone()["c"],
     }
     con.close()
@@ -1590,13 +1682,37 @@ def admin_submissions(request: Request, kind: str = ""):
         row_style = ' style="background:#fff5f5;"' if is_spam else ""
         spam_badge = f' <span class="badge sp" title="{_esc(spam_reason_val)}">spam</span>' if is_spam else ""
         mark_spam_btn = (
-            f'<form method="post" action="/api/admin/submissions/unspam/{r["id"]}">'
+            f'<form method="post" action="/admin/submissions/unspam/{r["id"]}">'
             f'<button type="submit" class="del-btn ok">ยกเลิกสแปม</button></form>'
         ) if is_spam else (
-            f'<form method="post" action="/api/admin/submissions/markspam/{r["id"]}">'
+            f'<form method="post" action="/admin/submissions/markspam/{r["id"]}">'
             f'<button type="submit" class="del-btn warn">สแปม</button></form>'
         )
         spam_reason_row = f'<div><span>Spam reason</span>{_esc(spam_reason_val) or "—"}</div>' if spam_reason_val else ""
+        extra_rows = ""
+        try:
+            extra_obj = json.loads(r["extra"] or "{}") if r["extra"] else {}
+        except Exception:
+            extra_obj = {}
+        if extra_obj.get("easychair_id"):
+            extra_rows += (
+                f'<div><span>EasyChair ID</span>{_esc(extra_obj.get("easychair_id"))}</div>'
+            )
+        files = extra_obj.get("files") or []
+        if files:
+            links = []
+            for i, item in enumerate(files):
+                label = item.get("label") or item.get("original_name") or f"file {i + 1}"
+                orig = item.get("original_name") or ""
+                links.append(
+                    f'<a class="dl" href="/admin/submissions/file/{r["id"]}/{i}">'
+                    f'{_esc(label)}{" · " + _esc(orig) if orig else ""}</a>'
+                )
+            extra_rows += (
+                '<div style="grid-column:1/-1"><span>ไฟล์</span>'
+                + " &nbsp;·&nbsp; ".join(links)
+                + "</div>"
+            )
         body.append(
             f'<tr class="main"{row_style} data-search="{_esc(((r["name"] or "")+" "+(r["email"] or "")+" "+(r["organization"] or "")+" "+(r["subject"] or "")+" "+msg).lower())}" onclick="tog({r["id"]})">'
             f'<td class="muted nw">#{r["id"]}</td>'
@@ -1609,7 +1725,7 @@ def admin_submissions(request: Request, kind: str = ""):
             f'<td class="msg">{_esc(msg_short)}</td>'
             f'<td class="act" onclick="event.stopPropagation()"><div class="act-btns">'
             f'{mark_spam_btn}'
-            f'<form method="post" action="/api/admin/submissions/delete/{r["id"]}" '
+            f'<form method="post" action="/admin/submissions/delete/{r["id"]}" '
             f"onsubmit=\"return confirm('ลบรายการ #{r['id']} ถาวร?')\">"
             f'<button type="submit" class="del-btn">ลบ</button></form>'
             f'</div></td>'
@@ -1622,6 +1738,7 @@ def admin_submissions(request: Request, kind: str = ""):
             f'<div><span>หัวข้อ/ประเภท</span>{_esc(r["subject"]) or "—"}</div>'
             f'<div><span>IP</span>{_esc(r["ip"]) or "—"}</div>'
             + spam_reason_row
+            + extra_rows
             + f'<div style="grid-column:1/-1"><span>ข้อความ</span>{_esc(msg) or "—"}</div>'
             "</div></td></tr>"
         )
@@ -1639,14 +1756,14 @@ def admin_submissions(request: Request, kind: str = ""):
     )
 
     purge_btn = (
-        f'<form method="post" action="/api/admin/submissions/rescan" style="display:inline">'
+        f'<form method="post" action="/admin/submissions/rescan" style="display:inline">'
         f'<button type="submit" class="btn btn-ghost">🔍 สแกนสแปมใหม่</button></form>'
-        f'<form method="post" action="/api/admin/submissions/purgespam" style="display:inline"'
+        f'<form method="post" action="/admin/submissions/purgespam" style="display:inline"'
         f" onsubmit=\"return confirm('ลบสแปมทั้งหมด ({counts['spam']} รายการ) ถาวร?')\">"
         f'<button type="submit" class="btn" style="background:#c0392b;color:#fff;border:0">'
         f'🗑 ลบสแปมทั้งหมด ({counts["spam"]})</button></form>'
     ) if counts["spam"] > 0 else (
-        f'<form method="post" action="/api/admin/submissions/rescan" style="display:inline">'
+        f'<form method="post" action="/admin/submissions/rescan" style="display:inline">'
         f'<button type="submit" class="btn btn-ghost">🔍 สแกนสแปมใหม่</button></form>'
     )
 
@@ -1654,15 +1771,15 @@ def admin_submissions(request: Request, kind: str = ""):
 
     actions = (
         f'{purge_btn}'
-        f'<a class="btn btn-gold" href="/api/admin/submissions/export.csv{export_q}">'
+        f'<a class="btn btn-gold" href="/admin/submissions/export.csv{export_q}">'
         '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
         '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/>'
         '<line x1="12" y1="15" x2="12" y2="3"/></svg> Export CSV</a>'
     )
     top, bottom = _admin_shell(
         "forms", "แบบฟอร์มอื่น ๆ",
-        breadcrumb=(("/api/admin", "หน้าหลัก"), ("/api/admin/submissions", "แบบฟอร์มอื่น ๆ")),
-        desc="คำขอฝึกอบรม · ข้อความติดต่อ · ใบสมัครสมาชิก · สแปม",
+        breadcrumb=(("/admin", "หน้าหลัก"), ("/admin/submissions", "แบบฟอร์มอื่น ๆ")),
+        desc="คำขอฝึกอบรม · ข้อความติดต่อ · ไฟล์นำเสนอ · ใบสมัครสมาชิก · สแปม",
         actions=actions,
     )
     return f"""<!doctype html><html lang="th"><head><meta charset="utf-8">
@@ -1695,7 +1812,7 @@ def admin_submissions(request: Request, kind: str = ""):
     <div class="stat gold">
       <div class="top"><span class="k">ใบสมัครสมาชิก</span>
         <span class="ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></span></div>
-      <div class="v"><a href="/api/admin/members?tab=applications" style="color:inherit;text-decoration:none">{counts['membership']}</a></div>
+      <div class="v"><a href="/admin/members?tab=applications" style="color:inherit;text-decoration:none">{counts['membership']}</a></div>
       <div class="trend flat">รอตรวจ · อนุมัติแล้ว</div>
     </div>
     <div class="stat red">
@@ -1711,10 +1828,11 @@ def admin_submissions(request: Request, kind: str = ""):
       <input id="q" placeholder="ค้นหา ชื่อ / อีเมล / หน่วยงาน / หัวข้อ / ข้อความ…" oninput="flt()">
     </div>
     <div class="seg">
-      {seg('ทั้งหมด','all','/api/admin/submissions')}
-      {seg('ฝึกอบรม','training','/api/admin/submissions?kind=training')}
-      {seg('ติดต่อ','contact','/api/admin/submissions?kind=contact')}
-      {seg('สแปม','spam','/api/admin/submissions?kind=spam')}
+      {seg('ทั้งหมด','all','/admin/submissions')}
+      {seg('ฝึกอบรม','training','/admin/submissions?kind=training')}
+      {seg('ติดต่อ','contact','/admin/submissions?kind=contact')}
+      {seg('นำเสนอ','presentation','/admin/submissions?kind=presentation')}
+      {seg('สแปม','spam','/admin/submissions?kind=spam')}
     </div>
   </div>
   <div class="tablecard"><div class="table-wrap"><table>
@@ -1794,7 +1912,7 @@ def admin_submission_file(sid: int, idx: int, _: str = Depends(require_admin)) -
 @app.post("/admin/submissions/delete/{sid}")
 def admin_submission_delete(sid: int, request: Request):
     if not current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     con = db()
     row = con.execute("SELECT kind, extra FROM submissions WHERE id=?", (sid,)).fetchone()
     kind = row["kind"] if row else ""
@@ -1808,7 +1926,7 @@ def admin_submission_delete(sid: int, request: Request):
 @app.post("/admin/submissions/markspam/{sid}")
 def admin_mark_spam(sid: int, request: Request):
     if not current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     con = db()
     row = con.execute("SELECT kind FROM submissions WHERE id=?", (sid,)).fetchone()
     kind = row["kind"] if row else ""
@@ -1824,7 +1942,7 @@ def admin_mark_spam(sid: int, request: Request):
 @app.post("/admin/submissions/unspam/{sid}")
 def admin_unspam(sid: int, request: Request):
     if not current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     con = db()
     con.execute(
         "UPDATE submissions SET is_spam=0, spam_reason='' WHERE id=?",
@@ -1832,37 +1950,30 @@ def admin_unspam(sid: int, request: Request):
     )
     con.commit()
     con.close()
-    return RedirectResponse("/api/admin/submissions?kind=spam", status_code=303)
+    return RedirectResponse("/admin/submissions?kind=spam", status_code=303)
 
 
 @app.post("/admin/submissions/purgespam")
 def admin_purge_spam(request: Request):
     if not current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     con = db()
     con.execute("DELETE FROM submissions WHERE is_spam=1")
     con.commit()
     con.close()
-    return RedirectResponse("/api/admin/submissions", status_code=303)
+    return RedirectResponse("/admin/submissions", status_code=303)
 
 
 @app.post("/admin/submissions/rescan")
 def admin_rescan_spam(request: Request):
     if not current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     n = _rescan_spam_db()
-    return RedirectResponse(f"/api/admin/submissions?kind=spam&rescanned={n}", status_code=303)
+    return RedirectResponse(f"/admin/submissions?kind=spam&rescanned={n}", status_code=303)
 
 
 from members import configure as configure_members, router as members_router
-
-
-@app.get("/admin/cms", include_in_schema=False)
-@app.get("/admin/cms/", include_in_schema=False)
-@app.get("/admin/cms/{legacy_path:path}", include_in_schema=False)
-def legacy_cms_redirect(legacy_path: str = ""):
-    """Send old CMS bookmarks to the single Pages CMS content system."""
-    return RedirectResponse("https://cms.tsae.asia", status_code=308)
+from cms.routes import register_cms_routes
 
 
 configure_members(
@@ -1878,3 +1989,5 @@ configure_members(
     upload_dir=UPLOAD_DIR,
 )
 app.include_router(members_router)
+
+register_cms_routes(app, data_dir=DATA_DIR, auth_fn=current_admin)

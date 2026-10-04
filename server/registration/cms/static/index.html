@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/main.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/api/admin/cms/assets/app.css?v=17">
+  <link rel="stylesheet" href="/admin/cms/assets/app.css?v=40">
 </head>
 <body>
   <div class="shell">
@@ -26,14 +26,14 @@
       </div>
       <nav class="nav">
         <div class="nav-label">เมนูหลัก</div>
-        <a href="/api/admin" data-tip="ลงทะเบียนประชุม"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4h16v4H4V4zm0 8h16v8H4v-8z"/></svg><span>ลงทะเบียนประชุม</span></a>
-        <a href="/api/admin/submissions" data-tip="แบบฟอร์มอื่น ๆ"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span>แบบฟอร์มอื่น ๆ</span></a>
-        <a href="/api/admin/members" data-tip="สมาชิก"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z"/></svg><span>สมาชิก</span></a>
-        <a href="/api/admin/cms" class="on" data-tip="จัดการเนื้อหา"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg><span>จัดการเนื้อหา</span></a>
+        <a href="/admin" data-tip="ลงทะเบียนประชุม"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4h16v4H4V4zm0 8h16v8H4v-8z"/></svg><span>ลงทะเบียนประชุม</span></a>
+        <a href="/admin/submissions" data-tip="แบบฟอร์มอื่น ๆ"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span>แบบฟอร์มอื่น ๆ</span></a>
+        <a href="/admin/members" data-tip="สมาชิก"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z"/></svg><span>สมาชิก</span></a>
+        <a href="/admin/cms" class="on" data-tip="จัดการเนื้อหา"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg><span>จัดการเนื้อหา</span></a>
         <div class="nav-label nav-label-sub">เนื้อหา</div>
         <div class="nav-sub" id="main-nav"></div>
         <div class="sep"></div>
-        <a href="/api/admin/logout" class="logout" data-tip="ออกจากระบบ"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h6a2 2 0 012 2v1"/></svg><span>ออกจากระบบ</span></a>
+        <a href="/admin/logout" class="logout" data-tip="ออกจากระบบ"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h6a2 2 0 012 2v1"/></svg><span>ออกจากระบบ</span></a>
       </nav>
     </aside>
 
@@ -79,11 +79,13 @@
     } catch (e) {}
   })();
   </script>
-  <script src="/api/admin/cms/assets/icons.js?v=16"></script>
+  <script src="/admin/cms/assets/icons.js?v=40"></script>
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales/th.global.min.js"></script>
-  <script src="/api/admin/cms/assets/app.js?v=16"></script>
-  <script src="/api/admin/cms/assets/pages-builder.js?v=16"></script>
+  <script src="/admin/cms/assets/app.js?v=40"></script>
+  <script src="/admin/cms/assets/home-content.js?v=40"></script>
+  <script src="/admin/cms/assets/campaigns.js?v=40"></script>
+  <script src="/admin/cms/assets/pages-builder.js?v=40"></script>
 </body>
 </html>

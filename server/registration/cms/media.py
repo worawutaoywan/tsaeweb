@@ -1,4 +1,4 @@
-"""Media library — browse and upload files to /uploads/ (not wp-uploads)."""
+"""Media library — browse site media folders; write new files to /uploads/."""
 from __future__ import annotations
 
 import mimetypes
@@ -12,11 +12,13 @@ ALLOWED_EXT = {
     ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg",
     ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
     ".mp4", ".webm", ".mp3",
+    ".html", ".htm", ".zip",
 }
 IMAGE_EXT = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"}
 MAX_MEDIA_BYTES = int(os.getenv("MAX_MEDIA_BYTES", str(50 * 1024 * 1024)))
 
 URL_PREFIX = os.getenv("CMS_UPLOADS_URL", "/uploads").rstrip("/")
+WEB_ROOT = Path(os.getenv("CMS_WEB_ROOT", "/var/www/tsae_web"))
 
 
 def uploads_root() -> Path:
@@ -30,11 +32,60 @@ def uploads_root() -> Path:
     return fallback
 
 
-def public_url(relative: str) -> str:
+def libraries() -> dict[str, dict]:
+    """Named media roots. Only `uploads` is writable for new CMS files."""
+    return {
+        "uploads": {
+            "id": "uploads",
+            "label": "อัปโหลดใหม่",
+            "hint": "ไฟล์ใหม่จาก CMS — ใช้กับเนื้อหาใหม่",
+            "urlPrefix": "/uploads",
+            "writable": True,
+            "path": uploads_root(),
+        },
+        "images": {
+            "id": "images",
+            "label": "รูปเว็บไซต์",
+            "hint": "โลโก้ / Hero / โปสเตอร์ใน /images",
+            "urlPrefix": "/images",
+            "writable": False,
+            "path": WEB_ROOT / "images",
+        },
+        "wp-uploads": {
+            "id": "wp-uploads",
+            "label": "สื่อเก่า (WP)",
+            "hint": "รูปข่าวเก่าจาก WordPress — อ่านอย่างเดียว",
+            "urlPrefix": "/wp-uploads",
+            "writable": False,
+            "path": WEB_ROOT / "wp-uploads",
+        },
+        "downloads": {
+            "id": "downloads",
+            "label": "ดาวน์โหลด",
+            "hint": "PDF / เอกสารใน /downloads",
+            "urlPrefix": "/downloads",
+            "writable": False,
+            "path": WEB_ROOT / "downloads",
+        },
+    }
+
+
+def get_library(library_id: str | None = None) -> dict:
+    libs = libraries()
+    key = (library_id or "uploads").strip() or "uploads"
+    if key not in libs:
+        raise ValueError(f"unknown library: {key}")
+    return libs[key]
+
+
+def public_url(relative: str, url_prefix: str | None = None) -> str:
+    prefix = (url_prefix or URL_PREFIX).rstrip("/")
+    if not prefix.startswith("/"):
+        prefix = "/" + prefix
     rel = relative.replace("\\", "/").lstrip("/")
-    if rel.startswith(f"{URL_PREFIX.strip('/')}/"):
-        return rel if rel.startswith("/") else "/" + rel
-    return f"{URL_PREFIX}/{rel}"
+    if rel.startswith(prefix.strip("/") + "/"):
+        return "/" + rel if not rel.startswith("/") else rel
+    return f"{prefix}/{rel}" if rel else prefix
 
 
 def _safe_rel(path: str) -> str:
@@ -44,44 +95,130 @@ def _safe_rel(path: str) -> str:
     return p
 
 
-def list_media(root: Path, subpath: str = "", q: str = "", page: int = 1, per_page: int = 48) -> dict:
+def _count_files(root: Path, limit: int = 5000) -> int:
+    if not root.exists() or not root.is_dir():
+        return 0
+    n = 0
+    try:
+        for p in root.rglob("*"):
+            if p.is_file() and p.suffix.lower() in ALLOWED_EXT:
+                n += 1
+                if n >= limit:
+                    return n
+    except OSError:
+        return n
+    return n
+
+
+def list_libraries() -> dict:
+    items = []
+    for lib in libraries().values():
+        root: Path = lib["path"]
+        items.append({
+            "id": lib["id"],
+            "label": lib["label"],
+            "hint": lib["hint"],
+            "urlPrefix": lib["urlPrefix"],
+            "writable": lib["writable"],
+            "exists": root.exists() and root.is_dir(),
+            "fileCount": _count_files(root) if root.exists() else 0,
+        })
+    return {"items": items}
+
+
+def _file_entry(entry: Path, rel: str, url_prefix: str | None) -> dict | None:
+    if not entry.is_file() or entry.suffix.lower() not in ALLOWED_EXT:
+        return None
+    try:
+        stat = entry.stat()
+    except OSError:
+        return None
+    ext = entry.suffix.lower()
+    return {
+        "name": entry.name,
+        "path": rel,
+        "url": public_url(rel, url_prefix),
+        "size": stat.st_size,
+        "modified": datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).isoformat(),
+        "type": "image" if ext in IMAGE_EXT else ("pdf" if ext == ".pdf" else "file"),
+    }
+
+
+def list_media(
+    root: Path,
+    subpath: str = "",
+    q: str = "",
+    page: int = 1,
+    per_page: int = 48,
+    url_prefix: str | None = None,
+    library_id: str = "uploads",
+    writable: bool = True,
+    recursive: bool = False,
+) -> dict:
     sub = _safe_rel(subpath) if subpath else ""
     base = root / sub if sub else root
+    empty = {
+        "items": [], "dirs": [], "path": sub, "total": 0, "page": page, "pages": 0,
+        "library": library_id, "writable": writable, "urlPrefix": url_prefix or URL_PREFIX,
+        "root": str(root), "recursive": recursive,
+    }
     if not base.exists() or not base.is_dir():
-        return {"items": [], "dirs": [], "path": sub, "total": 0, "page": page, "pages": 0}
+        return empty
 
     dirs: list[dict] = []
     files: list[dict] = []
+    q_lower = q.lower().strip()
 
     try:
         entries = sorted(base.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower()))
     except OSError:
-        return {"items": [], "dirs": [], "path": sub, "total": 0, "page": page, "pages": 0}
+        return empty
 
-    q_lower = q.lower().strip()
     for entry in entries:
+        if entry.name.startswith("."):
+            continue
         rel = f"{sub}/{entry.name}".strip("/") if sub else entry.name
         if entry.is_dir():
-            if not q_lower or q_lower in entry.name.lower():
-                dirs.append({"name": entry.name, "path": rel})
-        elif entry.is_file() and entry.suffix.lower() in ALLOWED_EXT:
-            if q_lower and q_lower not in entry.name.lower():
+            if q_lower and q_lower not in entry.name.lower() and not recursive:
                 continue
-            stat = entry.stat()
-            ext = entry.suffix.lower()
-            files.append({
+            dirs.append({
                 "name": entry.name,
                 "path": rel,
-                "url": public_url(rel),
-                "size": stat.st_size,
-                "modified": datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).isoformat(),
-                "type": "image" if ext in IMAGE_EXT else ("pdf" if ext == ".pdf" else "file"),
+                "fileCount": _count_files(entry, limit=2000),
             })
+        else:
+            if recursive:
+                continue  # files gathered below when recursive
+            if q_lower and q_lower not in entry.name.lower():
+                continue
+            item = _file_entry(entry, rel, url_prefix)
+            if item:
+                files.append(item)
+
+    if recursive:
+        try:
+            for entry in base.rglob("*"):
+                if not entry.is_file() or entry.name.startswith("."):
+                    continue
+                try:
+                    rel = str(entry.relative_to(root)).replace("\\", "/")
+                except ValueError:
+                    continue
+                if q_lower and q_lower not in entry.name.lower() and q_lower not in rel.lower():
+                    continue
+                item = _file_entry(entry, rel, url_prefix)
+                if item:
+                    files.append(item)
+        except OSError:
+            pass
+        # When searching recursively, hide dirs that don't match unless we keep them for nav
+        if q_lower:
+            dirs = [d for d in dirs if q_lower in d["name"].lower()]
 
     files.sort(key=lambda f: f["modified"], reverse=True)
     total = len(files)
-    pages = max(1, (total + per_page - 1) // per_page)
-    page = max(1, min(page, pages))
+    pages = max(1, (total + per_page - 1) // per_page) if total else 0
+    page = max(1, min(page, pages)) if pages else 1
     start = (page - 1) * per_page
     items = files[start : start + per_page]
 
@@ -93,23 +230,21 @@ def list_media(root: Path, subpath: str = "", q: str = "", page: int = 1, per_pa
         "page": page,
         "pages": pages,
         "root": str(root),
+        "library": library_id,
+        "writable": writable,
+        "urlPrefix": url_prefix or URL_PREFIX,
+        "recursive": recursive,
     }
 
 
-def save_upload(root: Path, file_bytes: bytes, filename: str, subdir: str = "cms") -> dict:
-    """Save uploaded file. If `subdir` is empty or "cms" with no slash, treat as
-    target folder directly (uses it as-is). Otherwise (legacy "cms/YYYY/MM"
-    style) keep old behavior. This lets the UI drop files into the folder the
-    user is currently viewing.
-    """
+def save_upload(root: Path, file_bytes: bytes, filename: str, subdir: str = "cms", url_prefix: str | None = None) -> dict:
+    """Save uploaded file into the writable uploads root."""
     ext = Path(filename).suffix.lower()
     if ext not in ALLOWED_EXT:
         raise ValueError(f"file type {ext} not allowed")
     if len(file_bytes) > MAX_MEDIA_BYTES:
         raise ValueError("file too large")
 
-    # If the caller passes a real folder path (contains "/" or is non-empty and
-    # not the legacy default "cms"), honor it. Otherwise default to cms/YYYY/MM.
     target = subdir.strip("/") if subdir else ""
     if not target or target == "cms":
         now = datetime.now(timezone.utc)
@@ -118,7 +253,6 @@ def save_upload(root: Path, file_bytes: bytes, filename: str, subdir: str = "cms
         folder = target
 
     dest_dir = root / folder
-    # Safety: dest_dir must remain inside root
     if not str(dest_dir.resolve()).startswith(str(root.resolve())):
         raise ValueError("invalid upload path")
     dest_dir.mkdir(parents=True, exist_ok=True)
@@ -133,20 +267,16 @@ def save_upload(root: Path, file_bytes: bytes, filename: str, subdir: str = "cms
     return {
         "name": name,
         "path": rel,
-        "url": public_url(rel),
+        "url": public_url(rel, url_prefix),
         "size": len(file_bytes),
         "mime": mime or "application/octet-stream",
     }
 
 
 def create_dir(root: Path, rel_path: str) -> dict:
-    """Create a subdirectory under root. Returns the new dir info."""
     rel = _safe_rel(rel_path)
     if not rel:
         raise ValueError("folder name required")
-    if "/" in rel.split("/")[-1] and rel != rel.strip("/"):
-        # Allow nested paths but validate each segment
-        pass
     target = root / rel
     if not str(target.resolve()).startswith(str(root.resolve())):
         raise ValueError("invalid folder path")
@@ -159,7 +289,6 @@ def create_dir(root: Path, rel_path: str) -> dict:
 
 
 def delete_dir(root: Path, rel_path: str) -> dict:
-    """Delete a subdirectory only if empty. Returns the deleted dir info."""
     rel = _safe_rel(rel_path)
     if not rel:
         raise ValueError("cannot delete root")
@@ -169,7 +298,6 @@ def delete_dir(root: Path, rel_path: str) -> dict:
         raise ValueError("invalid path")
     if not target.is_dir():
         raise FileNotFoundError(rel_path)
-    # Must be empty (no files, no subdirs)
     try:
         next(target.iterdir())
         raise ValueError("folder not empty")
@@ -179,8 +307,7 @@ def delete_dir(root: Path, rel_path: str) -> dict:
     return {"path": rel}
 
 
-def move_file(root: Path, src_rel: str, dest_dir_rel: str) -> dict:
-    """Move a file into another folder. Returns the new path/url."""
+def move_file(root: Path, src_rel: str, dest_dir_rel: str, url_prefix: str | None = None) -> dict:
     src_rel = _safe_rel(src_rel)
     dest_dir_rel = _safe_rel(dest_dir_rel) if dest_dir_rel else ""
     if not src_rel:
@@ -199,7 +326,7 @@ def move_file(root: Path, src_rel: str, dest_dir_rel: str) -> dict:
         raise ValueError("file already exists in destination")
     src.rename(dest)
     new_rel = f"{dest_dir_rel}/{dest.name}".strip("/") if dest_dir_rel else dest.name
-    return {"name": dest.name, "path": new_rel, "url": public_url(new_rel)}
+    return {"name": dest.name, "path": new_rel, "url": public_url(new_rel, url_prefix)}
 
 
 def delete_media(root: Path, rel_path: str) -> None:
@@ -210,6 +337,6 @@ def delete_media(root: Path, rel_path: str) -> None:
         raise ValueError("invalid path")
     if not target.is_file():
         raise FileNotFoundError(rel_path)
-    if not target.suffix.lower() in ALLOWED_EXT:
+    if target.suffix.lower() not in ALLOWED_EXT:
         raise ValueError("cannot delete this file type")
     target.unlink()

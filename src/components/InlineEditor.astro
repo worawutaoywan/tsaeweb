@@ -199,7 +199,7 @@
     let mediaTarget: ((url: string) => void) | null = null;
 
     const api = (path: string, opts?: RequestInit) =>
-      fetch('/api/admin/cms/api' + path, { credentials: 'same-origin', ...opts });
+      fetch('/admin/cms/api' + path, { credentials: 'same-origin', ...opts });
 
     function toast(msg: string) {
       const t = document.createElement('div');

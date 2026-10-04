@@ -22,4 +22,4 @@ cp .env.example .env   # then edit ADMIN_USER / ADMIN_PASS
 docker compose up -d --build
 ```
 
-Admin UI: https://www.tsae.asia/api/admin
+Admin UI: https://www.tsae.asia/admin

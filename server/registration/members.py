@@ -497,16 +497,16 @@ def _files_html(
             dt = datetime.fromisoformat(f["uploaded_at"]).strftime("%d/%m/%Y %H:%M")
         except Exception:
             dt = e(f["uploaded_at"])
-        href = f"/api/admin/members/file/{f['id']}" if admin else f"/api/member/file/{f['id']}"
+        href = f"/admin/members/file/{f['id']}" if admin else f"/member/file/{f['id']}"
         del_form = ""
         if admin:
             del_form = (
-                f'<form method="post" action="/api/admin/members/files/{f["id"]}/delete" style="display:inline;margin-left:8px">'
+                f'<form method="post" action="/admin/members/files/{f["id"]}/delete" style="display:inline;margin-left:8px">'
                 f'<button type="submit" class="del-btn" onclick="event.stopPropagation()">ลบ</button></form>'
             )
         elif allow_member_delete and source == "member":
             del_form = (
-                f'<form method="post" action="/api/member/files/{f["id"]}/delete" style="display:inline;margin-left:8px">'
+                f'<form method="post" action="/member/files/{f["id"]}/delete" style="display:inline;margin-left:8px">'
                 f'<button type="submit" class="del-btn" onclick="event.stopPropagation()">ลบ</button></form>'
             )
         source_badge = (
@@ -544,7 +544,7 @@ def _admin_files_panel(mid: int, files: list) -> str:
     <div class="fgrid" style="margin-bottom:20px">
       <div class="fld full" style="background:#f8faf9;border-radius:12px;padding:14px 16px">
         <label style="color:#0f5a30">📤 อัปโหลดไฟล์ให้สมาชิก (จากสมาคม)</label>
-        <form method="post" action="/api/admin/members/{mid}/files/upload" enctype="multipart/form-data" style="margin-top:10px">
+        <form method="post" action="/admin/members/{mid}/files/upload" enctype="multipart/form-data" style="margin-top:10px">
           <div class="fgrid">
             <div class="fld">
               <label>ประเภทเอกสาร</label>
@@ -571,7 +571,7 @@ def _admin_files_panel(mid: int, files: list) -> str:
     {_files_html(admin_files, admin=True)}
     <h4 style="margin:18px 0 8px;font-size:13px;color:#42514a">ไฟล์ที่สมาชิกอัปโหลด ({len(member_files)})</h4>
     {_files_html(member_files, admin=True)}
-    <p class="sub" style="margin-top:12px">สมาชิกอัปโหลดเพิ่มได้ที่ <a href="{SITE_URL}/api/member/login">เข้าสู่ระบบสมาชิก</a></p>
+    <p class="sub" style="margin-top:12px">สมาชิกอัปโหลดเพิ่มได้ที่ <a href="{SITE_URL}/member/login">เข้าสู่ระบบสมาชิก</a></p>
   </div>"""
 
 
@@ -588,7 +588,7 @@ def _admin_email_panel(mid: int, email_addr: str) -> str:
   <div style="margin-top:28px;padding-top:20px;border-top:1px solid #e7ede9">
     <h3 style="margin:0 0 6px;font-size:15px;color:#0f5a30">📧 ส่งอีเมลถึงสมาชิก</h3>
     <p class="sub" style="margin:0 0 16px">เทมเพลตแบรนด์ TSAE · ส่งไปที่ {e(email_addr)} · เทมเพลตเชิญจะสร้างรหัสผ่านใหม่และแนบในอีเมล</p>
-    <form method="post" action="/api/admin/members/{mid}/email" id="emailForm">
+    <form method="post" action="/admin/members/{mid}/email" id="emailForm">
       <div class="fgrid">
         <div class="fld">
           <label>เทมเพลต</label>
@@ -833,7 +833,7 @@ def _approve_membership_submission(con: sqlite3.Connection, sid: int) -> tuple[i
     )
 
     if email:
-        login_url = f"{SITE_URL}/api/member/login"
+        login_url = f"{SITE_URL}/member/login"
         subj, html, plain = render_member_email(
             "invite",
             name=row["name"] or "",
@@ -865,7 +865,7 @@ def _set_member_cookie(response: RedirectResponse, payload: dict) -> None:
     tok = _member_signer.dumps(payload)
     response.set_cookie(
         MEMBER_COOKIE, tok, httponly=True, samesite="lax",
-        max_age=MEMBER_SESSION_MAX, path="/api",
+        max_age=MEMBER_SESSION_MAX, path="/",
     )
 
 
@@ -913,7 +913,7 @@ def _member_login_page(error: str = "", info: str = "") -> str:
   <h2>เข้าสู่ระบบสมาชิก TSAE</h2>
   <p class="s">กรอก<strong>เลขสมาชิก</strong> (เช่น <code>466</code> หรือ <code>ส.0466</code>) หรือ<strong>อีเมล</strong> อย่างใดอย่างหนึ่ง พร้อมรหัสผ่าน</p>
   {err}{inf}
-  <form method="post" action="/api/member/login">
+  <form method="post" action="/member/login">
     <div class="fgrid">
       <div class="fld full"><label>เลขสมาชิก หรือ อีเมล</label>
         <input name="login" placeholder="466 / ส.0466 / email@example.com" required autocomplete="username"></div>
@@ -922,7 +922,7 @@ def _member_login_page(error: str = "", info: str = "") -> str:
     <div class="factions"><button type="submit" class="btn btn-save">เข้าสู่ระบบ</button>
       <a class="btn btn-ghost" href="{SITE_URL}/th/about/members/">กลับหน้าสมาชิก</a></div>
     <p class="sub" style="margin-top:14px;text-align:center">
-      <a href="/api/member/forgot-password">ลืมรหัสผ่าน? ขอรหัสผ่านใหม่ทางอีเมล</a>
+      <a href="/member/forgot-password">ลืมรหัสผ่าน? ขอรหัสผ่านใหม่ทางอีเมล</a>
     </p>
   </form>
 </div></div></body></html>"""
@@ -940,14 +940,14 @@ def _member_forgot_page(error: str = "", info: str = "") -> str:
   <h2>ลืมรหัสผ่าน</h2>
   <p class="s">กรอก<strong>เลขสมาชิก</strong> (เช่น <code>466</code> หรือ <code>ส.0466</code>) หรือ<strong>อีเมล</strong> ที่ลงทะเบียน</p>
   {err}{inf}
-  <form method="post" action="/api/member/forgot-password">
+  <form method="post" action="/member/forgot-password">
     <div class="fgrid">
       <div class="fld full"><label>เลขสมาชิก หรือ อีเมล</label>
         <input name="login" placeholder="466 / ส.0466 / email@example.com" required autocomplete="username"></div>
     </div>
     <div class="factions">
       <button type="submit" class="btn btn-save">ส่งรหัสผ่านใหม่ทางอีเมล</button>
-      <a class="btn btn-line" href="/api/member/login">กลับหน้าเข้าสู่ระบบ</a>
+      <a class="btn btn-line" href="/member/login">กลับหน้าเข้าสู่ระบบ</a>
     </div>
   </form>
 </div></div></body></html>"""
@@ -956,7 +956,7 @@ def _member_forgot_page(error: str = "", info: str = "") -> str:
 @router.get("/member/login", response_class=HTMLResponse)
 def member_login_get(request: Request, msg: str = ""):
     if _member_session(request):
-        return RedirectResponse("/api/member/profile", status_code=303)
+        return RedirectResponse("/member/profile", status_code=303)
     info = ""
     if msg == "saved":
         info = "อัปเดตข้อมูลสำเร็จ"
@@ -982,7 +982,7 @@ def member_login_post(login: str = Form(...), password: str = Form(...)):
         )
     if not _verify_password(password, _row_val(row, "password_hash")):
         return HTMLResponse(_member_login_page(error="รหัสผ่านไม่ถูกต้อง"), status_code=401)
-    resp = RedirectResponse("/api/member/profile", status_code=303)
+    resp = RedirectResponse("/member/profile", status_code=303)
     _set_member_cookie(resp, {"id": row["id"], "code": row["code"]})
     return resp
 
@@ -990,7 +990,7 @@ def member_login_post(login: str = Form(...), password: str = Form(...)):
 @router.get("/member/forgot-password", response_class=HTMLResponse)
 def member_forgot_get(request: Request, msg: str = ""):
     if _member_session(request):
-        return RedirectResponse("/api/member/profile", status_code=303)
+        return RedirectResponse("/member/profile", status_code=303)
     info = "ส่งรหัสผ่านใหม่ไปที่อีเมลของท่านแล้ว กรุณาตรวจสอบกล่องจดหมาย" if msg == "sent" else ""
     return HTMLResponse(_member_forgot_page(info=info))
 
@@ -1003,7 +1003,7 @@ def member_forgot_post(login: str = Form(...)):
     if row and row["email"]:
         password = _issue_member_password(con, row["id"])
         con.commit()
-        login_url = f"{SITE_URL}/api/member/login"
+        login_url = f"{SITE_URL}/member/login"
         subj, html, plain = render_password_reset_email(
             name=row["name"],
             code=row["code"],
@@ -1016,13 +1016,13 @@ def member_forgot_post(login: str = Form(...)):
     else:
         con.commit()
     con.close()
-    return RedirectResponse("/api/member/forgot-password?msg=sent", status_code=303)
+    return RedirectResponse("/member/forgot-password?msg=sent", status_code=303)
 
 
 @router.get("/member/logout")
 def member_logout():
-    resp = RedirectResponse("/api/member/login", status_code=303)
-    resp.delete_cookie(MEMBER_COOKIE, path="/api")
+    resp = RedirectResponse("/member/login", status_code=303)
+    resp.delete_cookie(MEMBER_COOKIE, path="/")
     return resp
 
 
@@ -1030,13 +1030,13 @@ def member_logout():
 def member_profile_get(request: Request, msg: str = "", err: str = ""):
     sess = _member_session(request)
     if not sess:
-        return RedirectResponse("/api/member/login", status_code=303)
+        return RedirectResponse("/member/login", status_code=303)
     assert _db is not None
     con = _db()
     row = con.execute("SELECT * FROM members WHERE id=?", (sess["id"],)).fetchone()
     con.close()
     if not row:
-        return RedirectResponse("/api/member/login", status_code=303)
+        return RedirectResponse("/member/login", status_code=303)
     files = _list_member_files(sess["id"])
     admin_files = [f for f in files if _file_source(f) == "admin"]
     member_files = [f for f in files if _file_source(f) == "member"]
@@ -1066,7 +1066,7 @@ def member_profile_get(request: Request, msg: str = "", err: str = ""):
 <div class="formwrap">{banner}<div class="fcard">
   <h2>ข้อมูลสมาชิกของท่าน</h2>
   <p class="s">รหัส {e(row['code'])} · {e(row['type'])} · สถานะ: {'สมาชิกอยู่' if row['active'] else 'สิ้นสภาพแล้ว'}</p>
-  <form method="post" action="/api/member/profile" enctype="multipart/form-data">
+  <form method="post" action="/member/profile" enctype="multipart/form-data">
     <div class="fgrid">
       <div class="fld full"><label>ชื่อ-นามสกุล (ไม่สามารถแก้ได้)</label>
         <input value="{e(row['name'])}" disabled></div>
@@ -1094,14 +1094,14 @@ def member_profile_get(request: Request, msg: str = "", err: str = ""):
     </div>
     <div class="factions">
       <button type="submit" class="btn btn-save">บันทึกข้อมูล / อัปโหลดไฟล์</button>
-      <a class="btn btn-line" href="/api/member/logout">ออกจากระบบ</a>
+      <a class="btn btn-line" href="/member/logout">ออกจากระบบ</a>
     </div>
   </form>
 
   <div style="margin-top:28px;padding-top:20px;border-top:1px solid #e7ede9">
     <h3 style="margin:0 0 10px;font-size:15px;color:#0f5a30">เปลี่ยนรหัสผ่าน</h3>
     <p class="sub" style="margin:0 0 14px">เปลี่ยนรหัสผ่านได้ตลอดเวลา · หากลืมรหัสผ่าน ใช้เมนูด้านล่าง</p>
-    <form method="post" action="/api/member/password">
+    <form method="post" action="/member/password">
       <div class="fgrid">
         <div class="fld full"><label>รหัสผ่านปัจจุบัน</label>
           <input name="current_password" type="password" required autocomplete="current-password"></div>
@@ -1115,7 +1115,7 @@ def member_profile_get(request: Request, msg: str = "", err: str = ""):
       </div>
     </form>
     <p class="sub" style="margin-top:10px">
-      ลืมรหัสผ่าน? <a href="/api/member/forgot-password">ขอรหัสผ่านใหม่ทางอีเมล</a>
+      ลืมรหัสผ่าน? <a href="/member/forgot-password">ขอรหัสผ่านใหม่ทางอีเมล</a>
     </p>
   </div>
 
@@ -1134,7 +1134,7 @@ async def member_profile_post(
 ):
     sess = _member_session(request)
     if not sess:
-        return RedirectResponse("/api/member/login", status_code=303)
+        return RedirectResponse("/member/login", status_code=303)
     assert _db is not None
     email = email.strip().lower()
     upload_errs: list[str] = []
@@ -1151,7 +1151,7 @@ async def member_profile_post(
     con.close()
     if upload_errs:
         return RedirectResponse(
-            f"/api/member/profile?err={upload_errs[0]}",
+            f"/member/profile?err={upload_errs[0]}",
             status_code=303,
         )
     has_upload = (
@@ -1159,7 +1159,7 @@ async def member_profile_post(
         or (document_file and document_file.filename)
     )
     msg = "uploaded" if has_upload else "saved"
-    return RedirectResponse(f"/api/member/profile?msg={msg}", status_code=303)
+    return RedirectResponse(f"/member/profile?msg={msg}", status_code=303)
 
 
 @router.post("/member/password")
@@ -1171,40 +1171,40 @@ def member_change_password(
 ):
     sess = _member_session(request)
     if not sess:
-        return RedirectResponse("/api/member/login", status_code=303)
+        return RedirectResponse("/member/login", status_code=303)
     if len(new_password) < 8:
-        return RedirectResponse("/api/member/profile?err=รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร", status_code=303)
+        return RedirectResponse("/member/profile?err=รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร", status_code=303)
     if new_password != confirm_password:
-        return RedirectResponse("/api/member/profile?err=รหัสผ่านใหม่ไม่ตรงกัน", status_code=303)
+        return RedirectResponse("/member/profile?err=รหัสผ่านใหม่ไม่ตรงกัน", status_code=303)
     assert _db is not None
     con = _db()
     row = con.execute("SELECT password_hash FROM members WHERE id=?", (sess["id"],)).fetchone()
     if not row or not _verify_password(current_password, _row_val(row, "password_hash")):
         con.close()
-        return RedirectResponse("/api/member/profile?err=รหัสผ่านปัจจุบันไม่ถูกต้อง", status_code=303)
+        return RedirectResponse("/member/profile?err=รหัสผ่านปัจจุบันไม่ถูกต้อง", status_code=303)
     _set_member_password(con, sess["id"], new_password)
     con.commit()
     con.close()
-    return RedirectResponse("/api/member/profile?msg=password_changed", status_code=303)
+    return RedirectResponse("/member/profile?msg=password_changed", status_code=303)
 
 
 @router.post("/member/files/{fid}/delete")
 def member_file_delete(request: Request, fid: int):
     sess = _member_session(request)
     if not sess:
-        return RedirectResponse("/api/member/login", status_code=303)
+        return RedirectResponse("/member/login", status_code=303)
     row = _resolve_member_file(fid)
     if not row or row["member_id"] != sess["id"] or _file_source(row) != "member":
         raise HTTPException(404)
     _delete_member_file_row(row)
-    return RedirectResponse("/api/member/profile?msg=deleted", status_code=303)
+    return RedirectResponse("/member/profile?msg=deleted", status_code=303)
 
 
 @router.get("/member/file/{fid}")
 def member_file_download(request: Request, fid: int):
     sess = _member_session(request)
     if not sess:
-        return RedirectResponse("/api/member/login", status_code=303)
+        return RedirectResponse("/member/login", status_code=303)
     row = _resolve_member_file(fid)
     if not row or row["member_id"] != sess["id"]:
         raise HTTPException(404)
@@ -1238,7 +1238,7 @@ def _brandbar(title: str, subtitle: str, *, breadcrumb: tuple[tuple[str, str], .
             user = "admin"
         return _admin_shell(
             "members", title,
-            breadcrumb=_norm(breadcrumb or (("/api/admin", "หน้าหลัก"), (title,))),
+            breadcrumb=_norm(breadcrumb or (("/admin", "หน้าหลัก"), (title,))),
             desc=subtitle, actions=actions, user=user or "admin",
         )
     nav = _admin_nav("members") if _admin_nav else ""
@@ -1262,7 +1262,7 @@ def _submission_files_html(r: sqlite3.Row, e: Callable) -> str:
         label = f.get("label") or "ไฟล์แนบ"
         name = f.get("original_name") or "download"
         items.append(
-            f'<a class="dl" href="/api/admin/submissions/file/{r["id"]}/{i}" '
+            f'<a class="dl" href="/admin/submissions/file/{r["id"]}/{i}" '
             f'onclick="event.stopPropagation()">{e(label)}: {e(name)}</a>'
         )
     return "<br>".join(items)
@@ -1282,12 +1282,12 @@ def _app_row_html(r: sqlite3.Row, e: Callable) -> str:
     if status == "approved" and member_id:
         status_badge = f'<span class="badge nat">อนุมัติแล้ว</span>'
         approve_btn = (
-            f'<a class="del-btn ok" href="/api/admin/members/edit/{member_id}">ดูสมาชิก</a>'
+            f'<a class="del-btn ok" href="/admin/members/edit/{member_id}">ดูสมาชิก</a>'
         )
     else:
         status_badge = '<span class="badge mb">รอตรวจ</span>'
         approve_btn = (
-            f'<form method="post" action="/api/admin/submissions/{r["id"]}/approve" '
+            f'<form method="post" action="/admin/submissions/{r["id"]}/approve" '
             f"onsubmit=\"return confirm('อนุมัติใบสมัคร #{r['id']} และสร้างสมาชิกใหม่?')\">"
             f'<button type="submit" class="del-btn ok">อนุมัติ</button></form>'
         )
@@ -1304,9 +1304,9 @@ def _app_row_html(r: sqlite3.Row, e: Callable) -> str:
         f'<td class="files">{files_html or '<span class="muted">—</span>'}</td>'
         f'<td class="act" onclick="event.stopPropagation()"><div class="act-btns">'
         f'{approve_btn}'
-        f'<form method="post" action="/api/admin/submissions/markspam/{r["id"]}">'
+        f'<form method="post" action="/admin/submissions/markspam/{r["id"]}">'
         f'<button type="submit" class="del-btn warn">สแปม</button></form>'
-        f'<form method="post" action="/api/admin/submissions/delete/{r["id"]}" '
+        f'<form method="post" action="/admin/submissions/delete/{r["id"]}" '
         f"onsubmit=\"return confirm('ลบรายการ #{r['id']} ถาวร?')\">"
         f'<button type="submit" class="del-btn">ลบ</button></form>'
         f'</div></td></tr>'
@@ -1352,7 +1352,7 @@ def _admin_members_page(
 
     def seg(label: str, key: str) -> str:
         on = "on" if key == tab else ""
-        return f'<a class="{on}" href="/api/admin/members?tab={key}">{label}</a>'
+        return f'<a class="{on}" href="/admin/members?tab={key}">{label}</a>'
 
     apps_n = sum(1 for r in app_rows if _submission_status(r) == "pending")
     apps_label = f"ใบสมัครใหม่ ({apps_n})" if apps_n else "ใบสมัครใหม่"
@@ -1365,7 +1365,7 @@ def _admin_members_page(
             else '<tr><td colspan="8"><div class="empty">ยังไม่มีใบสมัครสมาชิก</div></td></tr>'
         )
         toolbar_extra = (
-            f'<a class="btn btn-gold" href="/api/admin/submissions/export.csv?kind=membership">'
+            f'<a class="btn btn-gold" href="/admin/submissions/export.csv?kind=membership">'
             f'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
             f'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>'
             f'<polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
@@ -1399,7 +1399,7 @@ def _admin_members_page(
             send_btn = ""
             if r["email"]:
                 send_btn = (
-                    f'<form method="post" action="/api/admin/members/{r["id"]}/email">'
+                    f'<form method="post" action="/admin/members/{r["id"]}/email">'
                     f'<input type="hidden" name="template" value="invite">'
                     f'<button type="submit" class="del-btn ok">ส่งอีเมล</button></form>'
                 )
@@ -1413,7 +1413,7 @@ def _admin_members_page(
                 f'<td class="contact">{email_cell}<br><span class="sub">{e(r["phone"])}</span></td>'
                 f'<td class="files">{file_badge}</td>'
                 f'<td class="act" onclick="event.stopPropagation()"><div class="act-btns">'
-                f'<a class="dl" href="/api/admin/members/edit/{r["id"]}">แก้ไข</a>'
+                f'<a class="dl" href="/admin/members/edit/{r["id"]}">แก้ไข</a>'
                 f'{send_btn}'
                 f'</div></td></tr>'
                 f'<tr class="detail" id="dm{r["id"]}" style="display:none"><td colspan="7"><div class="inner">'
@@ -1433,12 +1433,12 @@ def _admin_members_page(
             else '<tr><td colspan="7"><div class="empty">ไม่พบข้อมูล</div></td></tr>'
         )
         toolbar_extra = (
-            f'<a class="btn btn-gold" href="/api/admin/members/export.csv">'
+            f'<a class="btn btn-gold" href="/admin/members/export.csv">'
             f'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
             f'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>'
             f'<polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
             f' Export CSV</a>'
-            f'<form method="post" action="/api/admin/members/import" style="display:inline">'
+            f'<form method="post" action="/admin/members/import" style="display:inline">'
             f'<button type="submit" class="btn btn-line">นำเข้า JSON</button></form>'
             f'<a class="btn btn-line" href="{SITE_URL}/th/about/members/" target="_blank">ดูหน้าเว็บ</a>'
         )
@@ -1451,7 +1451,7 @@ def _admin_members_page(
 
     shell_top, shell_bottom = _brandbar(
         "สมาชิก TSAE", "ทะเบียนสมาชิก · ใบสมัครใหม่",
-        breadcrumb=(("/api/admin", "หน้าหลัก"), ("สมาชิก",)),
+        breadcrumb=(("/admin", "หน้าหลัก"), ("สมาชิก",)),
         actions=toolbar_extra,
     )
     return f"""<!doctype html><html lang="th"><head><meta charset="utf-8">
@@ -1501,7 +1501,7 @@ function flt(){{var q=(document.getElementById('mq').value||'').toLowerCase();
 @router.get("/admin/members", response_class=HTMLResponse)
 def admin_members_list(request: Request, tab: str = "registry", q: str = "", msg: str = "", err: str = ""):
     if not _current_admin or not _current_admin(request):
-        return RedirectResponse("/api/admin/login?next=/api/admin/members", status_code=303)
+        return RedirectResponse("/admin/login?next=/admin/members", status_code=303)
     assert _db is not None
     tab = tab if tab in ("registry", "applications") else "registry"
     con = _db()
@@ -1563,7 +1563,7 @@ def admin_members_list(request: Request, tab: str = "registry", q: str = "", msg
 @router.post("/admin/submissions/{sid}/approve")
 def admin_approve_membership(request: Request, sid: int):
     if not _current_admin or not _current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     assert _db is not None
     con = _db()
     try:
@@ -1571,25 +1571,25 @@ def admin_approve_membership(request: Request, sid: int):
         con.commit()
         con.close()
         return RedirectResponse(
-            f"/api/admin/members/edit/{member_id}?msg=approved+{detail.replace(' ', '+')}",
+            f"/admin/members/edit/{member_id}?msg=approved+{detail.replace(' ', '+')}",
             status_code=303,
         )
     except ValueError as exc:
         con.rollback()
         con.close()
         err = str(exc).replace(" ", "+")
-        return RedirectResponse(f"/api/admin/members?tab=applications&err={err}", status_code=303)
+        return RedirectResponse(f"/admin/members?tab=applications&err={err}", status_code=303)
     except Exception as exc:
         con.rollback()
         con.close()
         err = str(exc)[:120].replace(" ", "+")
-        return RedirectResponse(f"/api/admin/members?tab=applications&err={err}", status_code=303)
+        return RedirectResponse(f"/admin/members?tab=applications&err={err}", status_code=303)
 
 
 @router.get("/admin/members/edit/{mid}", response_class=HTMLResponse)
 def admin_member_edit(request: Request, mid: int, msg: str = "", err: str = ""):
     if not _current_admin or not _current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     assert _db is not None
     con = _db()
     row = con.execute("SELECT * FROM members WHERE id=?", (mid,)).fetchone()
@@ -1619,8 +1619,8 @@ def admin_member_edit(request: Request, mid: int, msg: str = "", err: str = ""):
     shell_top, shell_bottom = _brandbar(
         "แก้ไขสมาชิก",
         e(row['code']),
-        breadcrumb=(("/api/admin", "หน้าหลัก"), ("/api/admin/members", "สมาชิก"), (e(row['code']),)),
-        actions='<a class="btn btn-line" href="/api/admin/members">กลับ</a>',
+        breadcrumb=(("/admin", "หน้าหลัก"), ("/admin/members", "สมาชิก"), (e(row['code']),)),
+        actions='<a class="btn btn-line" href="/admin/members">กลับ</a>',
     )
     return HTMLResponse(f"""<!doctype html><html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1635,7 +1635,7 @@ def admin_member_edit(request: Request, mid: int, msg: str = "", err: str = ""):
 {shell_top}
 <div class="formwrap">{banner}<div class="fcard">
   <p class="sub" style="margin:0 0 16px">เข้าสู่ระบบ: เลขสมาชิก (ตัวเลข) หรืออีเมล + รหัสผ่าน · สถานะ: <strong>{e(pwd_status)}</strong></p>
-  <form method="post" action="/api/admin/members/edit/{mid}">
+  <form method="post" action="/admin/members/edit/{mid}">
     <div class="fgrid">
       <div class="fld"><label>รหัสสมาชิก</label><input name="code" value="{e(_normalize_member_code(row['code'] or ''))}" required></div>
       <div class="fld"><label>ประเภท</label>
@@ -1663,13 +1663,13 @@ def admin_member_edit(request: Request, mid: int, msg: str = "", err: str = ""):
     </div>
     <div class="factions">
       <button type="submit" class="btn btn-save">บันทึก</button>
-      <a class="btn btn-line" href="/api/admin/members">กลับ</a>
+      <a class="btn btn-line" href="/admin/members">กลับ</a>
     </div>
   </form>
   {files_panel}
   {email_panel}
   <div style="margin-top:20px;padding-top:16px;border-top:1px solid #e7ede9">
-    <form method="post" action="/api/admin/members/{mid}/reset-password" onsubmit="return confirm('รีเซ็ตรหัสผ่านและส่งอีเมลไปที่สมาชิก?')">
+    <form method="post" action="/admin/members/{mid}/reset-password" onsubmit="return confirm('รีเซ็ตรหัสผ่านและส่งอีเมลไปที่สมาชิก?')">
       <button type="submit" class="btn btn-line">รีเซ็ตรหัสผ่านและส่งอีเมล</button>
     </form>
   </div>
@@ -1692,7 +1692,7 @@ def admin_member_save(
     notes: str = Form(""),
 ):
     if not _current_admin or not _current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     assert _db is not None
     con = _db()
     con.execute(
@@ -1706,7 +1706,7 @@ def admin_member_save(
     )
     con.commit()
     con.close()
-    return RedirectResponse(f"/api/admin/members/edit/{mid}?msg=saved", status_code=303)
+    return RedirectResponse(f"/admin/members/edit/{mid}?msg=saved", status_code=303)
 
 
 @router.post("/admin/members/{mid}/files/upload")
@@ -1718,7 +1718,7 @@ async def admin_member_file_upload(
     file: UploadFile = File(...),
 ):
     if not _current_admin or not _current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     assert _db is not None
     con = _db()
     row = con.execute("SELECT id FROM members WHERE id=?", (mid,)).fetchone()
@@ -1729,28 +1729,28 @@ async def admin_member_file_upload(
         mid, category, file, uploaded_by="admin", note=note,
     )
     if err:
-        return RedirectResponse(f"/api/admin/members/edit/{mid}?err={err}", status_code=303)
-    return RedirectResponse(f"/api/admin/members/edit/{mid}?msg=uploaded", status_code=303)
+        return RedirectResponse(f"/admin/members/edit/{mid}?err={err}", status_code=303)
+    return RedirectResponse(f"/admin/members/edit/{mid}?msg=uploaded", status_code=303)
 
 
 @router.post("/admin/members/files/{fid}/delete")
 def admin_member_file_delete(request: Request, fid: int):
     if not _current_admin or not _current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     row = _resolve_member_file(fid)
     if not row:
         raise HTTPException(404)
     mid = row["member_id"]
     _delete_member_file_row(row)
-    return RedirectResponse(f"/api/admin/members/edit/{mid}?msg=deleted", status_code=303)
+    return RedirectResponse(f"/admin/members/edit/{mid}?msg=deleted", status_code=303)
 
 
 @router.post("/admin/members/import")
 def admin_members_import(request: Request):
     if not _current_admin or not _current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     n = import_members_json(replace=False)
-    return RedirectResponse(f"/api/admin/members?msg=imported+{n}+records", status_code=303)
+    return RedirectResponse(f"/admin/members?msg=imported+{n}+records", status_code=303)
 
 
 @router.post("/admin/members/{mid}/email")
@@ -1762,13 +1762,13 @@ def admin_send_member_email(
     body: str = Form(""),
 ):
     if not _current_admin or not _current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     assert _db is not None
     con = _db()
     row = con.execute("SELECT * FROM members WHERE id=?", (mid,)).fetchone()
     if not row or not row["email"]:
         con.close()
-        return RedirectResponse("/api/admin/members?err=no+email", status_code=303)
+        return RedirectResponse("/admin/members?err=no+email", status_code=303)
 
     tpl = template if template in EMAIL_TEMPLATES else "invite"
     password = ""
@@ -1776,7 +1776,7 @@ def admin_send_member_email(
         password = _issue_member_password(con, mid)
         con.commit()
 
-    login_url = f"{SITE_URL}/api/member/login"
+    login_url = f"{SITE_URL}/member/login"
     subj, html, plain = render_member_email(
         tpl,
         name=row["name"],
@@ -1792,26 +1792,26 @@ def admin_send_member_email(
     ok, detail = _send_email(row["email"], subj, html, plain)
     con.close()
     if ok:
-        return RedirectResponse(f"/api/admin/members/edit/{mid}?msg=email+sent", status_code=303)
-    return RedirectResponse(f"/api/admin/members/edit/{mid}?err={detail}", status_code=303)
+        return RedirectResponse(f"/admin/members/edit/{mid}?msg=email+sent", status_code=303)
+    return RedirectResponse(f"/admin/members/edit/{mid}?err={detail}", status_code=303)
 
 
 @router.post("/admin/members/{mid}/reset-password")
 def admin_reset_member_password(request: Request, mid: int):
     if not _current_admin or not _current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     assert _db is not None
     con = _db()
     row = con.execute("SELECT * FROM members WHERE id=?", (mid,)).fetchone()
     if not row or not row["email"]:
         con.close()
-        return RedirectResponse(f"/api/admin/members/edit/{mid}?err=no+email", status_code=303)
+        return RedirectResponse(f"/admin/members/edit/{mid}?err=no+email", status_code=303)
 
     password = _issue_member_password(con, mid)
     con.commit()
     con.close()
 
-    login_url = f"{SITE_URL}/api/member/login"
+    login_url = f"{SITE_URL}/member/login"
     subj, html, plain = render_password_reset_email(
         name=row["name"],
         code=row["code"],
@@ -1822,14 +1822,14 @@ def admin_reset_member_password(request: Request, mid: int):
     )
     ok, detail = _send_email(row["email"], subj, html, plain)
     if ok:
-        return RedirectResponse(f"/api/admin/members/edit/{mid}?msg=password+reset", status_code=303)
-    return RedirectResponse(f"/api/admin/members/edit/{mid}?err={detail}", status_code=303)
+        return RedirectResponse(f"/admin/members/edit/{mid}?msg=password+reset", status_code=303)
+    return RedirectResponse(f"/admin/members/edit/{mid}?err={detail}", status_code=303)
 
 
 @router.get("/admin/members/file/{fid}")
 def admin_member_file_download(request: Request, fid: int):
     if not _current_admin or not _current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     row = _resolve_member_file(fid)
     if not row:
         raise HTTPException(404)
@@ -1843,7 +1843,7 @@ def admin_member_file_download(request: Request, fid: int):
 @router.get("/admin/members/export.csv")
 def admin_members_export(request: Request):
     if not _current_admin or not _current_admin(request):
-        return RedirectResponse("/api/admin/login", status_code=303)
+        return RedirectResponse("/admin/login", status_code=303)
     assert _db is not None
     import csv
     import io

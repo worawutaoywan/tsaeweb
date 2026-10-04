@@ -1,7 +1,12 @@
-# TSAE site block — append to /etc/caddy/Caddyfile on root@104.248.152.59
+# TSAE site block — reference for /etc/caddy/Caddyfile on root@104.248.152.59
 # DNS: tsae.asia + www.tsae.asia A -> 104.248.152.59
 # Web root: /var/www/tsae_web
-# API: docker tsae_registration on 127.0.0.1:8090
+# App: docker tsae_registration on 127.0.0.1:8090
+#
+# Public management UI (single system):
+#   https://www.tsae.asia/admin
+#   https://www.tsae.asia/member/login
+# Form/API endpoints stay under /api/ (register, submit, search, health).
 
 http://tsae.asia, http://www.tsae.asia {
 	root * /var/www/tsae_web
@@ -12,11 +17,57 @@ http://tsae.asia, http://www.tsae.asia {
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
 
-	handle_path /api/* {
-		reverse_proxy 127.0.0.1:8090
+	# Legacy bookmarks → clean admin/member paths
+	@legacy_admin path_regexp ^/api/(admin.*)$
+	redir @legacy_admin /{re.1} permanent
+	@legacy_member path_regexp ^/api/(member.*)$
+	redir @legacy_member /{re.1} permanent
+
+	# Single management system (no /api in the URL)
+	handle /admin* {
+		request_body {
+			max_size 160MB
+		}
+		reverse_proxy 127.0.0.1:8090 {
+			transport http {
+				read_timeout 10m
+				write_timeout 10m
+			}
+		}
+	}
+	handle /member* {
+		request_body {
+			max_size 160MB
+		}
+		reverse_proxy 127.0.0.1:8090 {
+			transport http {
+				read_timeout 10m
+				write_timeout 10m
+			}
+		}
 	}
 
-	# WP media (local wp-uploads/ — run ./deploy.sh uploads to sync)
+	# Public form + health endpoints
+	handle_path /api/* {
+		request_body {
+			max_size 160MB
+		}
+		reverse_proxy 127.0.0.1:8090 {
+			transport http {
+				read_timeout 10m
+				write_timeout 10m
+			}
+		}
+	}
+
+	# CMS media uploads
+	handle /uploads/* {
+		root * /var/www/tsae_web
+		file_server
+		header Cache-Control "public, max-age=2592000"
+	}
+
+	# WP media (local wp-uploads/)
 	handle /wp-uploads/* {
 		root * /var/www/tsae_web
 		file_server
@@ -50,11 +101,52 @@ tsae.asia, www.tsae.asia {
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
 
-	handle_path /api/* {
-		reverse_proxy 127.0.0.1:8090
+	@legacy_admin path_regexp ^/api/(admin.*)$
+	redir @legacy_admin /{re.1} permanent
+	@legacy_member path_regexp ^/api/(member.*)$
+	redir @legacy_member /{re.1} permanent
+
+	handle /admin* {
+		request_body {
+			max_size 160MB
+		}
+		reverse_proxy 127.0.0.1:8090 {
+			transport http {
+				read_timeout 10m
+				write_timeout 10m
+			}
+		}
+	}
+	handle /member* {
+		request_body {
+			max_size 160MB
+		}
+		reverse_proxy 127.0.0.1:8090 {
+			transport http {
+				read_timeout 10m
+				write_timeout 10m
+			}
+		}
 	}
 
-	# WP media (local wp-uploads/ — run ./deploy.sh uploads to sync)
+	handle_path /api/* {
+		request_body {
+			max_size 160MB
+		}
+		reverse_proxy 127.0.0.1:8090 {
+			transport http {
+				read_timeout 10m
+				write_timeout 10m
+			}
+		}
+	}
+
+	handle /uploads/* {
+		root * /var/www/tsae_web
+		file_server
+		header Cache-Control "public, max-age=2592000"
+	}
+
 	handle /wp-uploads/* {
 		root * /var/www/tsae_web
 		file_server

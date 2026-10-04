@@ -1,0 +1,14 @@
+[Unit]
+Description=Rebuild TSAE Astro site after CMS save
+After=network.target
+
+[Service]
+Type=oneshot
+Nice=10
+Environment=TSAE_SITE_DIR=/opt/tsae-web
+Environment=TSAE_CMS_DIR=/opt/registration/data/cms
+Environment=TSAE_WEB_DEST=/var/www/tsae_web
+ExecStart=/opt/registration/bin/publish-web.sh
+
+[Install]
+WantedBy=multi-user.target

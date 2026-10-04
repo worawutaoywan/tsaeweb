@@ -1,0 +1,197 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCampaignBySlug, getCampaignStaticPaths, syncCampaignAssetsToPublic } from '../../loaders/campaigns';
+import { isPastByDate } from '../../loaders/cms';
+
+syncCampaignAssetsToPublic();
+
+export async function getStaticPaths() {
+  return getCampaignStaticPaths().map((p) => ({ params: { slug: p.slug } }));
+}
+
+const { slug } = Astro.params;
+const campaign = getCampaignBySlug(slug!);
+
+if (!campaign) {
+  return Astro.redirect('/404');
+}
+
+const title = campaign.titleEN || campaign.titleTH || campaign.slug;
+const theme = campaign.themeEN || campaign.themeTH || '';
+const description =
+  campaign.excerptEN ||
+  campaign.descriptionEN ||
+  `${title}${theme ? ` — ${theme}` : ''}`;
+const badge = campaign.badgeEN || campaign.badgeTH || title;
+const bodyText = campaign.descriptionEN || campaign.descriptionTH || campaign.excerptEN || '';
+const facts = campaign.facts || [];
+const fees = campaign.fees || [];
+const links = campaign.extraLinks || [];
+const categories = campaign.categories || [];
+const registerUrl = campaign.registerUrl || '';
+const posterImg = campaign.posterImage || '';
+const posterPdf = campaign.posterPdf || '';
+const posterHtml = campaign.posterHtmlUrl || '';
+const contactEmail = campaign.contactEmail || '';
+const archived = isPastByDate(campaign.target, campaign.endDate || campaign.target);
+---
+
+<Layout title={`${title}${theme ? ` — ${theme}` : ''}`} description={description} lang="en">
+  <section class="relative overflow-hidden text-white" style={`background: linear-gradient(145deg, ${archived ? '#374151 0%, #4b5563 55%, #6b7280 100%' : '#1F3B2C 0%, #2F5B41 55%, #35667A 100%'});`}>
+    <div class="max-w-6xl mx-auto px-4 py-14 lg:py-16">
+      <div class="flex flex-wrap items-center gap-2 mb-3">
+        <p class="text-xs font-semibold tracking-[0.18em] uppercase" style="color:#C79A3D;">{badge}</p>
+        {archived && (
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide bg-white/15 text-white/90">
+            Archive · Closed
+          </span>
+        )}
+      </div>
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight max-w-3xl mb-4" style="font-family: Georgia, 'Times New Roman', serif;">
+        {title}
+      </h1>
+      {theme && theme !== title && (
+        <p class="text-lg sm:text-xl font-medium text-white/90 max-w-2xl mb-4" style="color:#F2CF6B;">{theme}</p>
+      )}
+      {bodyText && (
+        <p class="text-base sm:text-lg text-white/85 max-w-2xl leading-relaxed mb-8">{bodyText}</p>
+      )}
+      <div class="flex flex-wrap gap-3">
+        {registerUrl && !archived && (
+          <a href={registerUrl} target="_blank" rel="noopener" class="inline-flex items-center px-6 py-3 rounded-xl font-bold text-white shadow transition-transform hover:scale-105" style="background-color:#C79A3D;">
+            Register / Submit
+          </a>
+        )}
+        {posterPdf && (
+          <a href={posterPdf} target="_blank" rel="noopener" class="inline-flex items-center px-6 py-3 rounded-xl font-semibold border-2 border-white/40 text-white hover:bg-white/10 transition-colors">
+            Download poster PDF
+          </a>
+        )}
+        {posterHtml && (
+          <a href={posterHtml} class="inline-flex items-center px-6 py-3 rounded-xl font-semibold border-2 border-white/40 text-white hover:bg-white/10 transition-colors">
+            View interactive poster
+          </a>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <section class="py-12" style="background:#FBF7EC;">
+    <div class="max-w-6xl mx-auto px-4 grid lg:grid-cols-2 gap-10 items-start">
+      {posterImg ? (
+        posterHtml ? (
+          <a href={posterHtml} class="block rounded-2xl overflow-hidden shadow-xl ring-1 ring-black/5 bg-white group">
+            <img src={posterImg} alt={`${title} poster`} class="w-full h-auto group-hover:opacity-95 transition-opacity" loading="eager" />
+          </a>
+        ) : (
+          <div class="rounded-2xl overflow-hidden shadow-xl ring-1 ring-black/5 bg-white">
+            <img src={posterImg} alt={`${title} poster`} class="w-full h-auto" loading="eager" />
+          </div>
+        )
+      ) : (
+        <div class="rounded-2xl border border-dashed border-black/15 p-10 text-center text-gray-500">No poster image</div>
+      )}
+
+      <div>
+        {(campaign.dateEN || campaign.venueEN) && (
+          <div class="mb-6 space-y-2 text-sm text-gray-700">
+            {campaign.dateEN && <p><span class="font-bold uppercase tracking-wider text-xs mr-2" style="color:#C79A3D;">Dates</span>{campaign.dateEN}</p>}
+            {campaign.venueEN && <p><span class="font-bold uppercase tracking-wider text-xs mr-2" style="color:#C79A3D;">Venue</span>{campaign.venueEN}</p>}
+          </div>
+        )}
+
+        {facts.length > 0 && (
+          <>
+            <h2 class="text-2xl font-bold mb-5" style="color:#1F3B2C;">Key information</h2>
+            <dl class="space-y-4 mb-8">
+              {facts.map((f) => (
+                <div class="flex gap-4 border-b border-black/10 pb-3">
+                  <dt class="w-32 shrink-0 text-xs font-bold uppercase tracking-wider" style="color:#C79A3D;">{f.label}</dt>
+                  <dd class="text-gray-800 font-medium leading-snug">{f.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </>
+        )}
+
+        {categories.length > 0 && (
+          <>
+            <h2 class="text-2xl font-bold mb-4" style="color:#1F3B2C;">Award categories</h2>
+            <ol class="mb-8 space-y-2 text-sm text-gray-800">
+              {categories.map((cat) => (
+                <li class="flex gap-3 border-b border-black/5 pb-2">
+                  <span class="text-gray-800 leading-snug">{cat}</span>
+                </li>
+              ))}
+            </ol>
+          </>
+        )}
+
+        {fees.length > 0 && (
+          <>
+            <h3 class="text-lg font-bold mb-3" style="color:#1F3B2C;">Registration fees</h3>
+            <div class="rounded-xl overflow-hidden border border-black/10 bg-white mb-6">
+              <table class="w-full text-sm">
+                <thead style="background:#1F3B2C; color:#F3ECD9;">
+                  <tr>
+                    <th class="text-left px-4 py-3 font-semibold">Category</th>
+                    <th class="text-right px-4 py-3 font-semibold">USD</th>
+                    <th class="text-right px-4 py-3 font-semibold">INR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fees.map((row) => (
+                    <tr class="border-t border-black/5">
+                      <td class="px-4 py-3 text-gray-700">{row.who}</td>
+                      <td class="px-4 py-3 text-right font-semibold" style="color:#1F3B2C;">{row.usd}</td>
+                      <td class="px-4 py-3 text-right font-semibold" style="color:#1F3B2C;">{row.inr}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+
+        {links.length > 0 && (
+          <div class="flex flex-wrap gap-3 mb-6">
+            {links.map((l) => (
+              <a
+                href={l.href}
+                target="_blank"
+                rel="noopener"
+                class="px-4 py-2.5 rounded-lg text-sm font-semibold text-white"
+                style={l.style === 'secondary' ? 'background:#B5652E;' : 'background:#2F5B41;'}
+              >
+                {l.label}
+              </a>
+            ))}
+          </div>
+        )}
+
+        {archived && (
+          <p class="text-sm text-gray-500 mb-6 rounded-lg bg-gray-50 border border-gray-100 px-4 py-3">
+            This call / event has closed. Materials remain available below for reference and publicity.
+          </p>
+        )}
+
+        {contactEmail && (
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Questions: <a href={`mailto:${contactEmail}`} class="font-semibold underline" style="color:#2F5B41;">{contactEmail}</a>
+          </p>
+        )}
+      </div>
+    </div>
+  </section>
+
+  {registerUrl && !archived && (
+    <section class="py-10 bg-white border-t border-gray-100">
+      <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <p class="text-sm text-gray-500">{badge}</p>
+        <a href={registerUrl} target="_blank" rel="noopener" class="inline-flex self-start px-6 py-3 rounded-xl font-bold text-white" style="background-color:#C79A3D;">
+          Register for {title} →
+        </a>
+      </div>
+    </section>
+  )}
+</Layout>

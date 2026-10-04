@@ -1,0 +1,45 @@
+---
+interface Props {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  actionHref?: string;
+  actionLabel?: string;
+  align?: 'start' | 'center';
+}
+
+const { eyebrow, title, description, actionHref, actionLabel, align = 'start' } = Astro.props;
+const centered = align === 'center';
+---
+
+<div
+  class={`mb-8 flex gap-4 ${centered
+    ? 'flex-col items-center text-center'
+    : 'flex-col sm:flex-row sm:items-end sm:justify-between'}`}
+>
+  <div class={centered ? 'max-w-2xl' : 'max-w-2xl'}>
+    {eyebrow && (
+      <p class="text-[11px] font-bold uppercase tracking-[0.14em] mb-2" style="color:#a8892f;">{eyebrow}</p>
+    )}
+    <h2 class="text-2xl sm:text-3xl font-bold leading-tight" style="color:#143b22;">{title}</h2>
+    {description && <p class="text-sm text-gray-600 leading-relaxed mt-1.5">{description}</p>}
+  </div>
+
+  {actionHref && actionLabel && (
+    <a
+      href={actionHref}
+      class="section-action shrink-0 inline-flex items-center gap-1 text-sm font-semibold transition-colors"
+      style="color:#1a6b3a;"
+    >
+      {actionLabel}
+      <svg class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </a>
+  )}
+</div>
+
+<style>
+  .section-action:hover { color: #a8892f; }
+  .section-action:hover svg { transform: translateX(2px); }
+</style>

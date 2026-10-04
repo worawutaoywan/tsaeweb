@@ -91,7 +91,7 @@ const types = [
         ? 'ข้อมูลสาธารณะแสดงเฉพาะรหัสสมาชิกและชื่อ-นามสกุล สมาชิกเข้าสู่ระบบเพื่อดูและอัปเดตข้อมูลของตนเอง'
         : 'Public results show member code and name only. Members can sign in to view and update their full profile.'}
       {' · '}
-      <a href="/api/member/login" class="text-green-700 hover:underline font-medium">
+      <a href="/member/login" class="text-green-700 hover:underline font-medium">
         {th ? 'สมาชิกเข้าสู่ระบบเพื่ออัปเดตข้อมูล' : 'Members: sign in to update your profile'}
       </a>
     </p>
@@ -160,7 +160,7 @@ const types = [
     try {
       const params = new URLSearchParams({ limit: String(MAX) });
       params.set('q', q);
-      const res = await fetch(`/api/members/search?${params}`);
+      const res = await fetch(`/members/search?${params}`);
       if (!res.ok) throw new Error('api');
       const data = await res.json();
       if (reqId !== pending) return;

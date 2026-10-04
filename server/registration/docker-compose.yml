@@ -9,6 +9,7 @@ services:
       DATA_DIR: /data
       CMS_UPLOADS_DIR: /uploads
       CMS_UPLOADS_URL: /uploads
+      CMS_WEB_ROOT: /web
       ADMIN_USER: ${ADMIN_USER}
       ADMIN_PASS: ${ADMIN_PASS}
       SECRET_KEY: ${SECRET_KEY}
@@ -19,8 +20,10 @@ services:
       SMTP_FROM: ${SMTP_FROM:-center@tsae.asia}
       SITE_URL: ${SITE_URL:-https://www.tsae.asia}
       MAX_FILE_BYTES: "47185920"
+      PRESENTATION_MAX_VIDEO_BYTES: "157286400"
       MAX_MEDIA_BYTES: "52428800"
     volumes:
       - ./data:/data
       - /var/www/tsae_web/uploads:/uploads
+      - /var/www/tsae_web:/web:ro
     restart: always

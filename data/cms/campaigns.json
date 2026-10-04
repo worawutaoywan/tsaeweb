@@ -1,0 +1,179 @@
+[
+  {
+    "id": "aaae-awards-2026",
+    "slug": "aaae-awards-2026",
+    "enabled": true,
+    "sortOrder": 0,
+    "showOnHome": true,
+    "showInHero": true,
+    "createEvent": true,
+    "titleTH": "AAAE Awards 2026",
+    "titleEN": "AAAE Awards 2026",
+    "themeTH": "รางวัลเกียรติยศ 12 สาขา — Call for Nominations",
+    "themeEN": "12 honour categories — Call for Nominations",
+    "badgeTH": "AAAE Awards 2026",
+    "badgeEN": "AAAE Awards 2026",
+    "dateTH": "ปิดรับเสนอชื่อ 15 สิงหาคม 2569",
+    "dateEN": "Deadline 15 August 2026",
+    "venueTH": "Asian Association for Agricultural Engineering",
+    "venueEN": "Asian Association for Agricultural Engineering",
+    "target": "2026-08-15T23:59:00+07:00",
+    "endDate": "2026-08-15T23:59:00+07:00",
+    "registerUrl": "https://aaaesociety.org/awards",
+    "contactEmail": "office@aaaesociety.org",
+    "posterImage": "/images/conf/aaae-awards-2026.jpg",
+    "posterPdf": "/downloads/AAAE-Awards-2026-nominations.pdf",
+    "posterHtmlUrl": "",
+    "excerptEN": "12 AAAE Awards categories for engineers, educators, researchers, and industry leaders across Asia. Nomination deadline was 15 August 2026 — materials remain available for reference.",
+    "excerptTH": "รางวัล AAAE Awards 2026 จำนวน 12 สาขา ปิดรับเสนอชื่อ 15 ส.ค. 2569 — เอกสารและโปสเตอร์ยังเผยแพร่เพื่อประชาสัมพันธ์",
+    "descriptionEN": "Help us honour the engineers, educators, researchers, and industry leaders advancing agricultural, food, and biological systems engineering across Asia. Nominations are welcomed from AAAE members and partner societies (AAAE · TSAE · AMMA-INDIA · ISAE · NSAE · IGRSM).",
+    "descriptionTH": "เชิญชวนเสนอชื่อวิศวกร นักการศึกษา นักวิจัย และผู้นำอุตสาหกรรมที่ขับเคลื่อนวิศวกรรมเกษตร อาหาร และระบบชีวภาพในเอเชีย เปิดรับจากสมาชิก AAAE และสมาคมพันธมิตร (รวม TSAE)",
+    "facts": [
+      {
+        "label": "Status",
+        "value": "Nominations closed (15 August 2026) — archive for reference"
+      },
+      {
+        "label": "Categories",
+        "value": "12 awards from Fellow to Pioneer"
+      },
+      {
+        "label": "Who can nominate",
+        "value": "AAAE members and partner societies across the region"
+      },
+      {
+        "label": "Nominate form",
+        "value": "aaaesociety.org/awards"
+      },
+      {
+        "label": "Contact",
+        "value": "office@aaaesociety.org"
+      }
+    ],
+    "fees": [],
+    "extraLinks": [
+      {
+        "label": "Nomination form (AAAE site)",
+        "href": "https://aaaesociety.org/awards",
+        "style": "primary"
+      },
+      {
+        "label": "Download nominations poster PDF",
+        "href": "/downloads/AAAE-Awards-2026-nominations.pdf",
+        "style": "secondary"
+      }
+    ],
+    "eventStatus": "past",
+    "homeKind": "call",
+    "ctaTH": "เสนอชื่อ",
+    "ctaEN": "Nominate",
+    "categories": [
+      "I. AAAE Fellow — Highest Honor",
+      "II. Early Career",
+      "III. Outstanding Young Educator",
+      "IV. Outstanding Young Researcher",
+      "V. Dr. Sharad Patel (ASPEE) Young Indian Researcher",
+      "VI. Outstanding Young Industry Leadership",
+      "VII. Mid-Career / Long-Term Career",
+      "VIII. Researcher of the Year",
+      "IX. Industry Leadership Award of the Year",
+      "X. Excellence in International Engagement",
+      "XI. Lifetime Achievement Award",
+      "XII. Agricultural Engineering Pioneer Award"
+    ]
+  },
+  {
+    "id": "iaec2026",
+    "slug": "iaec2026",
+    "enabled": true,
+    "sortOrder": 3,
+    "showOnHome": true,
+    "showInHero": true,
+    "createEvent": true,
+    "titleTH": "IAEC 2026",
+    "titleEN": "IAEC 2026",
+    "themeTH": "Appropriate Technologies for Climate Resilient Farming",
+    "themeEN": "Appropriate Technologies for Climate Resilient Farming",
+    "badgeTH": "AAAE · IAEC 2026",
+    "badgeEN": "AAAE · IAEC 2026",
+    "dateTH": "26 – 28 พฤศจิกายน 2569",
+    "dateEN": "26 – 28 November 2026",
+    "venueTH": "Prime Plaza Hotel, บาหลี",
+    "venueEN": "Prime Plaza Hotel, Bali, Indonesia",
+    "target": "2026-11-26T09:00:00+08:00",
+    "endDate": "2026-11-28T18:00:00+08:00",
+    "registerUrl": "https://aaaesociety.org/register-iaec2026/",
+    "contactEmail": "office@aaaesociety.org",
+    "posterImage": "/images/conf/iaec2026-poster.jpg",
+    "posterPdf": "/downloads/IAEC2026-poster.pdf",
+    "posterHtmlUrl": "/iaec2026/poster/",
+    "excerptEN": "Hosted by AAAE with PERTETA. Abstracts due 30 August 2026. TSAE members register at the member-society rate (USD 100).",
+    "excerptTH": "จัดโดย AAAE ร่วมกับ PERTETA ที่บาหลี 26–28 พ.ย. 2569 ส่งบทคัดย่อภายใน 30 ส.ค. 2569 สมาชิก TSAE ลงทะเบียนในอัตราสมาชิกสมาคม (USD 100)",
+    "descriptionEN": "The Asian Association for Agricultural Engineering (AAAE), together with PERTETA – the Indonesian Society of Agricultural Engineering – convenes researchers, engineers and practitioners from across Asia and beyond to advance farming systems that hold their ground as the climate shifts. Peer-reviewed papers are published in the International Agricultural Engineering Journal (IAEJ, ISSN 0858-2114), Scopus indexed. TSAE members register at the member-society rate.",
+    "descriptionTH": "Asian Association for Agricultural Engineering (AAAE) ร่วมกับ PERTETA (สมาคมวิศวกรรมเกษตรอินโดนีเซีย) เชิญนักวิจัย วิศวกร และผู้ปฏิบัติงานทั่วเอเชีย ภายใต้ธีม Appropriate Technologies for Climate Resilient Farming บทความผ่าน peer-review ตีพิมพ์ใน IAEJ (Scopus) สมาชิก TSAE ลงทะเบียนในอัตราสมาชิกสมาคม",
+    "facts": [
+      {
+        "label": "Dates",
+        "value": "26 – 28 November 2026"
+      },
+      {
+        "label": "Venue",
+        "value": "Prime Plaza Hotel, Bali, Indonesia"
+      },
+      {
+        "label": "Abstracts due",
+        "value": "30 August 2026"
+      },
+      {
+        "label": "Registration",
+        "value": "Same form for register + abstract upload"
+      },
+      {
+        "label": "Publication",
+        "value": "IAEJ (ISSN 0858-2114), Scopus indexed"
+      },
+      {
+        "label": "TSAE member rate",
+        "value": "USD 100 (member societies)"
+      },
+      {
+        "label": "Non-member rate",
+        "value": "USD 150"
+      },
+      {
+        "label": "Contact",
+        "value": "office@aaaesociety.org"
+      }
+    ],
+    "fees": [
+      {
+        "who": "Member societies (AAAE · TSAE · AMMA · ISAE · NSAE · PERTETA · IGRSM)",
+        "usd": "USD 100",
+        "inr": "₹10,000"
+      },
+      {
+        "who": "Non-members",
+        "usd": "USD 150",
+        "inr": "₹15,000"
+      }
+    ],
+    "extraLinks": [
+      {
+        "label": "Register / Submit abstract →",
+        "href": "https://aaaesociety.org/register-iaec2026/",
+        "style": "primary"
+      },
+      {
+        "label": "Pay in USD → Shop",
+        "href": "https://aaaesociety.org/shop/",
+        "style": "secondary"
+      },
+      {
+        "label": "Pay in INR via UPI",
+        "href": "https://aaaesociety.org/upi-payments/",
+        "style": "secondary"
+      }
+    ],
+    "homeKind": "conference"
+  }
+]

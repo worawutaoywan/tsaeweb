@@ -51,13 +51,22 @@ interface CmsEventItem {
   html?: string;
 }
 
-function eventStatus(start: string, end?: string): 'upcoming' | 'past' | 'ongoing' {
+/** Derive status from dates; ignores stale CMS status so past items auto-archive. */
+export function eventStatus(start: string, end?: string | null): 'upcoming' | 'past' | 'ongoing' {
   const now = Date.now();
   const s = new Date(start).getTime();
+  if (Number.isNaN(s)) return 'upcoming';
   const e = end ? new Date(end).getTime() : s;
+  const endMs = Number.isNaN(e) ? s : e;
   if (now < s) return 'upcoming';
-  if (now > e) return 'past';
+  if (now > endMs) return 'past';
   return 'ongoing';
+}
+
+export function isPastByDate(start?: string | null, end?: string | null): boolean {
+  if (!start && !end) return false;
+  const status = eventStatus(start || end!, end);
+  return status === 'past';
 }
 
 export function cmsNewsLoader(): Loader {
@@ -107,9 +116,8 @@ export function cmsEventsLoader(): Loader {
       }
       ctx.store.clear();
       for (const item of items) {
-        const status = item.status === 'upcoming' || item.status === 'past' || item.status === 'ongoing'
-          ? item.status
-          : eventStatus(item.startDate, item.endDate);
+        // Always derive from dates so expired events move to Past automatically.
+        const status = eventStatus(item.startDate, item.endDate);
         ctx.store.set({
           id: item.id,
           data: {
@@ -164,6 +172,8 @@ export interface HeroSlide {
   glow: string;
   /** false = text + poster layout; default true = full-bleed poster */
   fullImage?: boolean;
+  /** ISO datetime — slide leaves the active carousel after this moment */
+  endsAt?: string;
   titleTH?: string;
   titleEN?: string;
   titleAccentTH?: string;
@@ -176,12 +186,31 @@ export interface HeroSlide {
   locationEN?: string;
   tagTH?: string;
   tagEN?: string;
+  /** Second CTA label (defaults to Register / ลงทะเบียน) */
+  ctaTH?: string;
+  ctaEN?: string;
 }
 
 export function loadHeroSlides(): HeroSlide[] {
   try {
     const slides = readJson<HeroSlide[]>('hero.json');
-    return slides.filter((s) => s.enabled).sort((a, b) => a.sortOrder - b.sortOrder);
+    return slides
+      .filter((s) => s.enabled !== false)
+      .filter((s) => !isPastByDate(s.endsAt, s.endsAt))
+      .sort((a, b) => a.sortOrder - b.sortOrder);
+  } catch {
+    return [];
+  }
+}
+
+/** Past slides kept for CMS / archive references (not shown in hero carousel). */
+export function loadArchivedHeroSlides(): HeroSlide[] {
+  try {
+    const slides = readJson<HeroSlide[]>('hero.json');
+    return slides
+      .filter((s) => s.enabled !== false)
+      .filter((s) => Boolean(s.endsAt) && isPastByDate(s.endsAt, s.endsAt))
+      .sort((a, b) => a.sortOrder - b.sortOrder);
   } catch {
     return [];
   }

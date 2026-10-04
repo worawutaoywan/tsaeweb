@@ -4,6 +4,8 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ARG BASE_URL=https://cms.tsae.asia
+ENV BASE_URL=${BASE_URL}
 
 COPY package.json package-lock.json ./
 RUN npm ci

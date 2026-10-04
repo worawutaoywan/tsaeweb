@@ -1,0 +1,70 @@
+---
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'en' } = Astro.props;
+const th = lang === 'th';
+
+const pillars = [
+  {
+    key: 'research',
+    title: th ? 'วิจัยและพัฒนา' : 'Research & Development',
+    desc: th
+      ? 'ส่งเสริมงานวิจัยด้านวิศวกรรมเกษตร และเผยแพร่ผ่านวารสาร สวกท.'
+      : 'Promoting agricultural engineering research and publishing through the TSAE Journal.',
+  },
+  {
+    key: 'tech',
+    title: th ? 'เทคโนโลยีเกษตร' : 'Agri-Technology',
+    desc: th
+      ? 'พัฒนาและถ่ายทอดเทคโนโลยีการเกษตรสมัยใหม่สู่เกษตรกรและวิชาชีพ'
+      : 'Developing and transferring modern agricultural technology to farmers and professionals.',
+  },
+  {
+    key: 'people',
+    title: th ? 'พัฒนาบุคลากร' : 'Human Capital',
+    desc: th
+      ? 'จัดอบรม สัมมนา และพัฒนาทักษะสำหรับวิศวกรเกษตร'
+      : 'Organizing training, seminars, and skill development programs for agricultural engineers.',
+  },
+  {
+    key: 'network',
+    title: th ? 'เครือข่ายนานาชาติ' : 'Global Network',
+    desc: th
+      ? 'สร้างความร่วมมือกับ AAAE และองค์กรวิศวกรรมเกษตรทั่วโลก'
+      : 'Building partnerships with AAAE and agricultural engineering organizations worldwide.',
+  },
+] as const;
+
+const paths: Record<(typeof pillars)[number]['key'], string> = {
+  // flask / beaker
+  research:
+    'M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.611L5 14.5',
+  // cpu / chip for tech
+  tech:
+    'M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z',
+  // academic cap
+  people:
+    'M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5',
+  // globe
+  network:
+    'M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418',
+};
+---
+
+<div class="grid grid-cols-2 gap-3 sm:gap-4">
+  {pillars.map((item) => (
+    <div class="p-4 sm:p-5 rounded-xl border border-white/10 hover:border-white/25 transition-colors" style="background-color: rgba(255,255,255,0.07);">
+      <div class="mb-3 inline-flex items-center justify-center w-10 h-10 rounded-lg" style="background: rgba(200,169,81,0.18); color:#f5e6b8;">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d={paths[item.key]} />
+        </svg>
+      </div>
+      <h3 class="text-white font-semibold mb-1.5 text-sm leading-snug">{item.title}</h3>
+      <p class="text-green-200/85 text-xs leading-relaxed">{item.desc}</p>
+    </div>
+  ))}
+</div>

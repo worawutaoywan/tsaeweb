@@ -1,0 +1,149 @@
+---
+import type { Lang } from '../i18n/ui';
+import SectionHeading from './SectionHeading.astro';
+import { useTranslations, formatDate, localize } from '../i18n/utils';
+
+interface NewsItem {
+  id: string;
+  data: {
+    title: string;
+    titleTH?: string;
+    date: Date;
+    category: string;
+    excerpt: string;
+    excerptTH?: string;
+    image?: string;
+    featured?: boolean;
+  };
+}
+
+interface Props {
+  lang?: Lang;
+  title: string;
+  description: string;
+  items: NewsItem[];
+}
+
+const { lang = 'en', title, description, items } = Astro.props;
+const t = useTranslations(lang);
+const base = lang === 'th' ? '/th' : '';
+
+const categoryLabels: Record<string, { label: string; color: string }> = {
+  conference: { label: t('cat.conference'), color: '#1a6b3a' },
+  journal: { label: t('cat.journal'), color: '#7c3aed' },
+  training: { label: t('cat.training'), color: '#c8a951' },
+  announcement: { label: t('cat.announcement'), color: '#dc2626' },
+  activity: { label: t('cat.activity'), color: '#0891b2' },
+};
+
+const lead = items[0];
+const rest = items.slice(1);
+
+function cat(key: string) {
+  return categoryLabels[key] || { label: key, color: '#6b7280' };
+}
+---
+
+{items.length > 0 && (
+<section class="home-news py-14 sm:py-16" style="background-color:#f6faf7;">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <SectionHeading
+      title={title}
+      description={description}
+      actionHref={`${base}/news`}
+      actionLabel={t('ui.viewAll')}
+    />
+
+    <div class="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-5 lg:gap-6 items-stretch">
+      {lead && (
+        <a
+          href={`${base}/news/${lead.id}`}
+          class="group relative overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow min-h-[280px] sm:min-h-[320px] flex flex-col"
+        >
+          <div class="relative flex-1 min-h-[180px] sm:min-h-[220px] bg-gradient-to-br from-green-50 to-green-100 overflow-hidden">
+            {lead.data.image ? (
+              <img
+                src={lead.data.image}
+                alt=""
+                class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                loading="eager"
+                onerror="this.style.display='none'"
+              />
+            ) : (
+              <div class="absolute inset-0 flex items-center justify-center">
+                <svg class="w-14 h-14 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                </svg>
+              </div>
+            )}
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            <span
+              class="absolute top-3 left-3 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide text-white"
+              style={`background-color:${cat(lead.data.category).color};`}
+            >
+              {cat(lead.data.category).label}
+            </span>
+            <div class="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
+              <time class="text-white/70 text-xs" datetime={lead.data.date.toISOString()}>
+                {formatDate(lang, lead.data.date)}
+              </time>
+              <h3 class="mt-1 text-white text-xl sm:text-2xl font-bold leading-snug line-clamp-3 group-hover:underline decoration-white/40 underline-offset-4">
+                {localize(lang, lead.data.title, lead.data.titleTH)}
+              </h3>
+              <p class="mt-2 text-white/80 text-sm leading-relaxed line-clamp-2 hidden sm:block">
+                {localize(lang, lead.data.excerpt, lead.data.excerptTH)}
+              </p>
+            </div>
+          </div>
+        </a>
+      )}
+
+      <div class="flex flex-col gap-3">
+        {rest.map((news) => {
+          const info = cat(news.data.category);
+          const displayTitle = localize(lang, news.data.title, news.data.titleTH);
+          return (
+            <a
+              href={`${base}/news/${news.id}`}
+              class="group flex gap-3 sm:gap-4 rounded-xl bg-white border border-gray-100 p-3 hover:border-green-200 hover:shadow-sm transition-all"
+            >
+              <div class="relative shrink-0 w-[88px] sm:w-[104px] aspect-[4/3] rounded-lg overflow-hidden bg-gradient-to-br from-green-50 to-green-100">
+                {news.data.image ? (
+                  <img
+                    src={news.data.image}
+                    alt=""
+                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                    onerror="this.style.display='none'"
+                  />
+                ) : (
+                  <div class="w-full h-full flex items-center justify-center">
+                    <svg class="w-7 h-7 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+              <div class="min-w-0 flex-1 flex flex-col justify-center py-0.5">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-[10px] font-bold uppercase tracking-wide" style={`color:${info.color};`}>{info.label}</span>
+                  <span class="text-gray-300">·</span>
+                  <time class="text-[11px] text-gray-400" datetime={news.data.date.toISOString()}>
+                    {formatDate(lang, news.data.date)}
+                  </time>
+                </div>
+                <h3 class="text-sm sm:text-base font-semibold leading-snug text-gray-900 line-clamp-2 group-hover:text-green-800 transition-colors">
+                  {displayTitle}
+                </h3>
+                <p class="mt-1 text-xs text-gray-500 line-clamp-2 hidden sm:block">
+                  {localize(lang, news.data.excerpt, news.data.excerptTH)}
+                </p>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+</section>
+)}

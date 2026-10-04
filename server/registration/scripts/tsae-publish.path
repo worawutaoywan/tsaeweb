@@ -1,0 +1,7 @@
+[Path]
+PathChanged=/opt/registration/data/cms/.needs_publish
+PathExists=/opt/registration/data/cms/.needs_publish
+Unit=tsae-publish.service
+
+[Install]
+WantedBy=multi-user.target

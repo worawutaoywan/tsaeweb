@@ -321,7 +321,7 @@
         <td>${p.lang === 'th' ? 'ไทย' : 'EN'}</td>
         <td><code style="font-size:12px">/${p.lang === 'th' ? 'th/' : ''}p/${esc(p.slug)}</code></td>
         <td>${(p.blocks || []).length}</td>
-        <td>${p.published === false ? '<span class="badge badge-draft">ฉบับร่าง</span>' : '<span class="badge badge-published">เผยแพร่</span>'}</td>
+        <td class="col-status">${p.published === false ? '<span class="badge badge-draft">ร่าง</span>' : '<span class="badge badge-published">เปิด</span>'}</td>
         <td style="font-size:12px;color:var(--ink-500)">${esc((p.updatedAt || '').slice(0, 16).replace('T', ' '))}</td>
         <td><a class="btn btn-sm btn-ghost" href="#/pages/edit/${esc(p.id)}">${ic('pencil', 14)} แก้ไข</a></td>
       </tr>`).join('')}</tbody>
@@ -361,8 +361,9 @@
           <div class="full field"><label>คำอธิบาย (SEO meta description)</label><input id="p-desc" value="${esc(item.description || '')}" placeholder="คำอธิบายสั้นๆ สำหรับ SEO"></div>
           <div class="field"><label>Hero หัวข้อ</label><input id="p-hero-t" value="${esc(item.heroTitle || item.title || '')}"></div>
           <div class="field"><label>Hero คำบรรยาย</label><input id="p-hero-s" value="${esc(item.heroSubtitle || '')}"></div>
-          <div class="full field field-check" style="flex-direction:column;align-items:flex-start;gap:8px">
-            <label><input type="checkbox" id="p-pub"${item.published !== false ? ' checked' : ''}> เผยแพร่ (ถ้าไม่เลือก = ฉบับร่าง draft)</label>
+          <div class="checks">
+            <span class="checks-label">สถานะ</span>
+            <label><input type="checkbox" id="p-pub"${item.published !== false ? ' checked' : ''}> เผยแพร่</label>
             <label><input type="checkbox" id="p-en"${item.enabled !== false ? ' checked' : ''}> เปิดใช้งานหน้านี้</label>
           </div>
         </div></div>
@@ -517,12 +518,10 @@
           body.id = `${body.slug}-${body.lang}`;
           const r = await cms().api('/pages', { method: 'POST', body });
           location.hash = '#/pages/edit/' + r.id;
-          cms().toast('สร้างหน้าแล้ว');
-          cms().notifyParentSave?.();
+          await cms().afterSavePublish('สร้างหน้าแล้ว — กำลังอัปเดตหน้าเว็บ…');
         } else {
           await cms().api('/pages/' + encodeURIComponent(id), { method: 'PUT', body });
-          cms().toast('บันทึกแล้ว — รัน ./deploy.sh web');
-          cms().notifyParentSave?.();
+          await cms().afterSavePublish('บันทึกแล้ว — กำลังอัปเดตหน้าเว็บ…');
         }
       } catch (e) { cms().toast('ผิดพลาด: ' + e.message); }
     };
@@ -531,6 +530,7 @@
       if (!confirm('ลบหน้านี้?')) return;
       await cms().api('/pages/' + encodeURIComponent(id), { method: 'DELETE' });
       location.hash = '#/pages';
+      await cms().afterSavePublish('ลบแล้ว — กำลังอัปเดตหน้าเว็บ…');
     };
   }
 

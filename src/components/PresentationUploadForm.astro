@@ -1,0 +1,279 @@
+---
+interface Props {
+  conf?: 'intl' | 'national';
+}
+const { conf = 'intl' } = Astro.props;
+const MAX_SLIDE_MB = 45;
+const MAX_VIDEO_MB = 150;
+---
+
+<form
+  id="presentation-upload-form"
+  class="tsae-pres-form rounded-xl ring-1 ring-slate-200 bg-white p-6 sm:p-8"
+  data-max-slide={String(MAX_SLIDE_MB)}
+  data-max-video={String(MAX_VIDEO_MB)}
+  novalidate
+>
+  <input type="hidden" name="conf" value={conf} />
+  <div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;">
+    <label>Company URL <input type="text" name="company_url" tabindex="-1" autocomplete="off" /></label>
+    <input type="hidden" name="form_token" />
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Full name <span class="text-red-600">*</span></label>
+      <input name="name" required type="text" autocomplete="name" class="tsae-pres-input" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Email <span class="text-red-600">*</span></label>
+      <input name="email" required type="email" autocomplete="email" class="tsae-pres-input" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Phone</label>
+      <input name="phone" type="tel" autocomplete="tel" class="tsae-pres-input" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Organization</label>
+      <input name="organization" type="text" class="tsae-pres-input" />
+    </div>
+    <div class="sm:col-span-2">
+      <label class="block text-sm font-medium text-slate-700 mb-1">Paper title <span class="text-red-600">*</span></label>
+      <input name="paper_title" required type="text" class="tsae-pres-input" placeholder="Title as submitted on EasyChair" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">EasyChair submission ID</label>
+      <input name="easychair_id" type="text" class="tsae-pres-input" placeholder="e.g. 42" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Presentation mode <span class="text-red-600">*</span></label>
+      <select name="mode" required class="tsae-pres-input bg-white">
+        <option value="">Select mode</option>
+        <option value="oral">Oral (on-site)</option>
+        <option value="online">Online (pre-recorded video required)</option>
+        <option value="poster">Poster</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+    <label class="tsae-drop" data-for="slides">
+      <input id="pres-slides" name="slides" type="file" required accept=".pdf,.ppt,.pptx,.key,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" class="sr-only" />
+      <span class="tsae-drop-ico" aria-hidden="true">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+      </span>
+      <span class="block text-sm font-semibold text-slate-800">Slides or poster file <span class="text-red-600">*</span></span>
+      <span class="tsae-drop-name mt-1 block text-xs text-slate-500">PDF, PPT, PPTX · max {MAX_SLIDE_MB} MB</span>
+    </label>
+
+    <label class="tsae-drop tsae-drop-video" data-for="video">
+      <input id="pres-video" name="video" type="file" accept=".mp4,.mov,.m4v,.webm,video/mp4,video/quicktime,video/webm" class="sr-only" />
+      <span class="tsae-drop-ico" aria-hidden="true">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+      </span>
+      <span class="block text-sm font-semibold text-slate-800">Pre-recorded video</span>
+      <span class="tsae-drop-name mt-1 block text-xs text-slate-500">Required for online · MP4/MOV · max 10 min · {MAX_VIDEO_MB} MB</span>
+    </label>
+  </div>
+
+  <p class="pres-error hidden mt-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5"></p>
+
+  <div class="pres-progress hidden mt-5">
+    <div class="flex justify-between text-xs text-slate-500 mb-1.5">
+      <span>Uploading…</span>
+      <span class="pres-pct tabular-nums">0%</span>
+    </div>
+    <div class="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+      <div class="pres-bar h-full rounded-full" style="width:0%;background:#1a6b3a;transition:width .15s linear;"></div>
+    </div>
+  </div>
+
+  <button type="submit" class="pres-submit intl-btn intl-btn-gold mt-6">Upload presentation file</button>
+  <p class="text-xs text-slate-400 mt-3">Online videos must reach the organizer by 3 September 2026.</p>
+</form>
+
+<div class="tsae-pres-success hidden rounded-xl ring-1 ring-emerald-200 bg-emerald-50 p-8 text-center">
+  <div class="mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-4" style="background:#1a6b3a;">
+    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+  </div>
+  <h3 class="text-lg font-semibold text-slate-900 mb-1">Presentation received</h3>
+  <p class="text-sm text-slate-600">Thank you. Your file has been sent to the TSAE 2026 organizing committee.</p>
+</div>
+
+<style>
+  .tsae-pres-input {
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid #dce3dc;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.875rem;
+    color: #0f2419;
+    background: #fff;
+  }
+  .tsae-pres-input:focus {
+    outline: none;
+    border-color: #1a6b3a;
+    box-shadow: 0 0 0 3px rgba(26,107,58,0.15);
+  }
+  .tsae-drop {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    padding: 1.1rem 1.15rem;
+    border: 1px dashed #c5d0c6;
+    border-radius: 0.75rem;
+    background: #f8faf8;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .tsae-drop:hover, .tsae-drop.is-drag {
+    border-color: #1a6b3a;
+    background: #f1f7f2;
+  }
+  .tsae-drop.has-file {
+    border-style: solid;
+    border-color: #1a6b3a;
+    background: #fff;
+  }
+  .tsae-drop-ico {
+    color: #1a6b3a;
+    margin-bottom: 0.4rem;
+  }
+  .tsae-drop-video.is-required {
+    border-color: #c8a951;
+    background: #fbf8ef;
+  }
+</style>
+
+<script>
+  function initPresentationUpload() {
+    const form = document.getElementById('presentation-upload-form') as HTMLFormElement | null;
+    if (!form || form.dataset.bound) return;
+    form.dataset.bound = '1';
+
+    const success = form.parentElement?.querySelector('.tsae-pres-success') as HTMLElement | null;
+    const errBox = form.querySelector('.pres-error') as HTMLElement | null;
+    const btn = form.querySelector('.pres-submit') as HTMLButtonElement | null;
+    const progress = form.querySelector('.pres-progress') as HTMLElement | null;
+    const bar = form.querySelector('.pres-bar') as HTMLElement | null;
+    const pctEl = form.querySelector('.pres-pct') as HTMLElement | null;
+    const mode = form.querySelector<HTMLSelectElement>('select[name="mode"]');
+    const videoWrap = form.querySelector('.tsae-drop-video') as HTMLElement | null;
+    const videoInput = form.querySelector<HTMLInputElement>('#pres-video');
+    const maxSlide = parseInt(form.dataset.maxSlide || '45', 10);
+    const maxVideo = parseInt(form.dataset.maxVideo || '150', 10);
+    const slideExt = ['pdf', 'ppt', 'pptx', 'key'];
+    const videoExt = ['mp4', 'mov', 'm4v', 'webm'];
+
+    const token = form.querySelector<HTMLInputElement>('input[name="form_token"]');
+    if (token) token.value = String(Math.floor(Date.now() / 1000));
+
+    const showError = (text: string) => {
+      if (!errBox) return;
+      errBox.textContent = text;
+      errBox.classList.remove('hidden');
+      errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
+    const bindDrop = (input: HTMLInputElement | null) => {
+      const box = input?.closest('.tsae-drop') as HTMLElement | null;
+      if (!input || !box) return;
+      const nameEl = box.querySelector('.tsae-drop-name') as HTMLElement | null;
+      const hint = nameEl?.textContent || '';
+      const setName = () => {
+        const f = input.files?.[0];
+        if (f && nameEl) {
+          nameEl.textContent = f.name;
+          box.classList.add('has-file');
+        } else if (nameEl) {
+          nameEl.textContent = hint;
+          box.classList.remove('has-file');
+        }
+      };
+      input.addEventListener('change', setName);
+      ['dragenter', 'dragover'].forEach((ev) => {
+        box.addEventListener(ev, (e) => { e.preventDefault(); box.classList.add('is-drag'); });
+      });
+      ['dragleave', 'drop'].forEach((ev) => {
+        box.addEventListener(ev, (e) => { e.preventDefault(); box.classList.remove('is-drag'); });
+      });
+      box.addEventListener('drop', (e) => {
+        const dt = (e as DragEvent).dataTransfer;
+        if (dt?.files?.length) {
+          input.files = dt.files;
+          setName();
+        }
+      });
+    };
+    bindDrop(form.querySelector('#pres-slides'));
+    bindDrop(videoInput);
+
+    const syncVideoRequired = () => {
+      const online = mode?.value === 'online';
+      if (videoInput) videoInput.required = online;
+      videoWrap?.classList.toggle('is-required', online);
+    };
+    mode?.addEventListener('change', syncVideoRequired);
+    syncVideoRequired();
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      errBox?.classList.add('hidden');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      const slides = form.querySelector<HTMLInputElement>('#pres-slides')?.files?.[0];
+      const video = videoInput?.files?.[0];
+      if (!slides) { showError('Please attach your slides or poster file.'); return; }
+      const sExt = (slides.name.split('.').pop() || '').toLowerCase();
+      if (!slideExt.includes(sExt)) { showError('Slides must be PDF, PPT, or PPTX.'); return; }
+      if (slides.size > maxSlide * 1024 * 1024) { showError(`Slides file is too large (max ${maxSlide} MB).`); return; }
+      if (mode?.value === 'online' && !video) { showError('Online presenters must upload a pre-recorded video.'); return; }
+      if (video) {
+        const vExt = (video.name.split('.').pop() || '').toLowerCase();
+        if (!videoExt.includes(vExt)) { showError('Video must be MP4, MOV, M4V, or WEBM.'); return; }
+        if (video.size > maxVideo * 1024 * 1024) { showError(`Video is too large (max ${maxVideo} MB).`); return; }
+      }
+
+      if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
+      progress?.classList.remove('hidden');
+      if (bar) bar.style.width = '0%';
+      if (pctEl) pctEl.textContent = '0%';
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/submit/presentation');
+      xhr.upload.onprogress = (ev) => {
+        if (!ev.lengthComputable) return;
+        const pct = Math.min(100, Math.round((ev.loaded / ev.total) * 100));
+        if (bar) bar.style.width = pct + '%';
+        if (pctEl) pctEl.textContent = pct + '%';
+      };
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          form.classList.add('hidden');
+          success?.classList.remove('hidden');
+          success?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+        let detail = '';
+        try { detail = JSON.parse(xhr.responseText)?.detail || ''; } catch (_e) { /* noop */ }
+        if (xhr.status === 413 || /too large/i.test(detail)) showError('File is too large. Please compress and try again.');
+        else if (/file type/i.test(detail)) showError('File type not allowed. Use PDF/PPT/PPTX for slides, MP4/MOV for video.');
+        else if (/video required/i.test(detail)) showError('Online presenters must upload a pre-recorded video.');
+        else showError('Upload failed. Please check your connection and try again.');
+        if (btn) { btn.disabled = false; btn.textContent = 'Upload presentation file'; }
+        progress?.classList.add('hidden');
+      };
+      xhr.onerror = () => {
+        showError('Connection failed. Please try again.');
+        if (btn) { btn.disabled = false; btn.textContent = 'Upload presentation file'; }
+        progress?.classList.add('hidden');
+      };
+      xhr.send(new FormData(form));
+    });
+  }
+  initPresentationUpload();
+  document.addEventListener('astro:page-load', initPresentationUpload);
+</script>

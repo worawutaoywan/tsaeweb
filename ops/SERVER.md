@@ -2,6 +2,9 @@
 
 Host: `104.248.152.59`
 
+To clone this project onto a new machine (what is in GitHub vs private DB copy):
+see **[MIGRATE.md](./MIGRATE.md)**.
+
 ## Reverse proxy and TLS
 
 The server uses **Caddy only** for ports 80 and 443.
@@ -10,8 +13,9 @@ The server uses **Caddy only** for ports 80 and 443.
 - Configuration: `/etc/caddy/Caddyfile`
 - TLS: managed automatically by Caddy
 - TSAE website: `tsae.asia`, `www.tsae.asia`
-- TSAE CMS: `cms.tsae.asia` -> `127.0.0.1:13003`
-- Registration API: `/api/*` -> `127.0.0.1:8090`
+- Admin (single system): `https://www.tsae.asia/admin` -> `127.0.0.1:8090`
+- Member portal: `https://www.tsae.asia/member/login` -> `127.0.0.1:8090`
+- Form/API endpoints: `/api/*` -> `127.0.0.1:8090`
 
 Do not install or enable Nginx on this server. It conflicts with Caddy on ports
 80 and 443. Nginx was confirmed inactive and unused, then removed on
@@ -27,8 +31,10 @@ Before changing Caddy:
 4. Verify `https://www.tsae.asia/` and
    `https://www.tsae.asia/api/health` both return HTTP 200.
 
-## Pages CMS
+## Pages CMS (retired)
 
-Pages CMS is installed under `/opt/apps/pagescms` and is isolated from the
-Astro website and registration API. See `ops/pagescms/README.md` for its
-deployment and recovery notes.
+Pages CMS (`cms.tsae.asia`) is **retired**. All content and membership admin
+lives in the single system at `https://www.tsae.asia/admin`.
+
+Do not start the Pages CMS stack under `/opt/apps/pagescms` unless recovering
+historical data. See archive notes in `ops/pagescms/README.md` if needed.

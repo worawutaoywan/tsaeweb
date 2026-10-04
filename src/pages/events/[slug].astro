@@ -59,8 +59,8 @@ const fmtDate = (d: Date) => formatDate(lang, d, { year: 'numeric', month: 'long
         <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-6">{displayTitle}</h1>
 
         {event.data.image && (
-          <div class="mb-8 rounded-xl overflow-hidden">
-            <img src={event.data.image} alt={displayTitle} class="w-full h-72 object-cover" onerror="this.parentElement.style.display='none'" />
+          <div class="mb-8 rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
+            <img src={event.data.image} alt={displayTitle} class="w-full h-auto" onerror="this.parentElement.style.display='none'" />
           </div>
         )}
 
@@ -137,12 +137,39 @@ const fmtDate = (d: Date) => formatDate(lang, d, { year: 'numeric', month: 'long
 </Layout>
 
 <style>
-  .prose h2 { color: #1a6b3a; margin-top: 2rem; margin-bottom: 1rem; }
-  .prose h3 { color: #124d2a; margin-top: 1.5rem; margin-bottom: 0.75rem; }
-  .prose ul { list-style-type: disc; padding-left: 1.5rem; }
-  .prose ol { list-style-type: decimal; padding-left: 1.5rem; }
-  .prose li { margin-bottom: 0.5rem; }
-  .prose a { color: #1a6b3a; text-decoration: underline; }
-  .prose blockquote { border-left: 4px solid #c8a951; padding-left: 1rem; color: #6b7280; }
-  .prose strong { font-weight: 700; }
+  .prose :global(h2) { color: #1a6b3a; font-size: 1.6rem; font-weight: 700; margin-top: 2.25rem; margin-bottom: 1rem; }
+  .prose :global(h3) {
+    color: #124d2a; font-size: 1.2rem; font-weight: 700;
+    margin-top: 2rem; margin-bottom: 1rem;
+    padding-left: 0.85rem; border-left: 4px solid #c8a951; line-height: 1.5;
+  }
+  .prose :global(p) { margin-bottom: 1rem; line-height: 1.85; }
+  .prose :global(ul) { list-style: none; padding-left: 0; display: grid; gap: 0.85rem; margin-bottom: 1.25rem; }
+  .prose :global(ol) { list-style-type: decimal; padding-left: 1.5rem; }
+  .prose :global(ol li) { margin-bottom: 0.5rem; }
+  .prose :global(ul > li) {
+    background-color: #fbfdfb;
+    border: 1px solid #e3ede7;
+    border-radius: 0.85rem;
+    padding: 1rem 1.15rem;
+    line-height: 1.75;
+  }
+  .prose :global(a) { color: #1a6b3a; text-decoration: underline; }
+  .prose :global(a[href$='.pdf']) {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    margin-top: 0.6rem; padding: 0.45rem 1rem;
+    border-radius: 9999px;
+    background-color: #1a6b3a; color: #fff;
+    font-size: 0.875rem; font-weight: 600; text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+  .prose :global(a[href$='.pdf']:hover) { background-color: #c8a951; }
+  .prose :global(a[href$='.pdf'])::before {
+    content: ''; width: 1rem; height: 1rem; flex: none;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='M12 3v12m0 0l-4-4m4 4l4-4M4 19h16'/%3E%3C/svg%3E") center/contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='M12 3v12m0 0l-4-4m4 4l4-4M4 19h16'/%3E%3C/svg%3E") center/contain no-repeat;
+  }
+  .prose :global(blockquote) { border-left: 4px solid #c8a951; padding-left: 1rem; color: #6b7280; }
+  .prose :global(strong) { font-weight: 700; color: #143b22; }
 </style>

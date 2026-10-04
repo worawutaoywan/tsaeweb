@@ -7,6 +7,9 @@
 #   API : server/registration/   -> root@104.248.152.59:/opt/registration/
 #         (docker container: tsae_registration, 127.0.0.1:8090 -> :8000,
 #          Caddy proxies https://www.tsae.asia/api/ -> 8090)
+#   Auto-publish: CMS save -> /opt/registration/data/cms/.needs_publish
+#         -> systemd tsae-publish.path -> publish-web.sh -> Astro build -> web root
+#         Site source for server builds lives in /opt/tsae-web/
 #
 # Auth:
 #   Set TSAE_DEPLOY_PASS to deploy with password auth (needs `sshpass`),
@@ -17,6 +20,7 @@
 #   ./deploy.sh web    # build + upload the static site  (default)
 #   ./deploy.sh api    # upload + rebuild the registration API
 #   ./deploy.sh all    # both
+#   ./deploy.sh publish-setup  # sync /opt/tsae-web + enable auto-publish only
 #
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -26,6 +30,7 @@ OLD_HOST="${TSAE_OLD_HOST:-root@167.71.193.109}"
 WEB_DEST="/var/www/tsae_web/"
 API_DEST="/opt/registration/"
 CMS_DEST="/opt/registration/data/cms/"
+SITE_DEST="/opt/tsae-web/"
 SSH_OPTS="-o StrictHostKeyChecking=no"
 
 if [ -n "${TSAE_DEPLOY_PASS:-}" ]; then
@@ -53,6 +58,43 @@ sync_cms_pull() {
   run_rsync -az "${SSH_HOST}:${CMS_DEST}" data/cms/ 2>/dev/null || true
 }
 
+sync_site_source() {
+  echo "==> Syncing Astro source -> ${SSH_HOST}:${SITE_DEST}"
+  run_ssh "mkdir -p ${SITE_DEST}"
+  run_rsync -az --delete \
+    --exclude 'node_modules/' \
+    --exclude 'dist/' \
+    --exclude '.git/' \
+    --exclude '.astro/' \
+    --exclude '.env' \
+    --exclude '.env.*' \
+    --exclude 'wp-uploads/' \
+    --exclude 'server/' \
+    --exclude 'ops/' \
+    --exclude 'deploy/' \
+    --exclude '.claude/' \
+    --exclude '.clinerules/' \
+    --exclude '.cursor/' \
+    --exclude '.github/' \
+    --exclude '.vscode/' \
+    --exclude 'old.tsae.asia/' \
+    --exclude 'data/cms/' \
+    --exclude '*.local' \
+    --exclude '.DS_Store' \
+    ./ "${SSH_HOST}:${SITE_DEST}"
+}
+
+install_publisher() {
+  echo "==> Installing auto-publish (systemd path + publish-web.sh)"
+  run_ssh "mkdir -p /opt/registration/bin ${SITE_DEST} ${CMS_DEST}"
+  run_rsync -az server/registration/scripts/publish-web.sh "${SSH_HOST}:/opt/registration/bin/publish-web.sh"
+  run_ssh "chmod +x /opt/registration/bin/publish-web.sh"
+  run_rsync -az server/registration/scripts/tsae-publish.service "${SSH_HOST}:/etc/systemd/system/tsae-publish.service"
+  run_rsync -az server/registration/scripts/tsae-publish.path "${SSH_HOST}:/etc/systemd/system/tsae-publish.path"
+  run_ssh "systemctl daemon-reload && systemctl enable --now tsae-publish.path && systemctl restart tsae-publish.path"
+  echo "==> Auto-publish enabled (tsae-publish.path)"
+}
+
 migrate_uploads() {
   echo "==> Syncing WP uploads to ${SSH_HOST}:/var/www/tsae_web/wp-uploads/"
   run_ssh "mkdir -p /var/www/tsae_web/wp-uploads /var/www/tsae_web/data"
@@ -70,12 +112,16 @@ migrate_uploads() {
 }
 
 deploy_web() {
+  # Pull CMS edits from server first so local build uses live content,
+  # then push any intentional local CMS updates back.
+  sync_cms_pull
   sync_cms_push
+  sync_site_source
   echo "==> Building Astro site..."
   npm run build
   echo "==> Uploading dist/ -> ${SSH_HOST}:${WEB_DEST}"
   # Preserve wp-uploads/ on the server — it is not part of dist/ but news images depend on it.
-  run_rsync -az --delete --exclude 'wp-uploads/' dist/ "${SSH_HOST}:${WEB_DEST}"
+  run_rsync -az --delete --exclude 'wp-uploads/' --exclude 'uploads/' dist/ "${SSH_HOST}:${WEB_DEST}"
   if [ -d wp-uploads ] && [ -n "$(ls -A wp-uploads 2>/dev/null)" ]; then
     echo "==> Syncing wp-uploads/ -> ${SSH_HOST}:${WEB_DEST}wp-uploads/"
     run_rsync -az wp-uploads/ "${SSH_HOST}:${WEB_DEST}wp-uploads/"
@@ -94,11 +140,13 @@ deploy_api() {
   run_ssh "mkdir -p ${API_DEST}data"
   run_rsync -az server/registration/data/members.json "${SSH_HOST}:${API_DEST}data/members.json" 2>/dev/null || true
   sync_cms_push
+  sync_site_source
+  install_publisher
   echo "==> Ensuring /uploads/ media directory exists..."
   run_ssh "mkdir -p /var/www/tsae_web/uploads && chown -R 1000:1000 /var/www/tsae_web/uploads 2>/dev/null || true"
   echo "==> Rebuilding & restarting the registration container..."
   run_ssh "cd ${API_DEST} && docker compose up -d --build"
-  echo "==> API deploy complete: https://www.tsae.asia/api/admin"
+  echo "==> API deploy complete: https://www.tsae.asia/admin"
 }
 
 case "${1:-web}" in
@@ -107,5 +155,6 @@ case "${1:-web}" in
   all) deploy_web; deploy_api ;;
   uploads) migrate_uploads ;;
   pull-cms) sync_cms_pull ;;
-  *) echo "Usage: $0 [web|api|all|uploads|pull-cms]"; exit 1 ;;
+  publish-setup) sync_site_source; install_publisher ;;
+  *) echo "Usage: $0 [web|api|all|uploads|pull-cms|publish-setup]"; exit 1 ;;
 esac
